@@ -567,42 +567,27 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        /* MODIFIED: dashboard-header now stacks title+time on same line, date below */
+        
+        /* MODIFIED: Dashboard header - stacked layout exactly like IMG_1977.png */
         .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
             margin-bottom: 30px;
-            flex-wrap: wrap;
         }
-        /* Title and time inline container */
-        .title-time {
-            display: flex;
-            align-items: baseline;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .title-time h1 {
+        .dashboard-header h1 {
             font-size: 32px;
-            margin: 0;
+            margin: 0 0 8px 0;
             line-height: 1.2;
         }
-        .title-time .time-inline {
+        .dashboard-time {
             font-size: 28px;
             font-weight: bold;
-            line-height: 1.2;
+            margin-bottom: 4px;
             color: white;
         }
-        .date-only {
+        .dashboard-date {
             color: #a0a0c0;
             font-size: 14px;
-            margin-top: 4px;
-            text-align: right;
         }
-        /* Remove old date-time styles but keep for reference */
-        .date-time {
-            text-align: right;
-        }
+        
         .portfolio-card {
             background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
             border: 1px solid rgba(255,255,255,0.08);
@@ -716,12 +701,7 @@
             cursor: pointer;
             color: #e53e3e;
         }
-        /* LIVE BADGE COMPLETELY REMOVED - no trace */
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
+        /* LIVE badge completely removed */
 
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
@@ -730,8 +710,8 @@
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
             .nav-item { font-size: 16px; }
-            .title-time h1 { font-size: 26px; }
-            .title-time .time-inline { font-size: 22px; }
+            .dashboard-header h1 { font-size: 26px; }
+            .dashboard-time { font-size: 22px; }
         }
     </style>
 </head>
@@ -822,13 +802,11 @@
         <div><button class="logout-btn" onclick="logout()">Logout</button></div>
     </div>
     <div class="dashboard-container">
-        <!-- MODIFIED: Dashboard header: title + time on same line, date below, NO live badge -->
+        <!-- MODIFIED: Dashboard header exactly like IMG_1977.png - stacked, no LIVE badge -->
         <div class="dashboard-header">
-            <div class="title-time">
-                <h1>Dashboard</h1>
-                <div class="time-inline" id="inlineTime">--:--:--</div>
-            </div>
-            <div class="date-only" id="dateOnly">---</div>
+            <h1>Dashboard</h1>
+            <div class="dashboard-time" id="dashboardTime">--:--:--</div>
+            <div class="dashboard-date" id="dashboardDate">---</div>
         </div>
         <div class="portfolio-card">
             <h3>REAL PORTFOLIO</h3>
@@ -962,17 +940,17 @@
 
     function logout() { localStorage.removeItem('currentUser'); currentUser = null; showHomepage(); }
 
-    // MODIFIED: update inline time + date separately
-    function updateDateTime() { 
+    // MODIFIED: Update dashboard time and date in stacked layout
+    function updateDashboardDateTime() { 
         let now = new Date(); 
         let timeStr = now.toLocaleTimeString();
         let dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        let inlineTimeElem = document.getElementById('inlineTime');
-        let dateOnlyElem = document.getElementById('dateOnly');
-        if(inlineTimeElem) inlineTimeElem.innerText = timeStr;
-        if(dateOnlyElem) dateOnlyElem.innerText = dateStr;
+        let timeElem = document.getElementById('dashboardTime');
+        let dateElem = document.getElementById('dashboardDate');
+        if(timeElem) timeElem.innerText = timeStr;
+        if(dateElem) dateElem.innerText = dateStr;
     }
-    setInterval(updateDateTime, 1000); updateDateTime();
+    setInterval(updateDashboardDateTime, 1000); updateDashboardDateTime();
 
     async function fetchPrices() { 
         if(isFetching) return;
