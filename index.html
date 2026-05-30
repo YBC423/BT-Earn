@@ -109,7 +109,7 @@
 
         .stats-marquee {
             display: inline-block;
-            animation: scrollStats 25s linear infinite;
+            animation: scrollStats 18s linear infinite;
         }
 
         .stats-marquee span {
@@ -117,7 +117,7 @@
             color: #48bb78;
             font-size: 24px;
             font-weight: bold;
-            margin: 0 20px;
+            margin: 0 15px;
         }
 
         @keyframes scrollStats {
@@ -174,11 +174,11 @@
         }
 
         .market-header h2 {
-            font-size: 28px;
+            font-size: 24px;
         }
 
         .last-updated {
-            font-size: 14px;
+            font-size: 12px;
             color: #48bb78;
         }
 
@@ -186,7 +186,6 @@
             color: #667eea;
             text-decoration: none;
             cursor: pointer;
-            font-size: 16px;
         }
 
         table {
@@ -414,7 +413,6 @@
         }
         .modal h2 {
             margin-bottom: 20px;
-            font-size: 28px;
         }
         .search-box {
             width: 100%;
@@ -437,12 +435,6 @@
             position: sticky;
             top: 0;
             background: #0a0e27;
-            font-size: 16px;
-            padding: 15px;
-        }
-        .market-table-container td {
-            font-size: 15px;
-            padding: 12px 15px;
         }
 
         @media (max-width: 768px) {
@@ -456,12 +448,16 @@
                 font-size: 32px;
             }
             .stats-marquee span {
-                font-size: 16px;
-                margin: 0 10px;
+                font-size: 18px;
             }
             th, td {
                 padding: 10px 8px;
-                font-size: 12px;
+                font-size: 13px;
+            }
+            .modal-content {
+                margin: 20px;
+                padding: 20px;
+                width: auto;
             }
         }
     </style>
@@ -632,7 +628,7 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeMarketsModal()">&times;</span>
             <h2>All Markets (100+ Cryptocurrencies)</h2>
-            <input type="text" id="marketSearch" class="search-box" placeholder="Search coin..." onkeyup="filterMarkets()">
+            <input type="text" id="marketSearch" class="search-box" placeholder="Search coin... (e.g. Bitcoin, Ethereum)" onkeyup="filterMarkets()">
             <div class="market-table-container">
                 <div id="allMarketsTable" class="loading">Loading 100+ live markets...</div>
             </div>
@@ -640,26 +636,33 @@
     </div>
 
     <script>
-        // Binance API - More reliable!
-        const marqueeSymbols = ['btcusdt', 'ethusdt', 'trxusdt', 'usdcusdt', 'bnbusdt', 'solusdt'];
-        const marqueeNames = ['BTC', 'ETH', 'TRX', 'USDC', 'BNB', 'SOL'];
+        // Marquee coins - BTC, ETH, TRX, USDC, BNB, SOL
+        const marqueeCoins = [
+            { id: 'bitcoin', name: 'BTC' },
+            { id: 'ethereum', name: 'ETH' },
+            { id: 'tron', name: 'TRX' },
+            { id: 'usd-coin', name: 'USDC' },
+            { id: 'binancecoin', name: 'BNB' },
+            { id: 'solana', name: 'SOL' }
+        ];
 
         async function updateMarquee() {
             try {
-                let prices = [];
-                for (let i = 0; i < marqueeSymbols.length; i++) {
-                    const url = `https://api.binance.com/api/v3/ticker/price?symbol=${marqueeSymbols[i].toUpperCase()}`;
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    const price = parseFloat(data.price);
-                    prices.push({ name: marqueeNames[i], price: price });
-                }
+                const ids = marqueeCoins.map(c => c.id).join(',');
+                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+                const response = await fetch(url);
+                const data = await response.json();
                 
-                // Create repeating content for smooth looping (each price appears 4 times = 24 items like original)
                 let html = '';
-                for (let repeat = 0; repeat < 4; repeat++) {
-                    for (let p of prices) {
-                        html += `<span>${p.name}: $${p.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`;
+                // Repeat 8 times to make it dense and fast
+                for (let repeat = 0; repeat < 8; repeat++) {
+                    for (let coin of marqueeCoins) {
+                        const price = data[coin.id]?.usd;
+                        if (price) {
+                            html += `<span>${coin.name}: $${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>`;
+                        } else {
+                            html += `<span>${coin.name}: --</span>`;
+                        }
                     }
                 }
                 
@@ -668,7 +671,6 @@
                     marqueeDiv.innerHTML = html;
                 }
                 
-                // Ensure clone exists for seamless loop
                 const container = document.querySelector('.stats-container');
                 if (container.children.length === 1) {
                     const clone = marqueeDiv.cloneNode(true);
@@ -679,54 +681,44 @@
             }
         }
 
-        // Market table using Binance API
-        const marketCoins = [
-            { symbol: 'BTCUSDT', name: 'BTC/USDT' },
-            { symbol: 'ETHUSDT', name: 'ETH/USDT' },
-            { symbol: 'TRXUSDT', name: 'TRX/USDT' },
-            { symbol: 'USDCUSDT', name: 'USDC/USDT' },
-            { symbol: 'XRPUSDT', name: 'XRP/USDT' },
-            { symbol: 'SOLUSDT', name: 'SOL/USDT' },
-            { symbol: 'DOGEUSDT', name: 'DOGE/USDT' },
-            { symbol: 'TONUSDT', name: 'TON/USDT' },
-            { symbol: 'BNBUSDT', name: 'BNB/USDT' },
-            { symbol: 'LTCUSDT', name: 'LTC/USDT' }
+        // Market table - Original CoinGecko API
+        const coins = [
+            { id: 'bitcoin', name: 'BTC/USDT' }, { id: 'ethereum', name: 'ETH/USDT' }, { id: 'tron', name: 'TRX/USDT' },
+            { id: 'usd-coin', name: 'USDC/USDT' }, { id: 'ripple', name: 'XRP/USDT' }, { id: 'solana', name: 'SOL/USDT' },
+            { id: 'dogecoin', name: 'DOGE/USDT' }, { id: 'toncoin', name: 'TON/USDT' }, { id: 'binancecoin', name: 'BNB/USDT' },
+            { id: 'litecoin', name: 'LTC/USDT' }
         ];
 
         async function fetchMarketData() {
             try {
+                const ids = coins.map(c => c.id).join(',');
+                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+                const response = await fetch(url);
+                const data = await response.json();
                 let tableHtml = `<tr><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>`;
-                
-                for (let coin of marketCoins) {
-                    const priceUrl = `https://api.binance.com/api/v3/ticker/price?symbol=${coin.symbol}`;
-                    const changeUrl = `https://api.binance.com/api/v3/ticker/24hr?symbol=${coin.symbol}`;
-                    
-                    const priceRes = await fetch(priceUrl);
-                    const priceData = await priceRes.json();
-                    const price = parseFloat(priceData.price);
-                    
-                    const changeRes = await fetch(changeUrl);
-                    const changeData = await changeRes.json();
-                    const change24h = parseFloat(changeData.priceChangePercent);
-                    
-                    const changeClass = change24h >= 0 ? 'positive' : 'negative';
-                    const changeSymbol = change24h >= 0 ? '+' : '';
-                    
-                    const volume = (parseFloat(changeData.quoteVolume) / 1000000).toFixed(2) + 'M';
-                    
-                    tableHtml += `<tr>
-                        <td>${coin.name}</td>
-                        <td>$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td>
-                        <td class="${changeClass}">${changeSymbol}${change24h.toFixed(2)}%</td>
-                        <td>${volume}</td>
-                    </tr>`;
+                const volumes = {
+                    'bitcoin': '14.60K', 'ethereum': '259.94K', 'tron': '154.36M', 'usd-coin': '480.48M',
+                    'ripple': '79.39M', 'solana': '1.89M', 'dogecoin': '530.46M', 'toncoin': '3.69M',
+                    'binancecoin': '100.01K', 'litecoin': '272.90K'
+                };
+                for (let coin of coins) {
+                    const coinData = data[coin.id];
+                    if (coinData) {
+                        const price = coinData.usd;
+                        const change24h = coinData.usd_24h_change;
+                        const changeClass = change24h >= 0 ? 'positive' : 'negative';
+                        const changeSymbol = change24h >= 0 ? '+' : '';
+                        tableHtml += `<tr>
+                            <td>${coin.name}</td>
+                            <td>${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td>
+                            <td class="${changeClass}">${changeSymbol}${change24h.toFixed(2)}%</td>
+                            <td>${volumes[coin.id] || 'N/A'}</td>
+                        </tr>`;
+                    }
                 }
-                
-                tableHtml += `</tbody>}</table>`;
+                tableHtml += `</tbody></table>`;
                 document.getElementById('marketTable').innerHTML = tableHtml;
                 document.getElementById('lastUpdated').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
-                
-                // Update marquee at same time
                 updateMarquee();
             } catch (error) {
                 console.error(error);
@@ -734,37 +726,45 @@
             }
         }
 
-        // Full 100+ markets modal using CoinGecko (fallback) or Binance for top coins
-        const fullMarketList = [
-            'BTCUSDT', 'ETHUSDT', 'TRXUSDT', 'USDCUSDT', 'XRPUSDT', 'SOLUSDT', 'DOGEUSDT', 'TONUSDT', 'BNBUSDT', 'LTCUSDT',
-            'ADAUSDT', 'DOTUSDT', 'LINKUSDT', 'XLMUSDT', 'UNIUSDT', 'ALGOUSDT', 'VETUSDT', 'FILUSDT', 'THETAUSDT', 'EOSUSDT',
-            'AAVEUSDT', 'MKRUSDT', 'COMPUSDT', 'SNXUSDT', 'XTZUSDT', 'ATOMUSDT', 'XMRUSDT', 'DASHUSDT', 'ZECUSDT', 'MANAUSDT',
-            'SANDUSDT', 'AXSUSDT', 'GALAUSDT', 'ENJUSDT', 'BATUSDT', 'OCEANUSDT', 'CRVUSDT', 'YFIUSDT', 'AVAXUSDT', 'MATICUSDT',
-            'FTMUSDT', 'NEARUSDT', 'ICPUSDT', 'HBARUSDT', 'EGLDUSDT', 'FLOWUSDT', 'GRTUSDT', 'ONEUSDT', 'CELOUSDT', 'IOTAUSDT'
+        // Full markets modal
+        const FULL_COINS_LIST = [
+            { id: 'bitcoin', name: 'BTC/USDT' }, { id: 'ethereum', name: 'ETH/USDT' }, { id: 'tron', name: 'TRX/USDT' },
+            { id: 'usd-coin', name: 'USDC/USDT' }, { id: 'ripple', name: 'XRP/USDT' }, { id: 'solana', name: 'SOL/USDT' },
+            { id: 'dogecoin', name: 'DOGE/USDT' }, { id: 'toncoin', name: 'TON/USDT' }, { id: 'binancecoin', name: 'BNB/USDT' },
+            { id: 'litecoin', name: 'LTC/USDT' }, { id: 'cardano', name: 'ADA/USDT' }, { id: 'polkadot', name: 'DOT/USDT' },
+            { id: 'chainlink', name: 'LINK/USDT' }, { id: 'stellar', name: 'XLM/USDT' }, { id: 'uniswap', name: 'UNI/USDT' },
+            { id: 'algorand', name: 'ALGO/USDT' }, { id: 'vechain', name: 'VET/USDT' }, { id: 'filecoin', name: 'FIL/USDT' },
+            { id: 'theta', name: 'THETA/USDT' }, { id: 'eos', name: 'EOS/USDT' }, { id: 'aave', name: 'AAVE/USDT' },
+            { id: 'maker', name: 'MKR/USDT' }, { id: 'compound', name: 'COMP/USDT' }, { id: 'synthetix', name: 'SNX/USDT' },
+            { id: 'tezos', name: 'XTZ/USDT' }, { id: 'cosmos', name: 'ATOM/USDT' }, { id: 'monero', name: 'XMR/USDT' },
+            { id: 'dash', name: 'DASH/USDT' }, { id: 'zcash', name: 'ZEC/USDT' }, { id: 'decentraland', name: 'MANA/USDT' },
+            { id: 'the-sandbox', name: 'SAND/USDT' }, { id: 'axie-infinity', name: 'AXS/USDT' }, { id: 'gala', name: 'GALA/USDT' },
+            { id: 'enjin-coin', name: 'ENJ/USDT' }, { id: 'basic-attention-token', name: 'BAT/USDT' }, { id: 'ocean-protocol', name: 'OCEAN/USDT' },
+            { id: 'curve-dao-token', name: 'CRV/USDT' }, { id: 'yearn-finance', name: 'YFI/USDT' }, { id: 'avalanche-2', name: 'AVAX/USDT' },
+            { id: 'polygon', name: 'MATIC/USDT' }, { id: 'fantom', name: 'FTM/USDT' }, { id: 'near', name: 'NEAR/USDT' },
+            { id: 'internet-computer', name: 'ICP/USDT' }, { id: 'hedera-hashgraph', name: 'HBAR/USDT' }, { id: 'elrond', name: 'EGLD/USDT' },
+            { id: 'flow', name: 'FLOW/USDT' }, { id: 'the-graph', name: 'GRT/USDT' }, { id: 'harmony', name: 'ONE/USDT' },
+            { id: 'celo', name: 'CELO/USDT' }, { id: 'iota', name: 'IOTA/USDT' }
         ];
 
-        let currentFullData = [];
+        let currentFullMarketData = [];
 
-        async function fetchFullMarkets() {
+        async function fetchFullMarketData() {
             try {
-                let fullData = [];
-                for (let symbol of fullMarketList) {
-                    const url = `https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`;
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    if (data.symbol) {
-                        fullData.push({
-                            name: symbol.replace('USDT', '/USDT'),
-                            price: parseFloat(data.lastPrice),
-                            change: parseFloat(data.priceChangePercent)
-                        });
+                const ids = FULL_COINS_LIST.map(c => c.id).join(',');
+                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+                const response = await fetch(url);
+                const data = await response.json();
+                currentFullMarketData = FULL_COINS_LIST.map(coin => {
+                    const info = data[coin.id];
+                    if (info) {
+                        return { name: coin.name, price: info.usd, change: info.usd_24h_change };
                     }
-                    await new Promise(r => setTimeout(r, 100)); // Rate limit protection
-                }
-                currentFullData = fullData;
-                renderFullMarkets(currentFullData);
+                    return null;
+                }).filter(item => item !== null);
+                renderFullMarkets(currentFullMarketData);
             } catch (err) {
-                document.getElementById('allMarketsTable').innerHTML = '<div class="loading">Unable to load markets. Please refresh.</div>';
+                document.getElementById('allMarketsTable').innerHTML = '<div class="loading">Unable to load 100+ markets. Please try again later.</div>';
             }
         }
 
@@ -773,28 +773,24 @@
             for (let item of data) {
                 const changeClass = item.change >= 0 ? 'positive' : 'negative';
                 const changeSymbol = item.change >= 0 ? '+' : '';
-                html += `<tr>
-                    <td>${item.name}</td>
-                    <td>$${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td>
-                    <td class="${changeClass}">${changeSymbol}${item.change.toFixed(2)}%</td>
-                </tr>`;
+                html += `<tr><td>${item.name}</td><td>$${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td><td class="${changeClass}">${changeSymbol}${item.change.toFixed(2)}%</td></tr>`;
             }
-            html += `</tbody></table>`;
+            html += `</tbody>树</scrip>`;
             document.getElementById('allMarketsTable').innerHTML = html;
         }
 
         function filterMarkets() {
             const searchTerm = document.getElementById('marketSearch').value.toLowerCase();
-            const filtered = currentFullData.filter(item => item.name.toLowerCase().includes(searchTerm));
+            const filtered = currentFullMarketData.filter(item => item.name.toLowerCase().includes(searchTerm));
             renderFullMarkets(filtered);
         }
 
         function openMarketsModal() {
             document.getElementById('marketsModal').style.display = 'block';
-            if (currentFullData.length === 0) {
-                fetchFullMarkets();
+            if (currentFullMarketData.length === 0) {
+                fetchFullMarketData();
             } else {
-                renderFullMarkets(currentFullData);
+                renderFullMarkets(currentFullMarketData);
             }
         }
 
@@ -814,8 +810,8 @@
             }
         }
 
-        function showLogin() { alert('Login page coming soon!'); }
-        function showSignup() { alert('Signup page coming soon!'); }
+        function showLogin() { window.location.href = 'dashboard.html'; }
+        function showSignup() { window.location.href = 'dashboard.html'; }
         function showChat() { alert('Chat support coming soon!\nEmail: support@bt-earn.com'); }
 
         fetchMarketData();
