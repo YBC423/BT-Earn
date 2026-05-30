@@ -1292,6 +1292,7 @@
                 <option value="ETH">ETH/USDT</option>
                 <option value="BNB">BNB/USDT</option>
                 <option value="SOL">SOL/USDT</option>
+                <option value="USDT">USDT/USDT</option>
             </select>
             <div class="chart-icon-btn" onclick="openChartModal()">
                 <div class="chart-icon">
@@ -1414,7 +1415,7 @@
     ];
 
     let currentUser = null;
-    let holdings = { btc: 0.01, eth: 0.25, bnb: 1.5, sol: 2.5 };
+    let holdings = { btc: 0.01, eth: 0.25, bnb: 1.5, sol: 2.5, usdt: 1000.00 };
     let currentPrices = {};
     let currentTradeCoin = 'BTC';
     let currentTradeMode = 'buy';
@@ -1422,9 +1423,9 @@
     let candleData = [];
     
     const FALLBACK_PRICES = {
-        btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00,
+        btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00, usdt: 1.00,
         trx: 0.12, usdc: 1.00, xrp: 0.52, doge: 0.12,
-        btcChange: -0.48, ethChange: -0.84, bnbChange: 0.32, solChange: 1.24
+        btcChange: -0.48, ethChange: -0.84, bnbChange: 0.32, solChange: 1.24, usdtChange: 0.00
     };
     
     currentPrices = { ...FALLBACK_PRICES };
@@ -1736,8 +1737,9 @@
 
     function renderMarketsWatchlist() { 
         let watchCoins = [
-            {id:'eth', name:'ETH', full:'Ethereum', onclick:'showTrade("ETH")'},
             {id:'btc', name:'BTC', full:'Bitcoin', onclick:'showTrade("BTC")'},
+            {id:'eth', name:'ETH', full:'Ethereum', onclick:'showTrade("ETH")'},
+            {id:'usdt', name:'USDT', full:'Tether', onclick:'showTrade("USDT")'},
             {id:'usdc', name:'USDC', full:'USD Coin', onclick:'showTrade("USDC")'}
         ]; 
         let html = ''; 
@@ -1760,7 +1762,8 @@
             {id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc, onclick:'showTrade("BTC")'},
             {id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth, onclick:'showTrade("ETH")'},
             {id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb, onclick:'showTrade("BNB")'},
-            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'}
+            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'},
+            {id:'usdt', name:'USDT', full:'Tether', amount:holdings.usdt, onclick:'showTrade("USDT")'}
         ]; 
         let html = ''; 
         for(let coin of cryptoList) { 
@@ -1974,7 +1977,7 @@
 
     async function fetchPrices() {
         try {
-            let ids = ['bitcoin','ethereum','binancecoin','solana','tron','usd-coin','ripple','dogecoin'];
+            let ids = ['bitcoin','ethereum','binancecoin','solana','tron','usd-coin','ripple','dogecoin','tether'];
             let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`;
             let res = await fetch(url);
             if (!res.ok) return true;
@@ -1987,12 +1990,14 @@
                     sol: data.solana?.usd || FALLBACK_PRICES.sol,
                     trx: data.tron?.usd || FALLBACK_PRICES.trx,
                     usdc: data['usd-coin']?.usd || FALLBACK_PRICES.usdc,
+                    usdt: data.tether?.usd || FALLBACK_PRICES.usdt,
                     xrp: data.ripple?.usd || FALLBACK_PRICES.xrp,
                     doge: data.dogecoin?.usd || FALLBACK_PRICES.doge,
                     btcChange: data.bitcoin?.usd_24h_change || FALLBACK_PRICES.btcChange,
                     ethChange: data.ethereum?.usd_24h_change || FALLBACK_PRICES.ethChange,
                     bnbChange: data.binancecoin?.usd_24h_change || FALLBACK_PRICES.bnbChange,
-                    solChange: data.solana?.usd_24h_change || FALLBACK_PRICES.solChange
+                    solChange: data.solana?.usd_24h_change || FALLBACK_PRICES.solChange,
+                    usdtChange: data.tether?.usd_24h_change || FALLBACK_PRICES.usdtChange
                 };
             }
             return true;
@@ -2008,8 +2013,9 @@
     
     function renderWatchlist() { 
         let watchCoins = [
-            {id:'eth', name:'ETH', full:'Ethereum', onclick:'showTrade("ETH")'},
             {id:'btc', name:'BTC', full:'Bitcoin', onclick:'showTrade("BTC")'},
+            {id:'eth', name:'ETH', full:'Ethereum', onclick:'showTrade("ETH")'},
+            {id:'usdt', name:'USDT', full:'Tether', onclick:'showTrade("USDT")'},
             {id:'usdc', name:'USDC', full:'USD Coin', onclick:'showTrade("USDC")'}
         ]; 
         let html = ''; 
@@ -2032,7 +2038,8 @@
             {id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc, onclick:'showTrade("BTC")'},
             {id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth, onclick:'showTrade("ETH")'},
             {id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb, onclick:'showTrade("BNB")'},
-            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'}
+            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'},
+            {id:'usdt', name:'USDT', full:'Tether', amount:holdings.usdt, onclick:'showTrade("USDT")'}
         ]; 
         let html = ''; 
         for(let coin of cryptoList) { 
@@ -2053,7 +2060,7 @@
     }
     
     function updatePortfolioTotal() { 
-        let total = (currentPrices.btc || 0)*holdings.btc + (currentPrices.eth || 0)*holdings.eth + (currentPrices.bnb || 0)*holdings.bnb + (currentPrices.sol || 0)*holdings.sol; 
+        let total = (currentPrices.btc || 0)*holdings.btc + (currentPrices.eth || 0)*holdings.eth + (currentPrices.bnb || 0)*holdings.bnb + (currentPrices.sol || 0)*holdings.sol + (currentPrices.usdt || 0)*holdings.usdt; 
         let balanceElement = document.getElementById('portfolioBalance');
         if(balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`; 
     }
@@ -2065,7 +2072,7 @@
         updatePortfolioTotal(); 
     }
 
-    const marqueeCoins = [{ id: 'bitcoin', name: 'BTC' },{ id: 'ethereum', name: 'ETH' },{ id: 'tron', name: 'TRX' },{ id: 'usd-coin', name: 'USDC' },{ id: 'binancecoin', name: 'BNB' },{ id: 'solana', name: 'SOL' }];
+    const marqueeCoins = [{ id: 'bitcoin', name: 'BTC' },{ id: 'ethereum', name: 'ETH' },{ id: 'tron', name: 'TRX' },{ id: 'tether', name: 'USDT' },{ id: 'binancecoin', name: 'BNB' },{ id: 'solana', name: 'SOL' }];
     
     async function updateMarqueePrices() { 
         try { 
@@ -2082,7 +2089,7 @@
         } catch(e) { console.error(e); } 
     }
     
-    const coins = [{ id: 'bitcoin', name: 'BTC' },{ id: 'ethereum', name: 'ETH' },{ id: 'tron', name: 'TRX' },{ id: 'usd-coin', name: 'USDC' },{ id: 'ripple', name: 'XRP' },{ id: 'solana', name: 'SOL' },{ id: 'dogecoin', name: 'DOGE' },{ id: 'toncoin', name: 'TON' },{ id: 'binancecoin', name: 'BNB' },{ id: 'litecoin', name: 'LTC' }];
+    const coins = [{ id: 'bitcoin', name: 'BTC' },{ id: 'ethereum', name: 'ETH' },{ id: 'tron', name: 'TRX' },{ id: 'tether', name: 'USDT' },{ id: 'ripple', name: 'XRP' },{ id: 'solana', name: 'SOL' },{ id: 'dogecoin', name: 'DOGE' },{ id: 'toncoin', name: 'TON' },{ id: 'binancecoin', name: 'BNB' },{ id: 'litecoin', name: 'LTC' }];
     
     async function fetchMarketData() { 
         try { 
@@ -2090,7 +2097,7 @@
             let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
             let data = await res.json(); 
             let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
-            let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', 'usd-coin':'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; 
+            let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', tether:'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; 
             for(let coin of coins) { 
                 let coinData = data[coin.id]; 
                 if(coinData) { 
@@ -2198,4 +2205,4 @@
     document.body.classList.add('loaded');
 </script>
 </body>
-</html> 
+</html>
