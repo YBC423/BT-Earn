@@ -18,6 +18,13 @@
             overflow-x: hidden;
         }
 
+        /* Hide flash on refresh - prevents homepage flicker */
+        body:not(.loaded) #homepage,
+        body:not(.loaded) #dashboard,
+        body:not(.loaded) #authPage {
+            display: none;
+        }
+
         /* Header */
         .header {
             display: flex;
@@ -1077,7 +1084,7 @@
             let ids = coins.map(c=>c.id).join(','); 
             let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
             let data = await res.json(); 
-            let html = '<td><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
+            let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
             let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', 'usd-coin':'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; 
             for(let coin of coins) { 
                 let coinData = data[coin.id]; 
@@ -1149,6 +1156,9 @@
     populateCountries();
     if(localStorage.getItem('currentUser')) { currentUser = JSON.parse(localStorage.getItem('currentUser')); showDashboard(); } else { showHomepage(); }
     fetchMarketData(); setInterval(fetchMarketData, 30000); updateMarqueePrices(); setInterval(updateMarqueePrices, 30000); window.onclick = function(e) { if(e.target==document.getElementById('marketsModal')) closeMarketsModal(); };
+    
+    // Remove flash on refresh - shows correct page immediately
+    document.body.classList.add('loaded');
 </script>
 </body>
 </html>
