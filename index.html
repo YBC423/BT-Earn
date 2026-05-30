@@ -23,7 +23,8 @@
         body:not(.loaded) #authPage,
         body:not(.loaded) #dashboard,
         body:not(.loaded) #profilePage,
-        body:not(.loaded) #marketsPage {
+        body:not(.loaded) #marketsPage,
+        body:not(.loaded) #tradePage {
             display: none;
         }
 
@@ -598,6 +599,12 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .watchlist-item:hover, .crypto-item:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(5px);
         }
         .coin-info h4 {
             font-size: 18px;
@@ -777,7 +784,7 @@
             background: rgba(229,62,62,0.3);
         }
 
-        /* Markets Page - Same as Dashboard Sections */
+        /* Markets Page */
         .markets-container {
             padding: 100px 20px 80px;
             max-width: 1200px;
@@ -794,6 +801,160 @@
             font-size: 32px;
         }
 
+        /* Trade Page Styles */
+        .trade-container {
+            padding: 100px 20px 80px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .trade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .coin-selector {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+        }
+        .trade-price-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .trade-price {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        .trade-change {
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        .trade-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .trade-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .trade-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: transparent;
+        }
+        .trade-tab.buy.active {
+            background: #48bb78;
+        }
+        .trade-tab.sell.active {
+            background: #e53e3e;
+        }
+        .trade-input-section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .input-row {
+            margin-bottom: 15px;
+        }
+        .input-row label {
+            display: block;
+            font-size: 14px;
+            color: #a0a0c0;
+            margin-bottom: 8px;
+        }
+        .input-row input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+        }
+        .input-row input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .balance-info {
+            font-size: 12px;
+            color: #a0a0c0;
+            text-align: right;
+            margin-top: 5px;
+        }
+        .total-value {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .total-value span {
+            color: #48bb78;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .confirm-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .confirm-btn.buy {
+            background: #48bb78;
+            color: white;
+        }
+        .confirm-btn.sell {
+            background: #e53e3e;
+            color: white;
+        }
+        .order-book {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 15px;
+        }
+        .order-book h4 {
+            margin-bottom: 10px;
+            color: #a0a0c0;
+        }
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .order-price {
+            color: #48bb78;
+        }
+        .order-price.sell {
+            color: #e53e3e;
+        }
+
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
             .features-section, .market-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
@@ -801,9 +962,10 @@
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
             .nav-item { font-size: 16px; }
-            .profile-container, .markets-container { padding: 80px 15px 80px; }
+            .profile-container, .markets-container, .trade-container { padding: 80px 15px 80px; }
             .info-row, .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
             .chat-widget { bottom: 75px; right: 10px; padding: 10px 16px; font-size: 14px; }
+            .trade-price { font-size: 28px; }
         }
     </style>
 </head>
@@ -916,7 +1078,7 @@
     <div class="bottom-nav">
         <div class="nav-item" data-nav="home">Home</div>
         <div class="nav-item" data-nav="markets">Markets</div>
-        <div class="nav-item" data-nav="trade" onclick="alert('Trade feature coming soon')">Trade</div>
+        <div class="nav-item" data-nav="trade">Trade</div>
         <div class="nav-item" data-nav="bots" onclick="alert('Bots feature coming soon')">Bots</div>
         <div class="nav-item" data-nav="profile">Profile</div>
     </div>
@@ -931,7 +1093,7 @@
     <div class="bottom-nav">
         <div class="nav-item" data-nav="home">Home</div>
         <div class="nav-item" data-nav="markets">Markets</div>
-        <div class="nav-item" data-nav="trade" onclick="alert('Trade feature coming soon')">Trade</div>
+        <div class="nav-item" data-nav="trade">Trade</div>
         <div class="nav-item" data-nav="bots" onclick="alert('Bots feature coming soon')">Bots</div>
         <div class="nav-item" data-nav="profile" style="color: #667eea;">Profile</div>
     </div>
@@ -956,7 +1118,72 @@
     <div class="bottom-nav">
         <div class="nav-item" data-nav="home">Home</div>
         <div class="nav-item" data-nav="markets" style="color: #667eea;">Markets</div>
-        <div class="nav-item" data-nav="trade" onclick="alert('Trade feature coming soon')">Trade</div>
+        <div class="nav-item" data-nav="trade">Trade</div>
+        <div class="nav-item" data-nav="bots" onclick="alert('Bots feature coming soon')">Bots</div>
+        <div class="nav-item" data-nav="profile">Profile</div>
+    </div>
+</div>
+
+<div id="tradePage" style="display:none;">
+    <div class="header">
+        <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
+        <div></div>
+    </div>
+    <div class="trade-container" id="tradeContainer">
+        <div class="trade-header">
+            <select id="tradeCoinSelect" class="coin-selector" onchange="changeTradeCoin()">
+                <option value="BTC">BTC/USDT</option>
+                <option value="ETH">ETH/USDT</option>
+                <option value="BNB">BNB/USDT</option>
+                <option value="SOL">SOL/USDT</option>
+            </select>
+            <button class="refresh-btn" onclick="refreshTradePrices()">⟳</button>
+        </div>
+        <div class="trade-price-card">
+            <div class="trade-price" id="tradePrice">$0.00</div>
+            <div class="trade-change" id="tradeChange">+0.00%</div>
+        </div>
+        <div class="trade-tabs">
+            <div class="trade-tab buy active" onclick="setTradeMode('buy')">Buy</div>
+            <div class="trade-tab sell" onclick="setTradeMode('sell')">Sell</div>
+        </div>
+        <div class="trade-input-section">
+            <div class="input-row">
+                <label>Price (USDT)</label>
+                <input type="number" id="tradePriceInput" placeholder="0.00" oninput="calculateTotal()">
+            </div>
+            <div class="input-row">
+                <label>Quantity (<span id="tradeCoinSymbol">BTC</span>)</label>
+                <input type="number" id="tradeQuantityInput" placeholder="0.00" oninput="calculateTotal()">
+            </div>
+            <div class="balance-info" id="tradeBalanceInfo">Available: 0.0000 BTC</div>
+            <div class="total-value">
+                Total: <span id="tradeTotalValue">$0.00</span>
+            </div>
+            <button class="confirm-btn" id="tradeConfirmBtn" onclick="executeTrade()">Buy BTC</button>
+        </div>
+        <div class="order-book">
+            <h4>Order Book</h4>
+            <div class="order-row">
+                <span>Price (USDT)</span>
+                <span>Quantity (BTC)</span>
+                <span>Total</span>
+            </div>
+            <div id="orderBookList">
+                <div class="order-row"><span class="order-price sell">74,055</span><span>0.0270</span><span>2,000</span></div>
+                <div class="order-row"><span class="order-price sell">74,050</span><span>0.6621</span><span>49,000</span></div>
+                <div class="order-row"><span class="order-price sell">74,045</span><span>0.2843</span><span>21,050</span></div>
+                <div class="order-row"><span class="order-price sell">74,040</span><span>0.0010</span><span>74</span></div>
+                <div class="order-row"><span class="order-price buy">74,060</span><span>0.1937</span><span>14,350</span></div>
+                <div class="order-row"><span class="order-price buy">74,065</span><span>0.0300</span><span>2,222</span></div>
+                <div class="order-row"><span class="order-price buy">74,070</span><span>2.5074</span><span>185,700</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-nav">
+        <div class="nav-item" data-nav="home">Home</div>
+        <div class="nav-item" data-nav="markets">Markets</div>
+        <div class="nav-item" data-nav="trade" style="color: #667eea;">Trade</div>
         <div class="nav-item" data-nav="bots" onclick="alert('Bots feature coming soon')">Bots</div>
         <div class="nav-item" data-nav="profile">Profile</div>
     </div>
@@ -992,6 +1219,8 @@
     let currentUser = null;
     let holdings = { btc: 0.01, eth: 0.25, bnb: 1.5, sol: 2.5 };
     let currentPrices = {};
+    let currentTradeCoin = 'BTC';
+    let currentTradeMode = 'buy';
     
     const FALLBACK_PRICES = {
         btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00,
@@ -1007,6 +1236,7 @@
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'none';
         document.getElementById('marketsPage').style.display = 'none';
+        document.getElementById('tradePage').style.display = 'none';
     }
     
     function showAuthPage() { 
@@ -1015,6 +1245,7 @@
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'none';
         document.getElementById('marketsPage').style.display = 'none';
+        document.getElementById('tradePage').style.display = 'none';
     }
     
     function showDashboard() { 
@@ -1023,6 +1254,7 @@
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('profilePage').style.display = 'none';
         document.getElementById('marketsPage').style.display = 'none';
+        document.getElementById('tradePage').style.display = 'none';
         loadDashboard(); 
     }
     
@@ -1032,6 +1264,7 @@
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'block';
         document.getElementById('marketsPage').style.display = 'none';
+        document.getElementById('tradePage').style.display = 'none';
         renderProfile();
     }
     
@@ -1041,7 +1274,19 @@
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'none';
         document.getElementById('marketsPage').style.display = 'block';
+        document.getElementById('tradePage').style.display = 'none';
         loadMarketsPage();
+    }
+    
+    function showTrade(coin = 'BTC') {
+        currentTradeCoin = coin;
+        document.getElementById('homepage').style.display = 'none';
+        document.getElementById('authPage').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('profilePage').style.display = 'none';
+        document.getElementById('marketsPage').style.display = 'none';
+        document.getElementById('tradePage').style.display = 'block';
+        loadTradePage();
     }
 
     function loadMarketsPage() {
@@ -1050,27 +1295,46 @@
     }
 
     function renderMarketsWatchlist() { 
-        let watchCoins = [{id:'eth', name:'ETH', full:'Ethereum'},{id:'btc', name:'BTC', full:'Bitcoin'},{id:'usdc', name:'USDC', full:'USD Coin'}]; 
+        let watchCoins = [
+            {id:'eth', name:'ETH', full:'Ethereum', onclick:'showTrade("ETH")'},
+            {id:'btc', name:'BTC', full:'Bitcoin', onclick:'showTrade("BTC")'},
+            {id:'usdc', name:'USDC', full:'USD Coin', onclick:'showTrade("USDC")'}
+        ]; 
         let html = ''; 
         for(let coin of watchCoins) { 
             let price = currentPrices[coin.id] || 0; 
             let change = currentPrices[coin.id+'Change'] || 0; 
             let changeClass = change >= 0 ? 'positive' : 'negative'; 
-            html += `<div class="watchlist-item"><div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div><div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div></div>`; 
+            html += `<div class="watchlist-item" onclick="${coin.onclick}">
+                <div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div>
+                <div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
+                <div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
+            </div>`; 
         } 
         let container = document.getElementById('marketsWatchlistContainer');
         if(container) container.innerHTML = html; 
     }
     
     function renderMarketsCrypto() { 
-        let cryptoList = [{id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc},{id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth},{id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb},{id:'sol', name:'SOL', full:'Solana', amount:holdings.sol}]; 
+        let cryptoList = [
+            {id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc, onclick:'showTrade("BTC")'},
+            {id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth, onclick:'showTrade("ETH")'},
+            {id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb, onclick:'showTrade("BNB")'},
+            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'}
+        ]; 
         let html = ''; 
         for(let coin of cryptoList) { 
             let price = currentPrices[coin.id] || 0; 
             let change = currentPrices[coin.id+'Change'] || 0; 
             let value = price * coin.amount; 
             let changeClass = change >= 0 ? 'positive' : 'negative'; 
-            html += `<div class="crypto-item"><div><h4>${coin.name}</h4><p>${coin.full}</p><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div><div style="text-align:right;"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div style="font-size:12px;color:#a0a0c0;">Amount: ${coin.amount} ${coin.name}</div><div>Value: $${value.toFixed(2)}</div><button class="trade-btn" style="margin-top:10px;" onclick="alert('Trading coming soon!')">Trade</button></div></div>`; 
+            html += `<div class="crypto-item" onclick="${coin.onclick}">
+                <div><h4>${coin.name}</h4><p>${coin.full}</p><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
+                <div style="text-align:right;"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
+                <div style="font-size:12px;color:#a0a0c0;">Amount: ${coin.amount} ${coin.name}</div>
+                <div>Value: $${value.toFixed(2)}</div>
+                <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('${coin.name}')">Trade</button></div>
+            </div>`; 
         } 
         let container = document.getElementById('marketsCryptoContainer');
         if(container) container.innerHTML = html + `<div style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;">Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko</div>`; 
@@ -1078,6 +1342,96 @@
 
     function refreshMarketsPrices() {
         loadMarketsPage();
+    }
+
+    function loadTradePage() {
+        document.getElementById('tradeCoinSelect').value = currentTradeCoin;
+        updateTradePriceDisplay();
+        setTradeMode(currentTradeMode);
+        calculateTotal();
+    }
+
+    function changeTradeCoin() {
+        currentTradeCoin = document.getElementById('tradeCoinSelect').value;
+        updateTradePriceDisplay();
+        calculateTotal();
+    }
+
+    function updateTradePriceDisplay() {
+        let coinId = currentTradeCoin.toLowerCase();
+        let price = currentPrices[coinId] || 0;
+        let change = currentPrices[coinId + 'Change'] || 0;
+        document.getElementById('tradePrice').innerHTML = `$${price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}`;
+        let changeClass = change >= 0 ? 'positive' : 'negative';
+        document.getElementById('tradeChange').innerHTML = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+        document.getElementById('tradeChange').className = 'trade-change ' + changeClass;
+        document.getElementById('tradePriceInput').value = price;
+        document.getElementById('tradeCoinSymbol').innerHTML = currentTradeCoin;
+        
+        let availableBalance = holdings[coinId] || 0;
+        document.getElementById('tradeBalanceInfo').innerHTML = `Available: ${availableBalance.toFixed(8)} ${currentTradeCoin}`;
+    }
+
+    function setTradeMode(mode) {
+        currentTradeMode = mode;
+        let buyTab = document.querySelector('.trade-tab.buy');
+        let sellTab = document.querySelector('.trade-tab.sell');
+        let confirmBtn = document.getElementById('tradeConfirmBtn');
+        
+        if (mode === 'buy') {
+            buyTab.classList.add('active');
+            sellTab.classList.remove('active');
+            confirmBtn.className = 'confirm-btn buy';
+            confirmBtn.innerHTML = `Buy ${currentTradeCoin}`;
+        } else {
+            sellTab.classList.add('active');
+            buyTab.classList.remove('active');
+            confirmBtn.className = 'confirm-btn sell';
+            confirmBtn.innerHTML = `Sell ${currentTradeCoin}`;
+        }
+    }
+
+    function calculateTotal() {
+        let quantity = parseFloat(document.getElementById('tradeQuantityInput').value) || 0;
+        let price = parseFloat(document.getElementById('tradePriceInput').value) || 0;
+        let total = quantity * price;
+        document.getElementById('tradeTotalValue').innerHTML = `$${total.toFixed(2)}`;
+    }
+
+    function executeTrade() {
+        let coinId = currentTradeCoin.toLowerCase();
+        let quantity = parseFloat(document.getElementById('tradeQuantityInput').value) || 0;
+        let price = parseFloat(document.getElementById('tradePriceInput').value) || 0;
+        let total = quantity * price;
+        
+        if (quantity <= 0) {
+            alert('Please enter a valid quantity');
+            return;
+        }
+        
+        if (currentTradeMode === 'buy') {
+            alert(`Buy order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`);
+            holdings[coinId] = (holdings[coinId] || 0) + quantity;
+        } else {
+            if (holdings[coinId] < quantity) {
+                alert(`Insufficient ${currentTradeCoin} balance. You have ${holdings[coinId].toFixed(8)} ${currentTradeCoin}`);
+                return;
+            }
+            alert(`Sell order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`);
+            holdings[coinId] = holdings[coinId] - quantity;
+        }
+        
+        document.getElementById('tradeQuantityInput').value = '';
+        updateTradePriceDisplay();
+        updatePortfolioTotal();
+        renderCrypto();
+        renderMarketsCrypto();
+    }
+
+    async function refreshTradePrices() {
+        await fetchPrices();
+        updateTradePriceDisplay();
+        calculateTotal();
     }
 
     function renderProfile() {
@@ -1219,27 +1573,46 @@
     }
     
     function renderWatchlist() { 
-        let watchCoins = [{id:'eth', name:'ETH', full:'Ethereum'},{id:'btc', name:'BTC', full:'Bitcoin'},{id:'usdc', name:'USDC', full:'USD Coin'}]; 
+        let watchCoins = [
+            {id:'eth', name:'ETH', full:'Ethereum', onclick:'showTrade("ETH")'},
+            {id:'btc', name:'BTC', full:'Bitcoin', onclick:'showTrade("BTC")'},
+            {id:'usdc', name:'USDC', full:'USD Coin', onclick:'showTrade("USDC")'}
+        ]; 
         let html = ''; 
         for(let coin of watchCoins) { 
             let price = currentPrices[coin.id] || 0; 
             let change = currentPrices[coin.id+'Change'] || 0; 
             let changeClass = change >= 0 ? 'positive' : 'negative'; 
-            html += `<div class="watchlist-item"><div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div><div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div></div>`; 
+            html += `<div class="watchlist-item" onclick="${coin.onclick}">
+                <div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div>
+                <div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
+                <div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
+            </div>`; 
         } 
         let container = document.getElementById('watchlistContainer');
         if(container) container.innerHTML = html; 
     }
     
     function renderCrypto() { 
-        let cryptoList = [{id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc},{id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth},{id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb},{id:'sol', name:'SOL', full:'Solana', amount:holdings.sol}]; 
+        let cryptoList = [
+            {id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc, onclick:'showTrade("BTC")'},
+            {id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth, onclick:'showTrade("ETH")'},
+            {id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb, onclick:'showTrade("BNB")'},
+            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'}
+        ]; 
         let html = ''; 
         for(let coin of cryptoList) { 
             let price = currentPrices[coin.id] || 0; 
             let change = currentPrices[coin.id+'Change'] || 0; 
             let value = price * coin.amount; 
             let changeClass = change >= 0 ? 'positive' : 'negative'; 
-            html += `<div class="crypto-item"><div><h4>${coin.name}</h4><p>${coin.full}</p><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div><div style="text-align:right;"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div style="font-size:12px;color:#a0a0c0;">Amount: ${coin.amount} ${coin.name}</div><div>Value: $${value.toFixed(2)}</div><button class="trade-btn" style="margin-top:10px;" onclick="alert('Trading coming soon!')">Trade</button></div></div>`; 
+            html += `<div class="crypto-item" onclick="${coin.onclick}">
+                <div><h4>${coin.name}</h4><p>${coin.full}</p><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
+                <div style="text-align:right;"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
+                <div style="font-size:12px;color:#a0a0c0;">Amount: ${coin.amount} ${coin.name}</div>
+                <div>Value: $${value.toFixed(2)}</div>
+                <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('${coin.name}')">Trade</button></div>
+            </div>`; 
         } 
         let container = document.getElementById('cryptoContainer');
         if(container) container.innerHTML = html + `<div style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;">Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko</div>`; 
@@ -1290,10 +1663,15 @@
                     let price = coinData.usd; 
                     let change = coinData.usd_24h_change; 
                     let changeClass = change>=0?'positive':'negative'; 
-                    html += `<tr><td>${coin.name}</td><td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</td><td>${volumes[coin.id]||'N/A'}</td></tr>`; 
+                    html += `<tr onclick="showTrade('${coin.name.split('/')[0]}')" style="cursor:pointer;">
+                        <td>${coin.name}</td>
+                        <td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
+                        <td class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</td>
+                        <td>${volumes[coin.id]||'N/A'}</td>
+                    </tr>`; 
                 } 
             } 
-            html += '</tbody></table>'; 
+            html += '</tbody></tr>'; 
             let marketTable = document.getElementById('marketTable');
             if(marketTable) marketTable.innerHTML = html; 
             let lastUpdated = document.getElementById('lastUpdated');
@@ -1357,6 +1735,7 @@
             if(navType === 'home') { showDashboard(); }
             else if(navType === 'profile') { showProfile(); }
             else if(navType === 'markets') { showMarkets(); }
+            else if(navType === 'trade') { showTrade(currentTradeCoin); }
         }
     });
     
