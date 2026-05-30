@@ -185,10 +185,19 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .market-header h2 {
             font-size: 28px;
+        }
+
+        .market-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .last-updated {
@@ -201,6 +210,30 @@
             text-decoration: none;
             cursor: pointer;
             font-size: 16px;
+            background: rgba(102,126,234,0.15);
+            padding: 6px 15px;
+            border-radius: 20px;
+        }
+
+        .see-all.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .market-search {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .market-search:focus {
+            outline: none;
+            border-color: #667eea;
         }
 
         table {
@@ -389,7 +422,7 @@
             font-size: 12px;
         }
 
-        /* Chat Widget - Draggable - MOVED UP so it doesn't block Profile button */
+        /* Chat Widget - Draggable - MOVED UP */
         .chat-widget {
             position: fixed;
             bottom: 80px;
@@ -648,6 +681,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .watchlist-scroll, .crypto-scroll {
             display: flex;
@@ -842,6 +877,43 @@
             background: rgba(229,62,62,0.3);
         }
 
+        /* Top 100 Markets Table */
+        .top100-container {
+            max-height: 600px;
+            overflow-y: auto;
+            border-radius: 12px;
+        }
+        .top100-table {
+            width: 100%;
+            font-size: 14px;
+        }
+        .top100-table th {
+            position: sticky;
+            top: 0;
+            background: #0a0e27;
+            padding: 15px 10px;
+            font-size: 14px;
+        }
+        .top100-table td {
+            padding: 12px 10px;
+            font-size: 14px;
+        }
+        .rank-cell {
+            width: 60px;
+            color: #a0a0c0;
+        }
+        .coin-name-cell {
+            font-weight: bold;
+        }
+        .coin-symbol {
+            color: #a0a0c0;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        .price-cell {
+            font-weight: 500;
+        }
+
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
             .features-section, .market-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
@@ -852,20 +924,15 @@
             .profile-container { padding: 80px 15px 80px; }
             .info-row { flex-direction: column; align-items: flex-start; gap: 8px; }
             .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-            /* Adjust chat widget position for mobile */
-            .chat-widget {
-                bottom: 75px;
-                right: 10px;
-                padding: 10px 16px;
-                font-size: 14px;
-            }
+            .chat-widget { bottom: 75px; right: 10px; padding: 10px 16px; font-size: 14px; }
+            .top100-table th, .top100-table td { padding: 10px 6px; font-size: 12px; }
+            .rank-cell { width: 45px; }
         }
     </style>
 </head>
 <body>
 
 <div id="homepage">
-    <!-- Header -->
     <div class="header">
         <div class="logo">BT-EARN</div>
         <div class="header-buttons">
@@ -894,7 +961,13 @@
     </div>
 
     <div class="market-section">
-        <div class="market-header"><h2>Markets</h2><div><span class="last-updated" id="lastUpdated">Loading...</span><a class="see-all" style="margin-left:20px;" onclick="openMarketsModal()">See All Markets →</a></div></div>
+        <div class="market-header">
+            <h2>Markets</h2>
+            <div class="market-buttons">
+                <span class="last-updated" id="lastUpdated">Loading...</span>
+                <a class="see-all" id="seeTop100Btn" onclick="toggleTop100Modal()">Top 100 →</a>
+            </div>
+        </div>
         <div id="marketTable"><div class="loading">Loading...</div></div>
     </div>
 
@@ -980,9 +1053,7 @@
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
         <div></div>
     </div>
-    <div class="profile-container" id="profileContainer">
-        <!-- Profile content will be loaded here -->
-    </div>
+    <div class="profile-container" id="profileContainer"></div>
     <div class="bottom-nav">
         <div class="nav-item" data-nav="home">Home</div>
         <div class="nav-item" data-nav="markets" onclick="alert('Markets')">Markets</div>
@@ -994,7 +1065,17 @@
 
 <div class="chat-widget" id="chatWidget" onclick="alert('Chat support coming soon! Email us at support@bt-earn.com')"><span>💬</span><span>Hi!</span></div>
 
-<div id="marketsModal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeMarketsModal()">&times;</span><h2>All Markets (100+ Cryptocurrencies)</h2><input type="text" id="marketSearch" class="search-box" placeholder="Search coin..." onkeyup="filterMarkets()"><div class="market-table-container"><div id="allMarketsTable" class="loading">Loading...</div></div></div></div>
+<!-- Top 100 Markets Modal -->
+<div id="top100Modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeTop100Modal()">&times;</span>
+        <h2>Top 100 Cryptocurrencies</h2>
+        <input type="text" id="top100Search" class="search-box" placeholder="Search coin..." onkeyup="filterTop100()">
+        <div class="market-table-container">
+            <div id="top100Table" class="loading">Loading top 100 coins...</div>
+        </div>
+    </div>
+</div>
 
 <script>
     // Full countries list
@@ -1025,6 +1106,8 @@
     let currentUser = null;
     let holdings = { btc: 0.01, eth: 0.25, bnb: 1.5, sol: 2.5 };
     let currentPrices = {};
+    let top100Data = [];
+    let filteredTop100Data = [];
     
     // Fallback prices
     const FALLBACK_PRICES = {
@@ -1259,6 +1342,103 @@
         }
     }
 
+    // Fetch Top 100 Cryptocurrencies
+    async function fetchTop100() {
+        try {
+            let url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false';
+            let res = await fetch(url);
+            
+            if (!res.ok) {
+                console.warn('Failed to fetch top 100, using fallback');
+                return false;
+            }
+            
+            let data = await res.json();
+            top100Data = data.map((coin, index) => ({
+                rank: index + 1,
+                name: coin.name,
+                symbol: coin.symbol.toUpperCase(),
+                price: coin.current_price || 0,
+                change: coin.price_change_percentage_24h || 0,
+                marketCap: coin.market_cap || 0,
+                volume: coin.total_volume || 0
+            }));
+            
+            filteredTop100Data = [...top100Data];
+            renderTop100Table();
+            return true;
+        } catch(e) {
+            console.error('Failed to fetch top 100:', e);
+            return false;
+        }
+    }
+
+    function renderTop100Table() {
+        let tableHtml = `
+            <table class="top100-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Coin</th>
+                        <th>Price</th>
+                        <th>24h Change</th>
+                        <th>Market Cap</th>
+                        <th>Volume (24h)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        for (let coin of filteredTop100Data) {
+            let changeClass = coin.change >= 0 ? 'positive' : 'negative';
+            let changeSymbol = coin.change >= 0 ? '+' : '';
+            
+            tableHtml += `
+                <tr>
+                    <td class="rank-cell">${coin.rank}</td>
+                    <td class="coin-name-cell">
+                        ${coin.name}
+                        <span class="coin-symbol">${coin.symbol}</span>
+                    </td>
+                    <td class="price-cell">$${coin.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td>
+                    <td class="${changeClass}">${changeSymbol}${coin.change.toFixed(2)}%</td>
+                    <td>$${(coin.marketCap / 1000000000).toFixed(2)}B</td>
+                    <td>$${(coin.volume / 1000000).toFixed(2)}M</td>
+                </tr>
+            `;
+        }
+        
+        tableHtml += `</tbody></table>`;
+        document.getElementById('top100Table').innerHTML = tableHtml;
+    }
+
+    function filterTop100() {
+        let searchTerm = document.getElementById('top100Search').value.toLowerCase();
+        filteredTop100Data = top100Data.filter(coin => 
+            coin.name.toLowerCase().includes(searchTerm) || 
+            coin.symbol.toLowerCase().includes(searchTerm)
+        );
+        renderTop100Table();
+    }
+
+    function toggleTop100Modal() {
+        let modal = document.getElementById('top100Modal');
+        if (modal.style.display === 'block') {
+            modal.style.display = 'none';
+        } else {
+            modal.style.display = 'block';
+            if (top100Data.length === 0) {
+                fetchTop100();
+            } else {
+                renderTop100Table();
+            }
+        }
+    }
+
+    function closeTop100Modal() {
+        document.getElementById('top100Modal').style.display = 'none';
+    }
+
     async function loadDashboard() { 
         await fetchPrices(); 
         renderWatchlist(); 
@@ -1349,7 +1529,7 @@
             let changeClass = item.change >= 0 ? 'positive' : 'negative'; 
             html += `<tr><td>${item.name}</td><td>$${item.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${item.change>=0?'+':''}${item.change.toFixed(2)}%</td></tr>`; 
         } 
-        html += '</tbody></table>'; 
+        html += '</tbody></tr>'; 
         let table = document.getElementById('allMarketsTable');
         if(table) table.innerHTML = html; 
     }
@@ -1377,7 +1557,7 @@
             let ids = coins.map(c=>c.id).join(','); 
             let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
             let data = await res.json(); 
-            let html = '<tr><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
+            let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
             let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', 'usd-coin':'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; 
             for(let coin of coins) { 
                 let coinData = data[coin.id]; 
@@ -1472,7 +1652,10 @@
     setInterval(fetchMarketData, 30000); 
     updateMarqueePrices(); 
     setInterval(updateMarqueePrices, 30000); 
-    window.onclick = function(e) { if(e.target==document.getElementById('marketsModal')) closeMarketsModal(); };
+    window.onclick = function(e) { 
+        if(e.target == document.getElementById('marketsModal')) closeMarketsModal(); 
+        if(e.target == document.getElementById('top100Modal')) closeTop100Modal();
+    };
     
     document.body.classList.add('loaded');
 </script>
