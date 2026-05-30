@@ -199,13 +199,6 @@
             color: #48bb78;
         }
 
-        .see-all {
-            color: #667eea;
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -528,12 +521,6 @@
         .forgot-btn:hover {
             text-decoration: underline;
         }
-        .error-msg {
-            color: #e53e3e;
-            font-size: 12px;
-            margin-top: 5px;
-            display: block;
-        }
 
         /* Dashboard Styles */
         .dashboard-container {
@@ -790,7 +777,7 @@
             background: rgba(229,62,62,0.3);
         }
 
-        /* Markets Page - Top 100 Scrollable List */
+        /* Markets Page - Same as Dashboard Sections */
         .markets-container {
             padding: 100px 20px 80px;
             max-width: 1200px;
@@ -800,100 +787,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
-            gap: 15px;
         }
         .markets-header h1 {
             font-size: 32px;
         }
-        .markets-search {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 14px;
-        }
-        .markets-search:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .top100-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-height: 65vh;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        .top100-list::-webkit-scrollbar {
-            width: 5px;
-        }
-        .top100-list::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-        }
-        .top100-list::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 10px;
-        }
-        .market-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            transition: 0.3s;
-        }
-        .market-card:hover {
-            background: rgba(255,255,255,0.05);
-            transform: translateX(5px);
-        }
-        .market-rank {
-            font-size: 14px;
-            color: #a0a0c0;
-            min-width: 45px;
-        }
-        .market-coin {
-            min-width: 120px;
-        }
-        .market-coin h4 {
-            font-size: 16px;
-            margin-bottom: 3px;
-        }
-        .market-coin p {
-            color: #a0a0c0;
-            font-size: 11px;
-        }
-        .market-price {
-            text-align: right;
-            min-width: 100px;
-        }
-        .market-price .price {
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .market-change {
-            min-width: 80px;
-            text-align: right;
-        }
-        .market-stats {
-            text-align: right;
-            min-width: 140px;
-        }
-        .market-stats div {
-            font-size: 12px;
-            color: #a0a0c0;
-        }
-        .market-stats .market-cap {
-            color: white;
-        }
+
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
             .features-section, .market-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
@@ -904,11 +804,6 @@
             .profile-container, .markets-container { padding: 80px 15px 80px; }
             .info-row, .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
             .chat-widget { bottom: 75px; right: 10px; padding: 10px 16px; font-size: 14px; }
-            .market-card { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .market-rank, .market-coin, .market-price, .market-change, .market-stats { width: 100%; text-align: left; }
-            .market-price { text-align: left; }
-            .market-change { text-align: left; }
-            .market-stats { text-align: left; }
         }
     </style>
 </head>
@@ -1050,10 +945,13 @@
     <div class="markets-container">
         <div class="markets-header">
             <h1>Markets</h1>
-            <button class="refresh-btn" id="refreshMarketsBtn" onclick="refreshMarkets()">Refresh Prices</button>
+            <button class="refresh-btn" id="refreshMarketsBtn" onclick="refreshMarketsPrices()">Refresh Prices</button>
         </div>
-        <input type="text" id="marketsSearchInput" class="markets-search" placeholder="Search cryptocurrency..." onkeyup="filterMarketsList()">
-        <div id="top100MarketsList" class="top100-list"><div class="loading">Loading top 100 cryptocurrencies...</div></div>
+        <div class="section-title">Watchlist</div>
+        <div id="marketsWatchlistContainer" class="watchlist-scroll"></div>
+        <div class="section-title">Your Crypto</div>
+        <div id="marketsCryptoContainer" class="crypto-scroll"></div>
+        <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
         <div class="nav-item" data-nav="home">Home</div>
@@ -1094,8 +992,6 @@
     let currentUser = null;
     let holdings = { btc: 0.01, eth: 0.25, bnb: 1.5, sol: 2.5 };
     let currentPrices = {};
-    let top100FullList = [];
-    let filteredTop100List = [];
     
     const FALLBACK_PRICES = {
         btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00,
@@ -1145,74 +1041,43 @@
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'none';
         document.getElementById('marketsPage').style.display = 'block';
-        loadTop100Markets();
+        loadMarketsPage();
     }
 
-    async function loadTop100Markets() {
-        let container = document.getElementById('top100MarketsList');
-        container.innerHTML = '<div class="loading">Loading top 100 cryptocurrencies...</div>';
-        try {
-            let url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false';
-            let res = await fetch(url);
-            if (!res.ok) throw new Error('API failed');
-            let data = await res.json();
-            top100FullList = data.map((coin, index) => ({
-                rank: index + 1,
-                name: coin.name,
-                symbol: coin.symbol.toUpperCase(),
-                price: coin.current_price || 0,
-                change: coin.price_change_percentage_24h || 0,
-                marketCap: coin.market_cap || 0,
-                volume: coin.total_volume || 0
-            }));
-            filteredTop100List = [...top100FullList];
-            renderMarketsList();
-        } catch(e) {
-            console.error('Failed to load top 100:', e);
-            container.innerHTML = '<div class="loading">Unable to load markets. Please try again.</div>';
-        }
+    function loadMarketsPage() {
+        renderMarketsWatchlist();
+        renderMarketsCrypto();
     }
 
-    function renderMarketsList() {
-        let container = document.getElementById('top100MarketsList');
-        let html = '';
-        for (let coin of filteredTop100List) {
-            let changeClass = coin.change >= 0 ? 'positive' : 'negative';
-            let changeSymbol = coin.change >= 0 ? '+' : '';
-            let marketCapB = (coin.marketCap / 1000000000).toFixed(2);
-            let volumeM = (coin.volume / 1000000).toFixed(2);
-            html += `
-                <div class="market-card">
-                    <div class="market-rank">#${coin.rank}</div>
-                    <div class="market-coin">
-                        <h4>${coin.name}</h4>
-                        <p>${coin.symbol}</p>
-                    </div>
-                    <div class="market-price">
-                        <div class="price">$${coin.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
-                    </div>
-                    <div class="market-change ${changeClass}">${changeSymbol}${coin.change.toFixed(2)}%</div>
-                    <div class="market-stats">
-                        <div class="market-cap">MCap: $${marketCapB}B</div>
-                        <div>Vol: $${volumeM}M</div>
-                    </div>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
+    function renderMarketsWatchlist() { 
+        let watchCoins = [{id:'eth', name:'ETH', full:'Ethereum'},{id:'btc', name:'BTC', full:'Bitcoin'},{id:'usdc', name:'USDC', full:'USD Coin'}]; 
+        let html = ''; 
+        for(let coin of watchCoins) { 
+            let price = currentPrices[coin.id] || 0; 
+            let change = currentPrices[coin.id+'Change'] || 0; 
+            let changeClass = change >= 0 ? 'positive' : 'negative'; 
+            html += `<div class="watchlist-item"><div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div><div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div></div>`; 
+        } 
+        let container = document.getElementById('marketsWatchlistContainer');
+        if(container) container.innerHTML = html; 
+    }
+    
+    function renderMarketsCrypto() { 
+        let cryptoList = [{id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc},{id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth},{id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb},{id:'sol', name:'SOL', full:'Solana', amount:holdings.sol}]; 
+        let html = ''; 
+        for(let coin of cryptoList) { 
+            let price = currentPrices[coin.id] || 0; 
+            let change = currentPrices[coin.id+'Change'] || 0; 
+            let value = price * coin.amount; 
+            let changeClass = change >= 0 ? 'positive' : 'negative'; 
+            html += `<div class="crypto-item"><div><h4>${coin.name}</h4><p>${coin.full}</p><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div><div style="text-align:right;"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div style="font-size:12px;color:#a0a0c0;">Amount: ${coin.amount} ${coin.name}</div><div>Value: $${value.toFixed(2)}</div><button class="trade-btn" style="margin-top:10px;" onclick="alert('Trading coming soon!')">Trade</button></div></div>`; 
+        } 
+        let container = document.getElementById('marketsCryptoContainer');
+        if(container) container.innerHTML = html + `<div style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;">Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko</div>`; 
     }
 
-    function filterMarketsList() {
-        let searchTerm = document.getElementById('marketsSearchInput').value.toLowerCase();
-        filteredTop100List = top100FullList.filter(coin => 
-            coin.name.toLowerCase().includes(searchTerm) || 
-            coin.symbol.toLowerCase().includes(searchTerm)
-        );
-        renderMarketsList();
-    }
-
-    async function refreshMarkets() {
-        await loadTop100Markets();
+    function refreshMarketsPrices() {
+        loadMarketsPage();
     }
 
     function renderProfile() {
@@ -1417,7 +1282,7 @@
             let ids = coins.map(c=>c.id).join(','); 
             let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
             let data = await res.json(); 
-            let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
+            let html = '<tr><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
             let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', 'usd-coin':'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; 
             for(let coin of coins) { 
                 let coinData = data[coin.id]; 
