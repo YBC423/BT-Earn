@@ -1207,10 +1207,12 @@
             <div class="portfolio-change" id="portfolioChange">+0.00%</div>
             <button class="deposit-btn" onclick="alert('Deposit feature coming soon!')">Deposit</button>
         </div>
-        <div class="section-title">Watchlist <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div>
-        <div id="watchlistContainer" class="watchlist-scroll"></div>
-        <div class="section-title">Your Crypto</div>
+        <!-- Your Crypto section FIRST (top) -->
+        <div class="section-title">Your Crypto <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div>
         <div id="cryptoContainer" class="crypto-scroll"></div>
+        <!-- Watchlist section SECOND (bottom) -->
+        <div class="section-title">Watchlist</div>
+        <div id="watchlistContainer" class="watchlist-scroll"></div>
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
@@ -1247,10 +1249,12 @@
             <h1>Markets</h1>
             <button class="refresh-btn" id="refreshMarketsBtn" onclick="refreshMarketsPrices()">Refresh Prices</button>
         </div>
-        <div class="section-title">Watchlist</div>
-        <div id="marketsWatchlistContainer" class="watchlist-scroll"></div>
+        <!-- Your Crypto section FIRST (top) -->
         <div class="section-title">Your Crypto</div>
         <div id="marketsCryptoContainer" class="crypto-scroll"></div>
+        <!-- Watchlist section SECOND (bottom) -->
+        <div class="section-title">Watchlist</div>
+        <div id="marketsWatchlistContainer" class="watchlist-scroll"></div>
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
@@ -1396,7 +1400,8 @@
     ];
 
     let currentUser = null;
-    let holdings = { btc: 0.01, eth: 0.25, bnb: 1.5, sol: 2.5, usdt: 1000.00 };
+    // Only USDT holdings - 1000 USDT
+    let holdings = { usdt: 1000.00 };
     let currentPrices = {};
     let currentTradeCoin = 'BTC';
     let currentTradeMode = 'buy';
@@ -1700,8 +1705,8 @@
     }
 
     function loadMarketsPage() {
-        renderMarketsWatchlist();
         renderMarketsCrypto();
+        renderMarketsWatchlist();
     }
 
     function renderMarketsWatchlist() { 
@@ -1727,7 +1732,6 @@
     }
     
     function renderMarketsCrypto() { 
-        // Only show USDT in "Your Crypto" section on Markets page
         let usdtPrice = currentPrices.usdt || 1.00;
         let usdtValue = usdtPrice * holdings.usdt;
         let html = `<div class="crypto-item" onclick="showTrade('USDT')">
@@ -1813,15 +1817,23 @@
         }
         
         if (currentTradeMode === 'buy') {
+            // Check if user has enough USDT to buy
+            let costInUSDT = total;
+            if (holdings.usdt < costInUSDT) {
+                alert(`Insufficient USDT balance. You have $${holdings.usdt.toFixed(2)} USDT`);
+                return;
+            }
             alert(`Buy order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`);
+            holdings.usdt = holdings.usdt - costInUSDT;
             holdings[coinId] = (holdings[coinId] || 0) + quantity;
         } else {
             if (holdings[coinId] < quantity) {
-                alert(`Insufficient ${currentTradeCoin} balance. You have ${holdings[coinId].toFixed(8)} ${currentTradeCoin}`);
+                alert(`Insufficient ${currentTradeCoin} balance. You have ${(holdings[coinId] || 0).toFixed(8)} ${currentTradeCoin}`);
                 return;
             }
             alert(`Sell order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`);
             holdings[coinId] = holdings[coinId] - quantity;
+            holdings.usdt = holdings.usdt + total;
         }
         
         document.getElementById('tradeQuantityInput').value = '';
@@ -1966,8 +1978,8 @@
 
     async function loadDashboard() { 
         await fetchPrices(); 
+        renderCrypto();
         renderWatchlist(); 
-        renderCrypto(); 
         updatePortfolioTotal(); 
     }
     
@@ -1994,7 +2006,6 @@
     }
     
     function renderCrypto() { 
-        // Only show USDT in "Your Crypto" section on Dashboard
         let usdtPrice = currentPrices.usdt || 1.00;
         let usdtValue = usdtPrice * holdings.usdt;
         let html = `<div class="crypto-item" onclick="showTrade('USDT')">
@@ -2011,15 +2022,15 @@
     }
     
     function updatePortfolioTotal() { 
-        let total = (currentPrices.btc || 0)*holdings.btc + (currentPrices.eth || 0)*holdings.eth + (currentPrices.bnb || 0)*holdings.bnb + (currentPrices.sol || 0)*holdings.sol + (currentPrices.usdt || 0)*holdings.usdt; 
+        let total = holdings.usdt * (currentPrices.usdt || 1.00);
         let balanceElement = document.getElementById('portfolioBalance');
         if(balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`; 
     }
     
     async function refreshDashboardPrices() { 
         await fetchPrices(); 
+        renderCrypto();
         renderWatchlist(); 
-        renderCrypto(); 
         updatePortfolioTotal(); 
     }
 
@@ -2048,7 +2059,6 @@
             let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
             let data = await res.json(); 
             
-            // Only show USDT in the markets table
             let usdtData = data.tether;
             if(usdtData) {
                 let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
@@ -2060,19 +2070,19 @@
                     <td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
                     <td class="${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</td>
                     <td>480.48M</td>
-                </tr>`;
+                </table>`;
                 html += '</tbody></table>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             } else {
-                let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>';
+                let html = '<tr><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>';
                 html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
                     <td>USDT/USDT</td>
                     <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
                     <td class="positive">0.00%</td>
                     <td>480.48M</td>
                 </tr>`;
-                html += '</tbody><tr>';
+                html += '</tbody></table>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             }
