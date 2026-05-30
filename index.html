@@ -380,7 +380,7 @@
             font-size: 12px;
         }
 
-        /* Chat Widget */
+        /* Chat Widget - Draggable */
         .chat-widget {
             position: fixed;
             bottom: 20px;
@@ -390,8 +390,12 @@
             border-radius: 30px;
             display: flex;
             gap: 10px;
-            cursor: pointer;
+            cursor: grab;
             z-index: 1000;
+            user-select: none;
+        }
+        .chat-widget:active {
+            cursor: grabbing;
         }
 
         /* Modal Styles */
@@ -691,7 +695,7 @@
             background: #0d1129;
             display: flex;
             justify-content: space-around;
-            padding: 12px 20px;
+            padding: 15px 20px;
             border-top: 1px solid rgba(255,255,255,0.08);
             z-index: 1000;
         }
@@ -699,7 +703,8 @@
             text-align: center;
             cursor: pointer;
             color: #a0a0c0;
-            font-size: 12px;
+            font-size: 18px;
+            font-weight: bold;
         }
         .nav-item.active {
             color: #667eea;
@@ -719,6 +724,7 @@
             .hero h1 { font-size: 32px; }
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
+            .nav-item { font-size: 16px; }
         }
     </style>
 </head>
@@ -835,7 +841,7 @@
     </div>
 </div>
 
-<div class="chat-widget" onclick="alert('Chat support coming soon! Email us at support@bt-earn.com')"><span>💬</span><span>Hi!</span></div>
+<div class="chat-widget" id="chatWidget" onclick="alert('Chat support coming soon! Email us at support@bt-earn.com')"><span>💬</span><span>Hi!</span></div>
 
 <div id="marketsModal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeMarketsModal()">&times;</span><h2>All Markets (100+ Cryptocurrencies)</h2><input type="text" id="marketSearch" class="search-box" placeholder="Search coin..." onkeyup="filterMarkets()"><div class="market-table-container"><div id="allMarketsTable" class="loading">Loading...</div></div></div></div>
 
@@ -918,6 +924,43 @@
     const coins = [{ id: 'bitcoin', name: 'BTC/USDT' },{ id: 'ethereum', name: 'ETH/USDT' },{ id: 'tron', name: 'TRX/USDT' },{ id: 'usd-coin', name: 'USDC/USDT' },{ id: 'ripple', name: 'XRP/USDT' },{ id: 'solana', name: 'SOL/USDT' },{ id: 'dogecoin', name: 'DOGE/USDT' },{ id: 'toncoin', name: 'TON/USDT' },{ id: 'binancecoin', name: 'BNB/USDT' },{ id: 'litecoin', name: 'LTC/USDT' }];
     async function fetchMarketData() { try { let ids = coins.map(c=>c.id).join(','); let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); let data = await res.json(); let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', 'usd-coin':'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; for(let coin of coins) { let coinData = data[coin.id]; if(coinData) { let price = coinData.usd; let change = coinData.usd_24h_change; let changeClass = change>=0?'positive':'negative'; html += `<tr><td>${coin.name}</td><td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</td><td>${volumes[coin.id]||'N/A'}</td></tr>`; } } html += '</tbody></table>'; document.getElementById('marketTable').innerHTML = html; document.getElementById('lastUpdated').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`; updateMarqueePrices(); } catch(e) { document.getElementById('marketTable').innerHTML = '<div class="loading">Unable to load prices</div>'; } }
     function toggleFAQ(el) { let ans = el.nextElementSibling; let plus = el.querySelector('.plus'); if(ans.style.display==='block') { ans.style.display='none'; plus.textContent='+'; } else { ans.style.display='block'; plus.textContent='−'; } }
+    
+    // Draggable chat widget
+    function makeDraggable(element) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        element.onmousedown = dragMouseDown;
+        function dragMouseDown(e) {
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+        }
+        function elementDrag(e) {
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            let top = element.offsetTop - pos2;
+            let left = element.offsetLeft - pos1;
+            let maxX = window.innerWidth - element.offsetWidth;
+            let maxY = window.innerHeight - element.offsetHeight;
+            left = Math.min(Math.max(0, left), maxX);
+            top = Math.min(Math.max(0, top), maxY);
+            element.style.top = top + 'px';
+            element.style.left = left + 'px';
+            element.style.bottom = 'auto';
+            element.style.right = 'auto';
+        }
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+    
+    let chatWidget = document.getElementById('chatWidget');
+    if(chatWidget) makeDraggable(chatWidget);
     
     populateCountries();
     if(localStorage.getItem('currentUser')) { currentUser = JSON.parse(localStorage.getItem('currentUser')); showDashboard(); } else { showHomepage(); }
