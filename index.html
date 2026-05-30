@@ -567,27 +567,24 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        
-        /* MODIFIED: Dashboard header - stacked layout exactly like IMG_1977.png */
         .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
-        .dashboard-header h1 {
-            font-size: 32px;
-            margin: 0 0 8px 0;
-            line-height: 1.2;
+        .date-time {
+            text-align: right;
         }
-        .dashboard-time {
+        .date-time .time {
             font-size: 28px;
             font-weight: bold;
-            margin-bottom: 4px;
-            color: white;
         }
-        .dashboard-date {
+        .date-time .date {
             color: #a0a0c0;
             font-size: 14px;
         }
-        
         .portfolio-card {
             background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
             border: 1px solid rgba(255,255,255,0.08);
@@ -701,7 +698,20 @@
             cursor: pointer;
             color: #e53e3e;
         }
-        /* LIVE badge completely removed */
+        .live-badge {
+            background: #e53e3e;
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
 
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
@@ -710,8 +720,6 @@
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
             .nav-item { font-size: 16px; }
-            .dashboard-header h1 { font-size: 26px; }
-            .dashboard-time { font-size: 22px; }
         }
     </style>
 </head>
@@ -802,11 +810,9 @@
         <div><button class="logout-btn" onclick="logout()">Logout</button></div>
     </div>
     <div class="dashboard-container">
-        <!-- MODIFIED: Dashboard header exactly like IMG_1977.png - stacked, no LIVE badge -->
         <div class="dashboard-header">
-            <h1>Dashboard</h1>
-            <div class="dashboard-time" id="dashboardTime">--:--:--</div>
-            <div class="dashboard-date" id="dashboardDate">---</div>
+            <h1>Dashboard <span class="live-badge">LIVE</span></h1>
+            <div class="date-time" id="dateTimeDisplay"><div class="time">--:--:--</div><div class="date">---</div></div>
         </div>
         <div class="portfolio-card">
             <h3>REAL PORTFOLIO</h3>
@@ -860,8 +866,11 @@
     ];
 
     let currentUser = null;
+    // Each user gets their own holdings - stored in their account
+    // Default holdings for new users (non-zero values)
     const defaultHoldings = { btc: 0.05, eth: 0.5, bnb: 2.0, sol: 3.0 };
     
+    // Initialize with realistic default prices (no zeros!)
     let currentPrices = {
         btc: 67500, btcChange: 2.5,
         eth: 3500, ethChange: 1.8,
@@ -880,6 +889,7 @@
         document.getElementById('homepage').style.display = 'none'; 
         document.getElementById('authPage').style.display = 'none'; 
         document.getElementById('dashboard').style.display = 'block'; 
+        // Render immediately with cached prices (no zeros!)
         renderWatchlist();
         renderCrypto();
         updatePortfolioTotal();
@@ -940,17 +950,8 @@
 
     function logout() { localStorage.removeItem('currentUser'); currentUser = null; showHomepage(); }
 
-    // MODIFIED: Update dashboard time and date in stacked layout
-    function updateDashboardDateTime() { 
-        let now = new Date(); 
-        let timeStr = now.toLocaleTimeString();
-        let dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        let timeElem = document.getElementById('dashboardTime');
-        let dateElem = document.getElementById('dashboardDate');
-        if(timeElem) timeElem.innerText = timeStr;
-        if(dateElem) dateElem.innerText = dateStr;
-    }
-    setInterval(updateDashboardDateTime, 1000); updateDashboardDateTime();
+    function updateDateTime() { let now = new Date(); document.getElementById('dateTimeDisplay').innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>`; }
+    setInterval(updateDateTime, 1000); updateDateTime();
 
     async function fetchPrices() { 
         if(isFetching) return;
@@ -960,6 +961,8 @@
             let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`; 
             let res = await fetch(url); 
             let data = await res.json(); 
+            
+            // Only update if we got valid data (no zeros)
             if(data.bitcoin && data.bitcoin.usd > 0) {
                 currentPrices.btc = data.bitcoin.usd;
                 currentPrices.btcChange = data.bitcoin.usd_24h_change || 0;
@@ -1006,6 +1009,7 @@
         renderWatchlist(); 
         renderCrypto(); 
         updatePortfolioTotal(); 
+        // Set up auto-refresh every 15 seconds
         if(window.priceInterval) clearInterval(window.priceInterval);
         window.priceInterval = setInterval(async () => {
             await fetchPrices();
@@ -1033,6 +1037,7 @@
     }
     
     function renderCrypto() { 
+        // Get user's holdings from their account
         const userHoldings = currentUser?.holdings || defaultHoldings;
         let cryptoList = [
             {id:'btc', name:'BTC', full:'Bitcoin', amount: userHoldings.btc, priceKey:'btc', changeKey:'btcChange'},
@@ -1058,6 +1063,7 @@
                     (currentPrices.bnb || 0) * userHoldings.bnb + 
                     (currentPrices.sol || 0) * userHoldings.sol; 
         document.getElementById('portfolioBalance').innerHTML = `$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+        // Calculate average change
         let avgChange = (currentPrices.btcChange + currentPrices.ethChange + currentPrices.bnbChange + currentPrices.solChange) / 4;
         document.getElementById('portfolioChange').innerHTML = `${avgChange >= 0 ? '+' : ''}${avgChange.toFixed(2)}%`;
         document.getElementById('portfolioChange').className = `portfolio-change ${avgChange >= 0 ? 'positive' : 'negative'}`;
@@ -1108,7 +1114,7 @@
             let changeClass = item.change >= 0 ? 'positive' : 'negative'; 
             html += `<tr><td>${item.name}</td><td>$${item.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${item.change>=0?'+':''}${item.change.toFixed(2)}%</td></tr>`; 
         } 
-        html += '</tbody></table>'; 
+        html += '</tbody><table>'; 
         document.getElementById('allMarketsTable').innerHTML = html; 
     }
     
