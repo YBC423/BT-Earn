@@ -20,8 +20,9 @@
 
         /* Hide flash on refresh - prevents homepage flicker */
         body:not(.loaded) #homepage,
+        body:not(.loaded) #authPage,
         body:not(.loaded) #dashboard,
-        body:not(.loaded) #authPage {
+        body:not(.loaded) #profilePage {
             display: none;
         }
 
@@ -47,6 +48,7 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            cursor: pointer;
         }
 
         .header-buttons {
@@ -716,13 +718,128 @@
         .nav-item.active {
             color: #667eea;
         }
-        .logout-btn {
-            background: rgba(229,62,62,0.2);
-            border: 1px solid #e53e3e;
-            padding: 8px 20px;
+
+        /* Profile Page Styles */
+        .profile-container {
+            padding: 100px 20px 80px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .profile-header h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .profile-header p {
+            color: #a0a0c0;
+            font-size: 14px;
+        }
+        .profile-section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .profile-section h3 {
+            font-size: 18px;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-size: 14px;
+            color: #a0a0c0;
+        }
+        .info-value {
+            font-size: 14px;
+            color: white;
+        }
+        .edit-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 15px;
+            border-radius: 20px;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .edit-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .status-badge {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(72,187,120,0.2);
+            color: #48bb78;
+        }
+        .status-badge.disabled {
+            background: rgba(229,62,62,0.2);
+            color: #e53e3e;
+        }
+        .preference-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .preference-row:last-child {
+            border-bottom: none;
+        }
+        .preference-label {
+            font-size: 14px;
+            color: #a0a0c0;
+        }
+        .preference-value {
+            font-size: 14px;
+            color: white;
+            background: rgba(255,255,255,0.05);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        .profile-logout-btn {
+            width: 100%;
+            background: rgba(229,62,62,0.15);
+            border: 1px solid #e53e3e;
+            padding: 14px;
+            border-radius: 30px;
             cursor: pointer;
             color: #e53e3e;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        .profile-logout-btn:hover {
+            background: rgba(229,62,62,0.3);
         }
 
         @media (max-width: 768px) {
@@ -732,6 +849,9 @@
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
             .nav-item { font-size: 16px; }
+            .profile-container { padding: 80px 15px 80px; }
+            .info-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
     </style>
 </head>
@@ -820,7 +940,7 @@
 <div id="dashboard" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
-        <div><button class="logout-btn" onclick="logout()">Logout</button></div>
+        <div></div>
     </div>
     <div class="dashboard-container">
         <div class="dashboard-header">
@@ -840,11 +960,28 @@
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="alert('Home')">Home</div>
-        <div class="nav-item" onclick="alert('Markets')">Markets</div>
-        <div class="nav-item" onclick="alert('Trade')">Trade</div>
-        <div class="nav-item" onclick="alert('Bots')">Bots</div>
-        <div class="nav-item" onclick="alert('Profile')">Profile</div>
+        <div class="nav-item" data-nav="home">Home</div>
+        <div class="nav-item" data-nav="markets" onclick="alert('Markets')">Markets</div>
+        <div class="nav-item" data-nav="trade" onclick="alert('Trade')">Trade</div>
+        <div class="nav-item" data-nav="bots" onclick="alert('Bots')">Bots</div>
+        <div class="nav-item" data-nav="profile">Profile</div>
+    </div>
+</div>
+
+<div id="profilePage" style="display:none;">
+    <div class="header">
+        <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
+        <div></div>
+    </div>
+    <div class="profile-container" id="profileContainer">
+        <!-- Profile content will be loaded here -->
+    </div>
+    <div class="bottom-nav">
+        <div class="nav-item" data-nav="home">Home</div>
+        <div class="nav-item" data-nav="markets" onclick="alert('Markets')">Markets</div>
+        <div class="nav-item" data-nav="trade" onclick="alert('Trade')">Trade</div>
+        <div class="nav-item" data-nav="bots" onclick="alert('Bots')">Bots</div>
+        <div class="nav-item" data-nav="profile" style="color: #667eea;">Profile</div>
     </div>
 </div>
 
@@ -882,7 +1019,7 @@
     let holdings = { btc: 0.01, eth: 0.25, bnb: 1.5, sol: 2.5 };
     let currentPrices = {};
     
-    // ===== FIX: FALLBACK PRICES (never show zero) =====
+    // Fallback prices
     const FALLBACK_PRICES = {
         btc: 73786.00,
         eth: 2022.64,
@@ -898,15 +1035,119 @@
         solChange: 1.24
     };
     
-    // Initialize with fallback prices so dashboard never shows $0.00
     currentPrices = { ...FALLBACK_PRICES };
-    // ===== END OF FIX =====
 
-    function showHomepage() { document.getElementById('homepage').style.display = 'block'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; }
-    function showAuthPage() { document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'block'; document.getElementById('dashboard').style.display = 'none'; }
-    function showDashboard() { document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; loadDashboard(); }
+    function showHomepage() { 
+        document.getElementById('homepage').style.display = 'block'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('profilePage').style.display = 'none';
+    }
+    
+    function showAuthPage() { 
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'block'; 
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('profilePage').style.display = 'none';
+    }
+    
+    function showDashboard() { 
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('profilePage').style.display = 'none';
+        loadDashboard(); 
+    }
+    
+    function showProfile() {
+        document.getElementById('homepage').style.display = 'none';
+        document.getElementById('authPage').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('profilePage').style.display = 'block';
+        renderProfile();
+    }
 
-    // Populate countries dropdown
+    function renderProfile() {
+        if (!currentUser) return;
+        
+        const memberSince = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        const phoneNumber = currentUser.phone || 'Not provided';
+        
+        const profileHTML = `
+            <div class="profile-header">
+                <div class="profile-avatar">${currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}</div>
+                <h2>${currentUser.name || 'User'}</h2>
+                <p>Member since ${memberSince}</p>
+            </div>
+            
+            <div class="profile-section">
+                <h3>Personal Information</h3>
+                <div class="info-row">
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value">${currentUser.name || 'Not set'}</span>
+                    <button class="edit-btn" onclick="alert('Edit name feature coming soon')">Edit</button>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email Address</span>
+                    <span class="info-value">${currentUser.email || 'Not set'}</span>
+                    <button class="edit-btn" onclick="alert('Edit email feature coming soon')">Edit</button>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phone Number</span>
+                    <span class="info-value">${phoneNumber}</span>
+                    <button class="edit-btn" onclick="alert('Edit phone feature coming soon')">Edit</button>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Account Type</span>
+                    <span class="info-value">Standard</span>
+                </div>
+            </div>
+            
+            <div class="profile-section">
+                <h3>Account Security</h3>
+                <div class="info-row">
+                    <span class="info-label">Last password change</span>
+                    <span class="info-value">Never</span>
+                    <button class="edit-btn" onclick="alert('Change password feature coming soon')">Change</button>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Two-Factor Authentication</span>
+                    <span class="status-badge disabled">Disabled</span>
+                    <button class="edit-btn" onclick="alert('Enable 2FA feature coming soon')">Enable</button>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Login</span>
+                    <span class="info-value">${new Date().toLocaleString()}</span>
+                </div>
+            </div>
+            
+            <div class="profile-section">
+                <h3>Preferences</h3>
+                <div class="preference-row">
+                    <span class="preference-label">Theme</span>
+                    <span class="preference-value">Dark</span>
+                </div>
+                <div class="preference-row">
+                    <span class="preference-label">Language</span>
+                    <span class="preference-value">English</span>
+                </div>
+                <div class="preference-row">
+                    <span class="preference-label">Notification</span>
+                    <span class="preference-value">Email Only</span>
+                </div>
+                <div class="preference-row">
+                    <span class="preference-label">Timezone</span>
+                    <span class="preference-value">UTC</span>
+                </div>
+                <button class="edit-btn" style="margin-top: 15px; width: 100%;" onclick="alert('Edit preferences coming soon')">Edit Preferences</button>
+            </div>
+            
+            <button class="profile-logout-btn" onclick="logout()">Logout</button>
+        `;
+        
+        document.getElementById('profileContainer').innerHTML = profileHTML;
+    }
+
     function populateCountries() {
         let countrySelect = document.getElementById('signupCountry');
         if(countrySelect) {
@@ -922,16 +1163,59 @@
 
     document.querySelectorAll('.auth-tab').forEach(tab => { tab.addEventListener('click', function() { document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); document.getElementById('loginForm').classList.toggle('active', this.dataset.tab === 'login'); document.getElementById('signupForm').classList.toggle('active', this.dataset.tab === 'signup'); }); });
 
-    function handleLogin() { let email = document.getElementById('loginEmail').value; let password = document.getElementById('loginPassword').value; if(!email.includes('@')) { alert('Please enter a valid email'); return; } if(password.length < 8) { alert('Password must be at least 8 characters'); return; } let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); let user = users.find(u => u.email === email && u.password === password); if(user) { currentUser = user; localStorage.setItem('currentUser', JSON.stringify(currentUser)); showDashboard(); } else { alert('Invalid credentials. Please sign up first.'); } }
+    function handleLogin() { 
+        let email = document.getElementById('loginEmail').value; 
+        let password = document.getElementById('loginPassword').value; 
+        if(!email.includes('@')) { alert('Please enter a valid email'); return; } 
+        if(password.length < 8) { alert('Password must be at least 8 characters'); return; } 
+        let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); 
+        let user = users.find(u => u.email === email && u.password === password); 
+        if(user) { 
+            currentUser = user; 
+            localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+            showDashboard(); 
+        } else { 
+            alert('Invalid credentials. Please sign up first.'); 
+        } 
+    }
 
-    function handleSignup() { let name = document.getElementById('signupName').value; let email = document.getElementById('signupEmail').value; let phone = document.getElementById('signupPhone').value; let country = document.getElementById('signupCountry').value; let password = document.getElementById('signupPassword').value; let confirm = document.getElementById('signupConfirmPassword').value; if(!name || !email || !phone || !country) { alert('Please fill all fields'); return; } if(!email.includes('@')) { alert('Email must contain @'); return; } if(password.length < 8) { alert('Password must be at least 8 characters'); return; } if(password !== confirm) { alert('Passwords do not match'); return; } let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); if(users.find(u => u.email === email)) { alert('Email already registered'); return; } let newUser = { name, email, phone, country, password }; users.push(newUser); localStorage.setItem('btUsers', JSON.stringify(users)); currentUser = newUser; localStorage.setItem('currentUser', JSON.stringify(currentUser)); showDashboard(); }
+    function handleSignup() { 
+        let name = document.getElementById('signupName').value; 
+        let email = document.getElementById('signupEmail').value; 
+        let phone = document.getElementById('signupPhone').value; 
+        let country = document.getElementById('signupCountry').value; 
+        let password = document.getElementById('signupPassword').value; 
+        let confirm = document.getElementById('signupConfirmPassword').value; 
+        if(!name || !email || !phone || !country) { alert('Please fill all fields'); return; } 
+        if(!email.includes('@')) { alert('Email must contain @'); return; } 
+        if(password.length < 8) { alert('Password must be at least 8 characters'); return; } 
+        if(password !== confirm) { alert('Passwords do not match'); return; } 
+        let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); 
+        if(users.find(u => u.email === email)) { alert('Email already registered'); return; } 
+        let newUser = { name, email, phone, country, password }; 
+        users.push(newUser); 
+        localStorage.setItem('btUsers', JSON.stringify(users)); 
+        currentUser = newUser; 
+        localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+        showDashboard(); 
+    }
 
-    function logout() { localStorage.removeItem('currentUser'); currentUser = null; showHomepage(); }
+    function logout() { 
+        localStorage.removeItem('currentUser'); 
+        currentUser = null; 
+        showHomepage(); 
+    }
 
-    function updateDateTime() { let now = new Date(); document.getElementById('dateTimeDisplay').innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>`; }
-    setInterval(updateDateTime, 1000); updateDateTime();
+    function updateDateTime() { 
+        let now = new Date(); 
+        let dateTimeElement = document.getElementById('dateTimeDisplay');
+        if(dateTimeElement) {
+            dateTimeElement.innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>`; 
+        }
+    }
+    setInterval(updateDateTime, 1000); 
+    updateDateTime();
 
-    // ===== FIX: UPDATED fetchPrices - always keeps fallback if API fails =====
     async function fetchPrices() {
         try {
             let ids = ['bitcoin','ethereum','binancecoin','solana','tron','usd-coin','ripple','dogecoin'];
@@ -940,12 +1224,11 @@
             
             if (!res.ok) {
                 console.warn(`API returned ${res.status}, keeping fallback prices`);
-                return true; // Keep existing prices (fallback already set)
+                return true;
             }
             
             let data = await res.json();
             
-            // Only update if we got valid data
             if (data.bitcoin?.usd !== undefined) {
                 currentPrices = {
                     btc: data.bitcoin?.usd || FALLBACK_PRICES.btc,
@@ -965,11 +1248,9 @@
             return true;
         } catch(e) { 
             console.error('API fetch failed, using fallback prices:', e);
-            // Prices already have fallback values, so nothing to do
             return true;
         }
     }
-    // ===== END OF FIX =====
 
     async function loadDashboard() { 
         await fetchPrices(); 
@@ -987,7 +1268,8 @@
             let changeClass = change >= 0 ? 'positive' : 'negative'; 
             html += `<div class="watchlist-item"><div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div><div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div></div>`; 
         } 
-        document.getElementById('watchlistContainer').innerHTML = html; 
+        let container = document.getElementById('watchlistContainer');
+        if(container) container.innerHTML = html; 
     }
     
     function renderCrypto() { 
@@ -1000,12 +1282,14 @@
             let changeClass = change >= 0 ? 'positive' : 'negative'; 
             html += `<div class="crypto-item"><div><h4>${coin.name}</h4><p>${coin.full}</p><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div><div style="text-align:right;"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div style="font-size:12px;color:#a0a0c0;">Amount: ${coin.amount} ${coin.name}</div><div>Value: $${value.toFixed(2)}</div><button class="trade-btn" style="margin-top:10px;" onclick="alert('Trading coming soon!')">Trade</button></div></div>`; 
         } 
-        document.getElementById('cryptoContainer').innerHTML = html + `<div style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;">Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko</div>`; 
+        let container = document.getElementById('cryptoContainer');
+        if(container) container.innerHTML = html + `<div style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;">Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko</div>`; 
     }
     
     function updatePortfolioTotal() { 
         let total = (currentPrices.btc || 0)*holdings.btc + (currentPrices.eth || 0)*holdings.eth + (currentPrices.bnb || 0)*holdings.bnb + (currentPrices.sol || 0)*holdings.sol; 
-        document.getElementById('portfolioBalance').innerHTML = `$${total.toFixed(2)}`; 
+        let balanceElement = document.getElementById('portfolioBalance');
+        if(balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`; 
     }
     
     async function refreshDashboardPrices() { 
@@ -1047,7 +1331,8 @@
             }).filter(i=>i); 
             renderFullMarkets(currentFullMarketData); 
         } catch(e) { 
-            document.getElementById('allMarketsTable').innerHTML = '<div class="loading">Unable to load markets</div>'; 
+            let table = document.getElementById('allMarketsTable');
+            if(table) table.innerHTML = '<div class="loading">Unable to load markets</div>'; 
         } 
     }
     
@@ -1058,7 +1343,8 @@
             html += `<tr><td>${item.name}</td><td>$${item.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${item.change>=0?'+':''}${item.change.toFixed(2)}%</td></tr>`; 
         } 
         html += '</tbody></table>'; 
-        document.getElementById('allMarketsTable').innerHTML = html; 
+        let table = document.getElementById('allMarketsTable');
+        if(table) table.innerHTML = html; 
     }
     
     function filterMarkets() { 
@@ -1096,11 +1382,14 @@
                 } 
             } 
             html += '</tbody></table>'; 
-            document.getElementById('marketTable').innerHTML = html; 
-            document.getElementById('lastUpdated').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`; 
+            let marketTable = document.getElementById('marketTable');
+            if(marketTable) marketTable.innerHTML = html; 
+            let lastUpdated = document.getElementById('lastUpdated');
+            if(lastUpdated) lastUpdated.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`; 
             updateMarqueePrices(); 
         } catch(e) { 
-            document.getElementById('marketTable').innerHTML = '<div class="loading">Unable to load prices</div>'; 
+            let marketTable = document.getElementById('marketTable');
+            if(marketTable) marketTable.innerHTML = '<div class="loading">Unable to load prices</div>'; 
         } 
     }
     
@@ -1116,7 +1405,6 @@
         } 
     }
     
-    // Draggable chat widget
     function makeDraggable(element) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         element.onmousedown = dragMouseDown;
@@ -1150,14 +1438,35 @@
         }
     }
     
+    // Navigation handlers
+    document.addEventListener('click', function(e) {
+        const navItem = e.target.closest('.nav-item');
+        if(navItem) {
+            const navType = navItem.getAttribute('data-nav');
+            if(navType === 'home') {
+                showDashboard();
+            } else if(navType === 'profile') {
+                showProfile();
+            }
+        }
+    });
+    
     let chatWidget = document.getElementById('chatWidget');
     if(chatWidget) makeDraggable(chatWidget);
     
     populateCountries();
-    if(localStorage.getItem('currentUser')) { currentUser = JSON.parse(localStorage.getItem('currentUser')); showDashboard(); } else { showHomepage(); }
-    fetchMarketData(); setInterval(fetchMarketData, 30000); updateMarqueePrices(); setInterval(updateMarqueePrices, 30000); window.onclick = function(e) { if(e.target==document.getElementById('marketsModal')) closeMarketsModal(); };
+    if(localStorage.getItem('currentUser')) { 
+        currentUser = JSON.parse(localStorage.getItem('currentUser')); 
+        showDashboard(); 
+    } else { 
+        showHomepage(); 
+    }
+    fetchMarketData(); 
+    setInterval(fetchMarketData, 30000); 
+    updateMarqueePrices(); 
+    setInterval(updateMarqueePrices, 30000); 
+    window.onclick = function(e) { if(e.target==document.getElementById('marketsModal')) closeMarketsModal(); };
     
-    // Remove flash on refresh - shows correct page immediately
     document.body.classList.add('loaded');
 </script>
 </body>
