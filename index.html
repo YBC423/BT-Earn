@@ -1220,7 +1220,7 @@
             <div class="date-time" id="dateTimeDisplay"><div class="time">--:--:--</div><div class="date">---</div></div>
         </div>
         <div class="portfolio-card">
-            <h3>REAL PORTFOLIO</h3>
+            <h3>REAL PORTFOLIO (USDT)</h3>
             <div class="portfolio-balance" id="portfolioBalance">$0.00</div>
             <div class="portfolio-change" id="portfolioChange">+0.00%</div>
             <button class="deposit-btn" onclick="alert('Deposit feature coming soon!')">Deposit</button>
@@ -1415,9 +1415,9 @@
     ];
 
     let currentUser = null;
-    let holdings = { btc: 0.01, eth: 0.25, bnb: 1.5, sol: 2.5, usdt: 1000.00 };
+    let holdings = { usdt: 167.06 };
     let currentPrices = {};
-    let currentTradeCoin = 'BTC';
+    let currentTradeCoin = 'USDT';
     let currentTradeMode = 'buy';
     let chartUpdateInterval = null;
     let candleData = [];
@@ -1719,7 +1719,7 @@
         loadMarketsPage();
     }
     
-    function showTrade(coin = 'BTC') {
+    function showTrade(coin = 'USDT') {
         currentTradeCoin = coin;
         document.getElementById('homepage').style.display = 'none';
         document.getElementById('authPage').style.display = 'none';
@@ -1759,10 +1759,6 @@
     
     function renderMarketsCrypto() { 
         let cryptoList = [
-            {id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc, onclick:'showTrade("BTC")'},
-            {id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth, onclick:'showTrade("ETH")'},
-            {id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb, onclick:'showTrade("BNB")'},
-            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'},
             {id:'usdt', name:'USDT', full:'Tether', amount:holdings.usdt, onclick:'showTrade("USDT")'}
         ]; 
         let html = ''; 
@@ -2035,10 +2031,6 @@
     
     function renderCrypto() { 
         let cryptoList = [
-            {id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc, onclick:'showTrade("BTC")'},
-            {id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth, onclick:'showTrade("ETH")'},
-            {id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb, onclick:'showTrade("BNB")'},
-            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'},
             {id:'usdt', name:'USDT', full:'Tether', amount:holdings.usdt, onclick:'showTrade("USDT")'}
         ]; 
         let html = ''; 
@@ -2060,9 +2052,9 @@
     }
     
     function updatePortfolioTotal() { 
-        let total = (currentPrices.btc || 0)*holdings.btc + (currentPrices.eth || 0)*holdings.eth + (currentPrices.bnb || 0)*holdings.bnb + (currentPrices.sol || 0)*holdings.sol + (currentPrices.usdt || 0)*holdings.usdt; 
+        let total = (currentPrices.usdt || 0) * holdings.usdt; 
         let balanceElement = document.getElementById('portfolioBalance');
-        if(balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`; 
+        if(balanceElement) balanceElement.innerHTML = `${total.toFixed(2)} USDT`; 
     }
     
     async function refreshDashboardPrices() { 
