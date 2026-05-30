@@ -962,7 +962,7 @@
             color: white;
         }
 
-        /* Chart Modal Styles */
+        /* Chart Modal Styles - Professional Candlestick Chart */
         .chart-modal {
             display: none;
             position: fixed;
@@ -978,7 +978,7 @@
             background: #0a0e27;
             margin: 60px auto;
             width: 95%;
-            max-width: 800px;
+            max-width: 900px;
             border-radius: 20px;
             padding: 20px;
             position: relative;
@@ -1015,13 +1015,13 @@
         }
         .time-intervals {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
         .time-btn {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 12px;
@@ -1034,8 +1034,18 @@
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 20px;
-            min-height: 350px;
+        }
+        .chart-canvas-container {
             position: relative;
+            overflow-x: auto;
+        }
+        .candle-chart-canvas {
+            display: block;
+            width: 100%;
+            min-width: 800px;
+            height: 350px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
         }
         .chart-stats {
             display: flex;
@@ -1098,40 +1108,6 @@
         .order-book-table th, .order-book-table td {
             padding: 8px 5px;
         }
-        .candle-container {
-            position: relative;
-            height: 300px;
-            display: flex;
-            align-items: flex-end;
-            gap: 4px;
-            overflow-x: auto;
-            padding: 10px 0;
-        }
-        .candle {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 40px;
-        }
-        .candle-body {
-            width: 8px;
-            background: #48bb78;
-            border-radius: 2px;
-            transition: height 0.5s ease;
-        }
-        .candle-body.red {
-            background: #e53e3e;
-        }
-        .candle-line {
-            width: 2px;
-            background: #a0a0c0;
-            transition: height 0.5s ease;
-        }
-        .candle-price {
-            font-size: 10px;
-            margin-top: 4px;
-            color: #a0a0c0;
-        }
 
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
@@ -1145,7 +1121,7 @@
             .chat-widget { bottom: 75px; right: 10px; padding: 10px 16px; font-size: 14px; }
             .trade-price { font-size: 28px; }
             .chart-modal-content { margin: 80px auto; width: 98%; }
-            .candle { min-width: 30px; }
+            .candle-chart-canvas { height: 250px; min-width: 600px; }
         }
     </style>
 </head>
@@ -1359,22 +1335,22 @@
     </div>
 </div>
 
-<!-- Chart Modal -->
+<!-- Chart Modal with Professional Candlestick Chart -->
 <div id="chartModal" class="chart-modal">
     <div class="chart-modal-content">
         <div class="close-chart" onclick="closeChartModal()">×</div>
         <div class="chart-header">
             <h3 id="chartCoinTitle">BTC/USDT Chart</h3>
             <div class="time-intervals" id="timeIntervals">
-                <button class="time-btn active" data-interval="15m">15m</button>
-                <button class="time-btn" data-interval="1h">1h</button>
+                <button class="time-btn" data-interval="15m">15m</button>
+                <button class="time-btn active" data-interval="1h">1h</button>
                 <button class="time-btn" data-interval="4h">4h</button>
                 <button class="time-btn" data-interval="1D">1D</button>
             </div>
         </div>
         <div class="candlestick-chart">
-            <div class="candle-container" id="candleContainer">
-                <!-- Candles will be dynamically generated here -->
+            <div class="chart-canvas-container">
+                <canvas id="candleCanvas" class="candle-chart-canvas" width="900" height="350"></canvas>
             </div>
         </div>
         <div class="chart-stats" id="chartStats">
@@ -1443,7 +1419,7 @@
     let currentTradeCoin = 'BTC';
     let currentTradeMode = 'buy';
     let chartUpdateInterval = null;
-    let historicalPrices = [];
+    let candleData = [];
     
     const FALLBACK_PRICES = {
         btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00,
@@ -1453,69 +1429,131 @@
     
     currentPrices = { ...FALLBACK_PRICES };
 
-    // Generate historical price data for chart
-    function generateHistoricalPrices(basePrice, volatility = 0.02) {
-        let prices = [];
+    // Generate candlestick data
+    function generateCandleData(basePrice, count = 30) {
+        let candles = [];
         let currentPrice = basePrice;
-        for (let i = 0; i < 50; i++) {
-            let change = (Math.random() - 0.5) * volatility * currentPrice;
-            currentPrice = currentPrice + change;
-            prices.push(currentPrice);
+        for (let i = 0; i < count; i++) {
+            let open = currentPrice;
+            let change = (Math.random() - 0.5) * 0.02 * currentPrice;
+            let close = currentPrice + change;
+            let high = Math.max(open, close) + (Math.random() * 0.01 * currentPrice);
+            let low = Math.min(open, close) - (Math.random() * 0.01 * currentPrice);
+            let volume = Math.random() * 100 + 20;
+            candles.push({ open, high, low, close, volume });
+            currentPrice = close;
         }
-        return prices;
+        return candles;
+    }
+
+    // Draw professional candlestick chart on canvas
+    function drawCandlestickChart() {
+        let canvas = document.getElementById('candleCanvas');
+        if (!canvas) return;
+        
+        let ctx = canvas.getContext('2d');
+        let width = canvas.width;
+        let height = canvas.height;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        if (candleData.length === 0) return;
+        
+        let candleWidth = (width - 80) / candleData.length;
+        let maxPrice = Math.max(...candleData.map(c => c.high));
+        let minPrice = Math.min(...candleData.map(c => c.low));
+        let priceRange = maxPrice - minPrice;
+        
+        // Draw grid lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i <= 5; i++) {
+            let y = 40 + (i * (height - 80) / 5);
+            ctx.beginPath();
+            ctx.moveTo(60, y);
+            ctx.lineTo(width - 20, y);
+            ctx.stroke();
+            
+            let price = maxPrice - (i * priceRange / 5);
+            ctx.fillStyle = '#a0a0c0';
+            ctx.font = '10px Arial';
+            ctx.fillText(price.toFixed(2), 5, y + 3);
+        }
+        
+        // Draw candles
+        for (let i = 0; i < candleData.length; i++) {
+            let candle = candleData[i];
+            let x = 60 + (i * candleWidth);
+            let isGreen = candle.close >= candle.open;
+            let color = isGreen ? '#48bb78' : '#e53e3e';
+            
+            // Calculate positions
+            let openY = 40 + ((maxPrice - candle.open) / priceRange) * (height - 80);
+            let closeY = 40 + ((maxPrice - candle.close) / priceRange) * (height - 80);
+            let highY = 40 + ((maxPrice - candle.high) / priceRange) * (height - 80);
+            let lowY = 40 + ((maxPrice - candle.low) / priceRange) * (height - 80);
+            
+            let bodyTop = Math.min(openY, closeY);
+            let bodyHeight = Math.abs(closeY - openY);
+            let bodyWidth = candleWidth * 0.6;
+            
+            // Draw wick (upper and lower shadow)
+            ctx.beginPath();
+            ctx.moveTo(x + bodyWidth/2, highY);
+            ctx.lineTo(x + bodyWidth/2, lowY);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Draw candle body
+            ctx.fillStyle = color;
+            ctx.fillRect(x + (candleWidth - bodyWidth)/2, bodyTop, bodyWidth, Math.max(1, bodyHeight));
+        }
+        
+        // Draw price line at current price
+        let coinId = currentTradeCoin.toLowerCase();
+        let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+        let currentY = 40 + ((maxPrice - currentPrice) / priceRange) * (height - 80);
+        ctx.beginPath();
+        ctx.moveTo(60, currentY);
+        ctx.lineTo(width - 20, currentY);
+        ctx.strokeStyle = '#667eea';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#667eea';
+        ctx.font = '10px Arial';
+        ctx.fillText(`Current: $${currentPrice.toFixed(2)}`, width - 120, currentY - 3);
     }
 
     function updateChartWithCurrentPrice() {
         let coinId = currentTradeCoin.toLowerCase();
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
         
-        // Add new price to historical data
-        historicalPrices.push(currentPrice);
-        if (historicalPrices.length > 50) {
-            historicalPrices.shift();
+        // Add new candle based on current price movement
+        let lastCandle = candleData[candleData.length - 1];
+        if (lastCandle) {
+            let newClose = currentPrice;
+            let newHigh = Math.max(lastCandle.high, currentPrice);
+            let newLow = Math.min(lastCandle.low, currentPrice);
+            lastCandle.close = newClose;
+            lastCandle.high = newHigh;
+            lastCandle.low = newLow;
+            lastCandle.volume += Math.random() * 10;
         }
         
-        renderCandles();
+        drawCandlestickChart();
         updateChartStats();
-    }
-
-    function renderCandles() {
-        let container = document.getElementById('candleContainer');
-        if (!container) return;
-        
-        let prices = historicalPrices;
-        if (prices.length === 0) return;
-        
-        let maxPrice = Math.max(...prices);
-        let minPrice = Math.min(...prices);
-        let range = maxPrice - minPrice;
-        
-        let html = '';
-        for (let i = 0; i < prices.length; i++) {
-            let price = prices[i];
-            let prevPrice = i > 0 ? prices[i-1] : price;
-            let isGreen = price >= prevPrice;
-            let heightPercent = ((price - minPrice) / range) * 100;
-            let bodyHeight = Math.max(3, heightPercent * 0.7);
-            let lineHeight = heightPercent;
-            
-            html += `
-                <div class="candle">
-                    <div class="candle-line" style="height: ${lineHeight}px;"></div>
-                    <div class="candle-body ${isGreen ? '' : 'red'}" style="height: ${bodyHeight}px;"></div>
-                    <div class="candle-price">$${Math.round(price)}</div>
-                </div>
-            `;
-        }
-        container.innerHTML = html;
     }
 
     function updateChartStats() {
         let coinId = currentTradeCoin.toLowerCase();
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
         let change = currentPrices[coinId + 'Change'] || 0;
-        let high = currentPrice * (1 + Math.abs(change) / 100);
-        let low = currentPrice * (1 - Math.abs(change) / 100);
+        let high = currentPrice * (1 + Math.abs(change) / 100 + 0.005);
+        let low = currentPrice * (1 - Math.abs(change) / 100 - 0.005);
         let volume = (Math.random() * 500 + 100).toFixed(2);
         let ma7 = currentPrice * (1 + (Math.random() - 0.5) * 0.01);
         let ma14 = currentPrice * (1 + (Math.random() - 0.5) * 0.008);
@@ -1558,12 +1596,12 @@
         let coinId = currentTradeCoin.toLowerCase();
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
         
-        // Initialize historical prices
-        historicalPrices = generateHistoricalPrices(currentPrice);
+        // Initialize candlestick data
+        candleData = generateCandleData(currentPrice, 30);
         document.getElementById('chartCoinTitle').innerHTML = `${currentTradeCoin}/USDT Chart`;
         
         modal.style.display = 'block';
-        renderCandles();
+        setTimeout(() => drawCandlestickChart(), 100);
         updateChartStats();
         
         // Start real-time chart updates
@@ -1571,9 +1609,16 @@
         chartUpdateInterval = setInterval(() => {
             let coinId = currentTradeCoin.toLowerCase();
             let newPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-            historicalPrices.push(newPrice);
-            if (historicalPrices.length > 50) historicalPrices.shift();
-            renderCandles();
+            
+            // Update last candle with new price
+            if (candleData.length > 0) {
+                let lastCandle = candleData[candleData.length - 1];
+                lastCandle.close = newPrice;
+                lastCandle.high = Math.max(lastCandle.high, newPrice);
+                lastCandle.low = Math.min(lastCandle.low, newPrice);
+            }
+            
+            drawCandlestickChart();
             updateChartStats();
         }, 3000);
     }
@@ -1586,11 +1631,26 @@
         }
     }
 
+    // Resize canvas when modal opens
+    function resizeCanvas() {
+        let canvas = document.getElementById('candleCanvas');
+        if (canvas) {
+            let container = canvas.parentElement;
+            canvas.width = Math.max(800, container.clientWidth - 20);
+            drawCandlestickChart();
+        }
+    }
+
     // Time interval buttons
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('time-btn')) {
             document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
+            // Regenerate candles based on interval
+            let coinId = currentTradeCoin.toLowerCase();
+            let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+            candleData = generateCandleData(currentPrice, 30);
+            drawCandlestickChart();
         }
         if (e.target.classList.contains('indicator-btn')) {
             document.querySelectorAll('.indicator-btn').forEach(btn => btn.classList.remove('active'));
@@ -2029,7 +2089,7 @@
             let ids = coins.map(c=>c.id).join(','); 
             let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
             let data = await res.json(); 
-            let html = '<tr><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
+            let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
             let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', 'usd-coin':'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; 
             for(let coin of coins) { 
                 let coinData = data[coin.id]; 
@@ -2110,6 +2170,13 @@
             else if(navType === 'profile') { showProfile(); }
             else if(navType === 'markets') { showMarkets(); }
             else if(navType === 'trade') { showTrade(currentTradeCoin); }
+        }
+    });
+    
+    // Resize canvas on window resize
+    window.addEventListener('resize', function() {
+        if (document.getElementById('chartModal').style.display === 'block') {
+            resizeCanvas();
         }
     });
     
