@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BITEARN - AI Trading Platform</title>
+    <title>BT-EARN - AI Trading Platform</title>
     <style>
         * {
             margin: 0;
@@ -190,6 +190,7 @@
         .see-all {
             color: #667eea;
             text-decoration: none;
+            cursor: pointer;
         }
 
         table {
@@ -388,6 +389,62 @@
             z-index: 1000;
         }
 
+        /* Modal Styles for Markets */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        .modal-content {
+            background: #0a0e27;
+            margin: 60px auto;
+            width: 90%;
+            max-width: 1200px;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .close-modal {
+            position: absolute;
+            right: 30px;
+            top: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            color: white;
+        }
+        .modal h2 {
+            margin-bottom: 20px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+        .market-table-container {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .market-table-container table {
+            width: 100%;
+        }
+        .market-table-container th {
+            position: sticky;
+            top: 0;
+            background: #0a0e27;
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 15px 20px;
@@ -405,6 +462,11 @@
                 padding: 8px;
                 font-size: 12px;
             }
+            .modal-content {
+                margin: 20px;
+                padding: 20px;
+                width: auto;
+            }
         }
     </style>
 </head>
@@ -412,7 +474,7 @@
 
     <!-- Header -->
     <div class="header">
-        <div class="logo">💰 BITEARN</div>
+        <div class="logo">BT-EARN</div>
         <div class="header-buttons">
             <a class="login-link" onclick="showLogin()">Log in</a>
             <a class="signup-link" onclick="showSignup()">Sign up</a>
@@ -456,23 +518,23 @@
         </div>
     </div>
 
-    <!-- Features Grid -->
+    <!-- Features Grid (no emojis) -->
     <div class="features-section">
         <div class="features-grid">
             <div class="feature-box">
-                <h3>🤖 AI Algorithm</h3>
+                <h3>AI Algorithm</h3>
                 <p>Analyzes the market in milliseconds</p>
             </div>
             <div class="feature-box">
-                <h3>⚙️ Custom Settings</h3>
+                <h3>Custom Settings</h3>
                 <p>Adjust risk level, strategies, and more</p>
             </div>
             <div class="feature-box">
-                <h3>🔄 Multiple Trading Pairs</h3>
+                <h3>Multiple Trading Pairs</h3>
                 <p>Supports BTC, ETH, USDT, etc.</p>
             </div>
             <div class="feature-box">
-                <h3>⏱️ Never misses a trading opportunity</h3>
+                <h3>Never misses a trading opportunity</h3>
                 <p>24/7 automated trading</p>
             </div>
         </div>
@@ -481,10 +543,10 @@
     <!-- Market Section with LIVE Prices -->
     <div class="market-section">
         <div class="market-header">
-            <h2>📊 Markets</h2>
+            <h2>Markets</h2>
             <div>
                 <span class="last-updated" id="lastUpdated">Loading live prices...</span>
-                <a href="#" class="see-all" style="margin-left: 20px;">See All Markets →</a>
+                <a class="see-all" style="margin-left: 20px;" onclick="openMarketsModal()">See All Markets →</a>
             </div>
         </div>
         <div id="marketTable">
@@ -492,49 +554,49 @@
         </div>
     </div>
 
-    <!-- Why Bittearn -->
+    <!-- Why BT-EARN (no emojis) -->
     <div class="why-section">
-        <h2>Why Bittearn?</h2>
+        <h2>Why BT-EARN?</h2>
         <div class="why-grid">
-            <div class="why-item"><h4>👥 Meet and Copy Trading</h4><p>Copy successful traders automatically</p></div>
-            <div class="why-item"><h4>💰 Hold to Maximize Your Asset</h4><p>Earn rewards by holding assets</p></div>
-            <div class="why-item"><h4>🏦 Bittearn Staking</h4><p>Stake and earn passive income</p></div>
+            <div class="why-item"><h4>Meet and Copy Trading</h4><p>Copy successful traders automatically</p></div>
+            <div class="why-item"><h4>Hold to Maximize Your Asset</h4><p>Earn rewards by holding assets</p></div>
+            <div class="why-item"><h4>BT-EARN Staking</h4><p>Stake and earn passive income</p></div>
         </div>
     </div>
 
-    <!-- Security -->
+    <!-- Security (no emojis) -->
     <div class="security-section">
         <div class="security-grid">
             <div class="feature-box">
-                <h3>🔒 Reliable Security</h3>
+                <h3>Reliable Security</h3>
                 <p>Protect user funds with Fireblocks' security and Chainalysis' real-time monitoring.</p>
             </div>
             <div class="feature-box">
-                <h3>📈 Derivatives Trading</h3>
+                <h3>Derivatives Trading</h3>
                 <p>Enjoy spots, copy trading, earnings, and API access—all in one platform.</p>
             </div>
             <div class="feature-box">
-                <h3>⚡ Stable and Seamless</h3>
+                <h3>Stable and Seamless</h3>
                 <p>Experience ultra-low latency, fast processing, and stable systems for smooth trading.</p>
             </div>
             <div class="feature-box">
-                <h3>🚀 High Performance</h3>
+                <h3>High Performance</h3>
                 <p>Benefit from deep liquidity and powerful tools for efficient trade execution.</p>
             </div>
             <div class="feature-box">
-                <h3>💸 Minimum commissions</h3>
+                <h3>Minimum commissions</h3>
                 <p>0% deposit fees, low trading commissions, and extra discounts for active traders.</p>
             </div>
             <div class="feature-box">
-                <h3>🛠️ Smart Trading Tools</h3>
+                <h3>Smart Trading Tools</h3>
                 <p>Deep analytics and charts. Automated trading and AI bots. API support for PRO traders.</p>
             </div>
         </div>
     </div>
 
-    <!-- Products -->
+    <!-- Products (no emojis) -->
     <div class="products-section">
-        <h2>📦 Trading Products</h2>
+        <h2>Trading Products</h2>
         <div class="products-grid">
             <div class="product-card">
                 <h4>Spot</h4>
@@ -557,19 +619,19 @@
     <!-- FAQ -->
     <div class="faq-section">
         <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">What products does Bittearn offer? <span class="plus">+</span></div>
-            <div class="faq-answer">Bittearn offers Spot trading, Futures trading (up to 125x leverage), Grid trading, Copy trading, and Staking services.</div>
+            <div class="faq-question" onclick="toggleFAQ(this)">What products does BT-EARN offer? <span class="plus">+</span></div>
+            <div class="faq-answer">BT-EARN offers Spot trading, Futures trading (up to 125x leverage), Grid trading, Copy trading, and Staking services.</div>
         </div>
         <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">How Secure is Bittearn? <span class="plus">+</span></div>
+            <div class="faq-question" onclick="toggleFAQ(this)">How Secure is BT-EARN? <span class="plus">+</span></div>
             <div class="faq-answer">98% of assets are stored in cold wallets. We use multi-level security system, KYC and two-factor authentication (2FA).</div>
         </div>
         <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">How to Buy Bitcoin and Other Cryptocurrencies on Bittearn? <span class="plus">+</span></div>
+            <div class="faq-question" onclick="toggleFAQ(this)">How to Buy Bitcoin and Other Cryptocurrencies on BT-EARN? <span class="plus">+</span></div>
             <div class="faq-answer">You can buy crypto via SEPA Transfer, Card Payment, or P2P trading. Go to "Buy Crypto" section to get started.</div>
         </div>
         <div class="faq-item">
-            <div class="faq-question" onclick="toggleFAQ(this)">How to Trade Cryptocurrency on Bittearn? <span class="plus">+</span></div>
+            <div class="faq-question" onclick="toggleFAQ(this)">How to Trade Cryptocurrency on BT-EARN? <span class="plus">+</span></div>
             <div class="faq-answer">Deposit funds, go to Spot/Futures market, choose your trading pair, and place your order.</div>
         </div>
         <div class="faq-item">
@@ -595,46 +657,141 @@
             <a href="#">Support</a>
             <a href="#">Contact support</a>
         </div>
-        <div class="copyright">© 2026 Bittearn. All rights reserved.</div>
+        <div class="copyright">© 2026 BT-EARN. All rights reserved.</div>
     </div>
 
-    <!-- Chat Widget -->
+    <!-- Chat Widget (emoji kept) -->
     <div class="chat-widget" onclick="showChat()">
         <span>💬</span>
         <span>Hi! How can we help?</span>
     </div>
 
+    <!-- Modal for 100+ Markets -->
+    <div id="marketsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeMarketsModal()">&times;</span>
+            <h2>All Markets (100+ Cryptocurrencies)</h2>
+            <input type="text" id="marketSearch" class="search-box" placeholder="Search coin... (e.g. Bitcoin, Ethereum)" onkeyup="filterMarkets()">
+            <div class="market-table-container">
+                <div id="allMarketsTable" class="loading">Loading 100+ live markets...</div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // LIVE MARKET DATA FROM COINGECKO API
+        // ========== 100+ COINS LIST ==========
+        const FULL_COINS_LIST = [
+            { id: 'bitcoin', name: 'BTC/USDT' }, { id: 'ethereum', name: 'ETH/USDT' }, { id: 'tron', name: 'TRX/USDT' },
+            { id: 'usd-coin', name: 'USDC/USDT' }, { id: 'ripple', name: 'XRP/USDT' }, { id: 'solana', name: 'SOL/USDT' },
+            { id: 'dogecoin', name: 'DOGE/USDT' }, { id: 'toncoin', name: 'TON/USDT' }, { id: 'binancecoin', name: 'BNB/USDT' },
+            { id: 'litecoin', name: 'LTC/USDT' }, { id: 'cardano', name: 'ADA/USDT' }, { id: 'polkadot', name: 'DOT/USDT' },
+            { id: 'chainlink', name: 'LINK/USDT' }, { id: 'stellar', name: 'XLM/USDT' }, { id: 'uniswap', name: 'UNI/USDT' },
+            { id: 'algorand', name: 'ALGO/USDT' }, { id: 'vechain', name: 'VET/USDT' }, { id: 'filecoin', name: 'FIL/USDT' },
+            { id: 'theta', name: 'THETA/USDT' }, { id: 'eos', name: 'EOS/USDT' }, { id: 'aave', name: 'AAVE/USDT' },
+            { id: 'maker', name: 'MKR/USDT' }, { id: 'compound', name: 'COMP/USDT' }, { id: 'synthetix', name: 'SNX/USDT' },
+            { id: 'tezos', name: 'XTZ/USDT' }, { id: 'cosmos', name: 'ATOM/USDT' }, { id: 'monero', name: 'XMR/USDT' },
+            { id: 'dash', name: 'DASH/USDT' }, { id: 'zcash', name: 'ZEC/USDT' }, { id: 'decentraland', name: 'MANA/USDT' },
+            { id: 'the-sandbox', name: 'SAND/USDT' }, { id: 'axie-infinity', name: 'AXS/USDT' }, { id: 'gala', name: 'GALA/USDT' },
+            { id: 'enjin-coin', name: 'ENJ/USDT' }, { id: 'basic-attention-token', name: 'BAT/USDT' }, { id: 'ocean-protocol', name: 'OCEAN/USDT' },
+            { id: 'curve-dao-token', name: 'CRV/USDT' }, { id: 'yearn-finance', name: 'YFI/USDT' }, { id: 'avalanche-2', name: 'AVAX/USDT' },
+            { id: 'polygon', name: 'MATIC/USDT' }, { id: 'fantom', name: 'FTM/USDT' }, { id: 'near', name: 'NEAR/USDT' },
+            { id: 'internet-computer', name: 'ICP/USDT' }, { id: 'hedera-hashgraph', name: 'HBAR/USDT' }, { id: 'elrond', name: 'EGLD/USDT' },
+            { id: 'flow', name: 'FLOW/USDT' }, { id: 'the-graph', name: 'GRT/USDT' }, { id: 'harmony', name: 'ONE/USDT' },
+            { id: 'celo', name: 'CELO/USDT' }, { id: 'iota', name: 'IOTA/USDT' }, { id: 'nxm', name: 'NXM/USDT' },
+            { id: 'kucoin-shares', name: 'KCS/USDT' }, { id: 'huobi-token', name: 'HT/USDT' }, { id: 'crypto-com-chain', name: 'CRO/USDT' },
+            { id: 'rocket-pool', name: 'RPL/USDT' }, { id: 'thorchain', name: 'RUNE/USDT' }, { id: 'helium', name: 'HNT/USDT' },
+            { id: 'arweave', name: 'AR/USDT' }, { id: 'siacoin', name: 'SC/USDT' }, { id: 'lisk', name: 'LSK/USDT' },
+            { id: 'waves', name: 'WAVES/USDT' }, { id: 'nem', name: 'XEM/USDT' }, { id: 'qtum', name: 'QTUM/USDT' },
+            { id: 'bitcoin-cash', name: 'BCH/USDT' }, { id: 'zilliqa', name: 'ZIL/USDT' }, { id: 'nexo', name: 'NEXO/USDT' },
+            { id: 'pancakeswap-token', name: 'CAKE/USDT' }, { id: '1inch', name: '1INCH/USDT' }, { id: 'wrapped-bitcoin', name: 'WBTC/USDT' }
+        ];
+
+        let currentFullMarketData = [];
+
+        // Fetch data for all coins from CoinGecko
+        async function fetchFullMarketData() {
+            try {
+                const ids = FULL_COINS_LIST.map(c => c.id).join(',');
+                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+                const response = await fetch(url);
+                const data = await response.json();
+                currentFullMarketData = FULL_COINS_LIST.map(coin => {
+                    const info = data[coin.id];
+                    if (info) {
+                        return {
+                            name: coin.name,
+                            price: info.usd,
+                            change: info.usd_24h_change
+                        };
+                    } else {
+                        return {
+                            name: coin.name,
+                            price: null,
+                            change: null
+                        };
+                    }
+                }).filter(item => item.price !== null);
+                renderFullMarkets(currentFullMarketData);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('allMarketsTable').innerHTML = '<div class="loading">Unable to load 100+ markets. Please try again later.</div>';
+            }
+        }
+
+        function renderFullMarkets(data) {
+            let html = `<table style="width:100%"><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th></tr></thead><tbody>`;
+            for (let item of data) {
+                const changeClass = item.change >= 0 ? 'positive' : 'negative';
+                const changeSymbol = item.change >= 0 ? '+' : '';
+                html += `<tr>
+                            <td>${item.name}</td>
+                            <td>$${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td>
+                            <td class="${changeClass}">${changeSymbol}${item.change.toFixed(2)}%</td>
+                         </tr>`;
+            }
+            html += `</tbody></table>`;
+            document.getElementById('allMarketsTable').innerHTML = html;
+        }
+
+        function filterMarkets() {
+            const searchTerm = document.getElementById('marketSearch').value.toLowerCase();
+            const filtered = currentFullMarketData.filter(item => item.name.toLowerCase().includes(searchTerm));
+            renderFullMarkets(filtered);
+        }
+
+        function openMarketsModal() {
+            document.getElementById('marketsModal').style.display = 'block';
+            if (currentFullMarketData.length === 0) {
+                fetchFullMarketData();
+            } else {
+                renderFullMarkets(currentFullMarketData);
+            }
+        }
+
+        function closeMarketsModal() {
+            document.getElementById('marketsModal').style.display = 'none';
+        }
+
+        // Standard market table (top 10)
         const coins = [
-            { id: 'bitcoin', symbol: 'BTC', name: 'BTC/USDT' },
-            { id: 'ethereum', symbol: 'ETH', name: 'ETH/USDT' },
-            { id: 'tron', symbol: 'TRX', name: 'TRX/USDT' },
-            { id: 'usd-coin', symbol: 'USDC', name: 'USDC/USDT' },
-            { id: 'ripple', symbol: 'XRP', name: 'XRP/USDT' },
-            { id: 'solana', symbol: 'SOL', name: 'SOL/USDT' },
-            { id: 'dogecoin', symbol: 'DOGE', name: 'DOGE/USDT' },
-            { id: 'toncoin', symbol: 'TON', name: 'TON/USDT' },
-            { id: 'binancecoin', symbol: 'BNB', name: 'BNB/USDT' },
-            { id: 'litecoin', symbol: 'LTC', name: 'LTC/USDT' }
+            { id: 'bitcoin', name: 'BTC/USDT' }, { id: 'ethereum', name: 'ETH/USDT' }, { id: 'tron', name: 'TRX/USDT' },
+            { id: 'usd-coin', name: 'USDC/USDT' }, { id: 'ripple', name: 'XRP/USDT' }, { id: 'solana', name: 'SOL/USDT' },
+            { id: 'dogecoin', name: 'DOGE/USDT' }, { id: 'toncoin', name: 'TON/USDT' }, { id: 'binancecoin', name: 'BNB/USDT' },
+            { id: 'litecoin', name: 'LTC/USDT' }
         ];
 
         async function fetchMarketData() {
             try {
                 const ids = coins.map(c => c.id).join(',');
                 const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
-                
                 const response = await fetch(url);
                 const data = await response.json();
-                
-                let tableHtml = `
-                    <table>
-                        <thead>
-                            <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>
-                        </thead>
-                        <tbody>
-                `;
-                
+                let tableHtml = `<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>`;
+                const volumes = {
+                    'bitcoin': '14.60K', 'ethereum': '259.94K', 'tron': '154.36M', 'usd-coin': '480.48M',
+                    'ripple': '79.39M', 'solana': '1.89M', 'dogecoin': '530.46M', 'toncoin': '3.69M',
+                    'binancecoin': '100.01K', 'litecoin': '272.90K'
+                };
                 for (let coin of coins) {
                     const coinData = data[coin.id];
                     if (coinData) {
@@ -642,42 +799,17 @@
                         const change24h = coinData.usd_24h_change;
                         const changeClass = change24h >= 0 ? 'positive' : 'negative';
                         const changeSymbol = change24h >= 0 ? '+' : '';
-                        const changeFormatted = `${changeSymbol}${change24h.toFixed(2)}%`;
-                        
-                        // Mock volume (API doesn't provide volume in this endpoint)
-                        const volumes = {
-                            'bitcoin': '14.60K', 'ethereum': '259.94K', 'tron': '154.36M',
-                            'usd-coin': '480.48M', 'ripple': '79.39M', 'solana': '1.89M',
-                            'dogecoin': '530.46M', 'toncoin': '3.69M', 'binancecoin': '100.01K',
-                            'litecoin': '272.90K'
-                        };
-                        
-                        tableHtml += `
-                            <tr>
-                                <td>${coin.name}</td>
-                                <td>${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td>
-                                <td class="${changeClass}">${changeFormatted}</td>
-                                <td>${volumes[coin.id] || 'N/A'}</td>
-                            </tr>
-                        `;
+                        tableHtml += `<tr><td>${coin.name}</td><td>${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td><td class="${changeClass}">${changeSymbol}${change24h.toFixed(2)}%</td><td>${volumes[coin.id] || 'N/A'}</td></tr>`;
                     }
                 }
-                
                 tableHtml += `</tbody></table>`;
                 document.getElementById('marketTable').innerHTML = tableHtml;
                 document.getElementById('lastUpdated').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
-                
             } catch (error) {
-                console.error('Error fetching market data:', error);
                 document.getElementById('marketTable').innerHTML = '<div class="loading">⚠️ Unable to load live prices. Will retry...</div>';
             }
         }
 
-        // Load market data immediately and every 30 seconds
-        fetchMarketData();
-        setInterval(fetchMarketData, 30000);
-
-        // FAQ toggle function
         function toggleFAQ(element) {
             const answer = element.nextElementSibling;
             const plus = element.querySelector('.plus');
@@ -690,25 +822,18 @@
             }
         }
 
-        // Navigation functions
-        function showLogin() {
-            window.location.href = 'dashboard.html';
-        }
+        function showLogin() { window.location.href = 'dashboard.html'; }
+        function showSignup() { window.location.href = 'dashboard.html'; }
+        function showChat() { alert('Chat support coming soon!\nFor now, email us at support@bt-earn.com'); }
 
-        function showSignup() {
-            window.location.href = 'dashboard.html';
-        }
-
-        function showChat() {
-            alert('💬 Chat support coming soon!\nFor now, email us at support@bitearn.com');
-        }
-
-        // Marquee duplication for seamless scrolling
+        fetchMarketData();
+        setInterval(fetchMarketData, 30000);
         const marquee = document.querySelector('.stats-marquee');
         if (marquee) {
             const clone = marquee.cloneNode(true);
             document.querySelector('.stats-container').appendChild(clone);
         }
+        window.onclick = function(event) { if (event.target == document.getElementById('marketsModal')) closeMarketsModal(); };
     </script>
 </body>
 </html>
