@@ -33,7 +33,7 @@
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     sendEmailVerification(userCredential.user);
-                    alert("Account created! Check your email to verify.");
+                    alert("Account created! Verification email sent.");
                 })
                 .catch((error) => alert(error.message));
         };
