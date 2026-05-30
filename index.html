@@ -573,17 +573,31 @@
             align-items: center;
             margin-bottom: 30px;
             flex-wrap: wrap;
+            gap: 20px;
         }
-        .date-time {
-            text-align: right;
-        }
-        .date-time .time {
+        .dashboard-title-section h1 {
             font-size: 28px;
             font-weight: bold;
+            margin: 0;
         }
-        .date-time .date {
+        .date-time-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 24px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            min-width: 200px;
+        }
+        .date-time-card .time {
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: white;
+        }
+        .date-time-card .date {
+            font-size: 12px;
             color: #a0a0c0;
-            font-size: 14px;
+            margin-top: 4px;
         }
         .portfolio-card {
             background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
@@ -720,6 +734,14 @@
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
             .nav-item { font-size: 16px; }
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .date-time-card {
+                width: 100%;
+                text-align: left;
+            }
         }
     </style>
 </head>
@@ -811,8 +833,13 @@
     </div>
     <div class="dashboard-container">
         <div class="dashboard-header">
-            <h1>Dashboard <span class="live-badge">LIVE</span></h1>
-            <div class="date-time" id="dateTimeDisplay"><div class="time">--:--:--</div><div class="date">---</div></div>
+            <div class="dashboard-title-section">
+                <h1>Dashboard <span class="live-badge">LIVE</span></h1>
+            </div>
+            <div class="date-time-card" id="dateTimeDisplay">
+                <div class="time">--:--:--</div>
+                <div class="date">---</div>
+            </div>
         </div>
         <div class="portfolio-card">
             <h3>REAL PORTFOLIO</h3>
@@ -889,7 +916,6 @@
         document.getElementById('homepage').style.display = 'none'; 
         document.getElementById('authPage').style.display = 'none'; 
         document.getElementById('dashboard').style.display = 'block'; 
-        // Render immediately with cached prices (no zeros!)
         renderWatchlist();
         renderCrypto();
         updatePortfolioTotal();
@@ -950,7 +976,15 @@
 
     function logout() { localStorage.removeItem('currentUser'); currentUser = null; showHomepage(); }
 
-    function updateDateTime() { let now = new Date(); document.getElementById('dateTimeDisplay').innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>`; }
+    function updateDateTime() { 
+        let now = new Date(); 
+        let hours = now.getHours().toString().padStart(2, '0');
+        let minutes = now.getMinutes().toString().padStart(2, '0');
+        let seconds = now.getSeconds().toString().padStart(2, '0');
+        let timeString = `${hours}:${minutes}:${seconds}`;
+        let dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('dateTimeDisplay').innerHTML = `<div class="time">${timeString}</div><div class="date">${dateString}</div>`; 
+    }
     setInterval(updateDateTime, 1000); updateDateTime();
 
     async function fetchPrices() { 
@@ -1114,7 +1148,7 @@
             let changeClass = item.change >= 0 ? 'positive' : 'negative'; 
             html += `<tr><td>${item.name}</td><td>$${item.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${item.change>=0?'+':''}${item.change.toFixed(2)}%</td></tr>`; 
         } 
-        html += '</tbody><table>'; 
+        html += '</tbody></table>'; 
         document.getElementById('allMarketsTable').innerHTML = html; 
     }
     
