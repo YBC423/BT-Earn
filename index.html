@@ -866,6 +866,9 @@
 <div id="marketsModal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeMarketsModal()">&times;</span><h2>All Markets (100+ Cryptocurrencies)</h2><input type="text" id="marketSearch" class="search-box" placeholder="Search coin..." onkeyup="filterMarkets()"><div class="market-table-container"><div id="allMarketsTable" class="loading">Loading...</div></div></div></div>
 
 <script>
+    // CORS PROXY - Fixes API issue on GitHub Pages
+    const CORS_PROXY = 'https://corsproxy.io/?';
+    
     // Full countries list
     const countriesList = [
         "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
@@ -991,7 +994,7 @@
         isFetching = true;
         try { 
             let ids = ['bitcoin','ethereum','binancecoin','solana','tron','usd-coin','ripple','dogecoin']; 
-            let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`; 
+            let url = `${CORS_PROXY}https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`; 
             let res = await fetch(url); 
             let data = await res.json(); 
             
@@ -1113,7 +1116,7 @@
     async function updateMarqueePrices() { 
         try { 
             let ids = marqueeCoins.map(c=>c.id).join(','); 
-            let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`); 
+            let res = await fetch(`${CORS_PROXY}https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`); 
             let data = await res.json(); 
             let html = ''; 
             for(let coin of marqueeCoins) { 
@@ -1130,7 +1133,7 @@
     async function fetchFullMarketData() { 
         try { 
             let ids = FULL_COINS_LIST.map(c=>c.id).join(','); 
-            let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
+            let res = await fetch(`${CORS_PROXY}https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
             let data = await res.json(); 
             currentFullMarketData = FULL_COINS_LIST.map(coin => { 
                 let info = data[coin.id]; 
@@ -1147,7 +1150,7 @@
             let changeClass = item.change >= 0 ? 'positive' : 'negative'; 
             html += `<tr><td>${item.name}</td><td>$${item.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${item.change>=0?'+':''}${item.change.toFixed(2)}%</td>`; 
         } 
-        html += '</tbody></table>'; 
+        html += '</tbody><table>'; 
         document.getElementById('allMarketsTable').innerHTML = html; 
     }
     
@@ -1172,9 +1175,9 @@
     async function fetchMarketData() { 
         try { 
             let ids = coins.map(c=>c.id).join(','); 
-            let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
+            let res = await fetch(`${CORS_PROXY}https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
             let data = await res.json(); 
-            let html = '</tr><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
+            let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
             let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', 'usd-coin':'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', binancecoin:'100.01K' }; 
             for(let coin of coins) { 
                 let coinData = data[coin.id]; 
