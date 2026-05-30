@@ -18,7 +18,6 @@
             overflow-x: hidden;
         }
 
-        /* Hide flash on refresh */
         body:not(.loaded) #homepage,
         body:not(.loaded) #authPage,
         body:not(.loaded) #dashboard,
@@ -28,7 +27,6 @@
             display: none;
         }
 
-        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -75,7 +73,6 @@
             border-radius: 20px;
         }
 
-        /* Hero Section */
         .hero {
             text-align: center;
             padding: 120px 20px 40px;
@@ -113,7 +110,6 @@
             transform: scale(1.05);
         }
 
-        /* Stats Marquee */
         .stats-container {
             background: #0d1129;
             padding: 20px 0;
@@ -139,7 +135,6 @@
             100% { transform: translateX(-50%); }
         }
 
-        /* Features Grid */
         .features-section {
             padding: 60px;
             background: #0a0e27;
@@ -177,7 +172,6 @@
             line-height: 1.5;
         }
 
-        /* Market Section on Homepage */
         .market-section {
             padding: 0 60px 60px;
         }
@@ -238,7 +232,6 @@
             color: #a0a0c0;
         }
 
-        /* Why Section */
         .why-section {
             padding: 60px;
             background: #0d1129;
@@ -268,7 +261,6 @@
             color: #a0a0c0;
         }
 
-        /* Security Section */
         .security-section {
             padding: 60px;
             background: #0a0e27;
@@ -282,7 +274,6 @@
             margin: 0 auto;
         }
 
-        /* Products Section */
         .products-section {
             padding: 60px;
             background: #0d1129;
@@ -326,7 +317,6 @@
             font-size: 13px;
         }
 
-        /* FAQ Section */
         .faq-section {
             padding: 60px;
             background: #0a0e27;
@@ -359,7 +349,6 @@
             font-size: 20px;
         }
 
-        /* Footer */
         .footer {
             padding: 40px 60px;
             background: #0d1129;
@@ -386,7 +375,6 @@
             font-size: 12px;
         }
 
-        /* Chat Widget */
         .chat-widget {
             position: fixed;
             bottom: 80px;
@@ -404,7 +392,6 @@
             cursor: grabbing;
         }
 
-        /* Auth Page Styles */
         .auth-container {
             min-height: 100vh;
             display: flex;
@@ -523,7 +510,6 @@
             text-decoration: underline;
         }
 
-        /* Dashboard Styles */
         .dashboard-container {
             padding: 100px 20px 80px;
             max-width: 1200px;
@@ -661,7 +647,6 @@
             color: #667eea;
         }
 
-        /* Profile Page Styles */
         .profile-container {
             padding: 100px 20px 80px;
             max-width: 800px;
@@ -784,7 +769,6 @@
             background: rgba(229,62,62,0.3);
         }
 
-        /* Markets Page */
         .markets-container {
             padding: 100px 20px 80px;
             max-width: 1200px;
@@ -801,7 +785,6 @@
             font-size: 32px;
         }
 
-        /* Trade Page Styles */
         .trade-container {
             padding: 100px 20px 80px;
             max-width: 600px;
@@ -962,7 +945,6 @@
             color: white;
         }
 
-        /* Chart Modal Styles - Professional Candlestick Chart */
         .chart-modal {
             display: none;
             position: fixed;
@@ -1336,7 +1318,6 @@
     </div>
 </div>
 
-<!-- Chart Modal with Professional Candlestick Chart -->
 <div id="chartModal" class="chart-modal">
     <div class="chart-modal-content">
         <div class="close-chart" onclick="closeChartModal()">×</div>
@@ -1430,7 +1411,6 @@
     
     currentPrices = { ...FALLBACK_PRICES };
 
-    // Generate candlestick data
     function generateCandleData(basePrice, count = 30) {
         let candles = [];
         let currentPrice = basePrice;
@@ -1447,7 +1427,6 @@
         return candles;
     }
 
-    // Draw professional candlestick chart on canvas
     function drawCandlestickChart() {
         let canvas = document.getElementById('candleCanvas');
         if (!canvas) return;
@@ -1465,7 +1444,6 @@
         let minPrice = Math.min(...candleData.map(c => c.low));
         let priceRange = maxPrice - minPrice;
         
-        // Draw grid lines
         ctx.strokeStyle = 'rgba(255,255,255,0.05)';
         ctx.lineWidth = 0.5;
         for (let i = 0; i <= 5; i++) {
@@ -1481,14 +1459,12 @@
             ctx.fillText(price.toFixed(2), 5, y + 3);
         }
         
-        // Draw candles
         for (let i = 0; i < candleData.length; i++) {
             let candle = candleData[i];
             let x = 60 + (i * candleWidth);
             let isGreen = candle.close >= candle.open;
             let color = isGreen ? '#48bb78' : '#e53e3e';
             
-            // Calculate positions
             let openY = 40 + ((maxPrice - candle.open) / priceRange) * (height - 80);
             let closeY = 40 + ((maxPrice - candle.close) / priceRange) * (height - 80);
             let highY = 40 + ((maxPrice - candle.high) / priceRange) * (height - 80);
@@ -1498,7 +1474,6 @@
             let bodyHeight = Math.abs(closeY - openY);
             let bodyWidth = candleWidth * 0.6;
             
-            // Draw wick (upper and lower shadow)
             ctx.beginPath();
             ctx.moveTo(x + bodyWidth/2, highY);
             ctx.lineTo(x + bodyWidth/2, lowY);
@@ -1506,12 +1481,10 @@
             ctx.lineWidth = 1;
             ctx.stroke();
             
-            // Draw candle body
             ctx.fillStyle = color;
             ctx.fillRect(x + (candleWidth - bodyWidth)/2, bodyTop, bodyWidth, Math.max(1, bodyHeight));
         }
         
-        // Draw price line at current price
         let coinId = currentTradeCoin.toLowerCase();
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
         let currentY = 40 + ((maxPrice - currentPrice) / priceRange) * (height - 80);
@@ -1533,9 +1506,8 @@
         let coinId = currentTradeCoin.toLowerCase();
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
         
-        // Add new candle based on current price movement
-        let lastCandle = candleData[candleData.length - 1];
-        if (lastCandle) {
+        if (candleData.length > 0) {
+            let lastCandle = candleData[candleData.length - 1];
             let newClose = currentPrice;
             let newHigh = Math.max(lastCandle.high, currentPrice);
             let newLow = Math.min(lastCandle.low, currentPrice);
@@ -1567,7 +1539,6 @@
         document.getElementById('statMA14').innerHTML = `$${ma14.toFixed(2)}`;
         document.getElementById('statMA28').innerHTML = `$${ma28.toFixed(2)}`;
         
-        // Update order book
         let orderBookHtml = '';
         for (let i = 0; i < 8; i++) {
             let side = i < 4 ? 'sell' : 'buy';
@@ -1579,7 +1550,6 @@
         }
         document.getElementById('orderBookBody').innerHTML = orderBookHtml;
         
-        // Update trades
         let tradesHtml = '';
         for (let i = 0; i < 10; i++) {
             let type = Math.random() > 0.5 ? 'Buy' : 'Sell';
@@ -1597,21 +1567,23 @@
         let coinId = currentTradeCoin.toLowerCase();
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
         
-        // Initialize candlestick data
         candleData = generateCandleData(currentPrice, 30);
         document.getElementById('chartCoinTitle').innerHTML = `${currentTradeCoin}/USDT Chart`;
         
         modal.style.display = 'block';
-        setTimeout(() => drawCandlestickChart(), 100);
+        setTimeout(() => {
+            let canvas = document.getElementById('candleCanvas');
+            let container = canvas.parentElement;
+            canvas.width = Math.max(800, container.clientWidth - 20);
+            drawCandlestickChart();
+        }, 100);
         updateChartStats();
         
-        // Start real-time chart updates
         if (chartUpdateInterval) clearInterval(chartUpdateInterval);
         chartUpdateInterval = setInterval(() => {
             let coinId = currentTradeCoin.toLowerCase();
             let newPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
             
-            // Update last candle with new price
             if (candleData.length > 0) {
                 let lastCandle = candleData[candleData.length - 1];
                 lastCandle.close = newPrice;
@@ -1632,22 +1604,19 @@
         }
     }
 
-    // Resize canvas when modal opens
     function resizeCanvas() {
         let canvas = document.getElementById('candleCanvas');
-        if (canvas) {
+        if (canvas && document.getElementById('chartModal').style.display === 'block') {
             let container = canvas.parentElement;
             canvas.width = Math.max(800, container.clientWidth - 20);
             drawCandlestickChart();
         }
     }
 
-    // Time interval buttons
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('time-btn')) {
             document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
-            // Regenerate candles based on interval
             let coinId = currentTradeCoin.toLowerCase();
             let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
             candleData = generateCandleData(currentPrice, 30);
@@ -1758,29 +1727,20 @@
     }
     
     function renderMarketsCrypto() { 
-        let cryptoList = [
-            {id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc, onclick:'showTrade("BTC")'},
-            {id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth, onclick:'showTrade("ETH")'},
-            {id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb, onclick:'showTrade("BNB")'},
-            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'},
-            {id:'usdt', name:'USDT', full:'Tether', amount:holdings.usdt, onclick:'showTrade("USDT")'}
-        ]; 
-        let html = ''; 
-        for(let coin of cryptoList) { 
-            let price = currentPrices[coin.id] || 0; 
-            let change = currentPrices[coin.id+'Change'] || 0; 
-            let value = price * coin.amount; 
-            let changeClass = change >= 0 ? 'positive' : 'negative'; 
-            html += `<div class="crypto-item" onclick="${coin.onclick}">
-                <div><h4>${coin.name}</h4><p>${coin.full}</p><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
-                <div style="text-align:right;"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
-                <div style="font-size:12px;color:#a0a0c0;">Amount: ${coin.amount} ${coin.name}</div>
-                <div>Value: $${value.toFixed(2)}</div>
-                <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('${coin.name}')">Trade</button></div>
-            </div>`; 
-        } 
+        // Only show USDT in "Your Crypto" section on Markets page
+        let usdtPrice = currentPrices.usdt || 1.00;
+        let usdtValue = usdtPrice * holdings.usdt;
+        let html = `<div class="crypto-item" onclick="showTrade('USDT')">
+            <div><h4>USDT</h4><p>Tether</p><div class="positive">0.00%</div></div>
+            <div style="text-align:right;"><div class="price">$${usdtPrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
+            <div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt} USDT</div>
+            <div>Value: $${usdtValue.toFixed(2)}</div>
+            <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('USDT')">Trade</button></div>
+        </div>
+        <div style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;">Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko</div>`; 
+        
         let container = document.getElementById('marketsCryptoContainer');
-        if(container) container.innerHTML = html + `<div style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;">Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko</div>`; 
+        if(container) container.innerHTML = html; 
     }
 
     function refreshMarketsPrices() {
@@ -2034,29 +1994,20 @@
     }
     
     function renderCrypto() { 
-        let cryptoList = [
-            {id:'btc', name:'BTC', full:'Bitcoin', amount:holdings.btc, onclick:'showTrade("BTC")'},
-            {id:'eth', name:'ETH', full:'Ethereum', amount:holdings.eth, onclick:'showTrade("ETH")'},
-            {id:'bnb', name:'BNB', full:'BNB', amount:holdings.bnb, onclick:'showTrade("BNB")'},
-            {id:'sol', name:'SOL', full:'Solana', amount:holdings.sol, onclick:'showTrade("SOL")'},
-            {id:'usdt', name:'USDT', full:'Tether', amount:holdings.usdt, onclick:'showTrade("USDT")'}
-        ]; 
-        let html = ''; 
-        for(let coin of cryptoList) { 
-            let price = currentPrices[coin.id] || 0; 
-            let change = currentPrices[coin.id+'Change'] || 0; 
-            let value = price * coin.amount; 
-            let changeClass = change >= 0 ? 'positive' : 'negative'; 
-            html += `<div class="crypto-item" onclick="${coin.onclick}">
-                <div><h4>${coin.name}</h4><p>${coin.full}</p><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
-                <div style="text-align:right;"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
-                <div style="font-size:12px;color:#a0a0c0;">Amount: ${coin.amount} ${coin.name}</div>
-                <div>Value: $${value.toFixed(2)}</div>
-                <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('${coin.name}')">Trade</button></div>
-            </div>`; 
-        } 
+        // Only show USDT in "Your Crypto" section on Dashboard
+        let usdtPrice = currentPrices.usdt || 1.00;
+        let usdtValue = usdtPrice * holdings.usdt;
+        let html = `<div class="crypto-item" onclick="showTrade('USDT')">
+            <div><h4>USDT</h4><p>Tether</p><div class="positive">0.00%</div></div>
+            <div style="text-align:right;"><div class="price">$${usdtPrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
+            <div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt} USDT</div>
+            <div>Value: $${usdtValue.toFixed(2)}</div>
+            <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('USDT')">Trade</button></div>
+        </div>
+        <div style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;">Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko</div>`; 
+        
         let container = document.getElementById('cryptoContainer');
-        if(container) container.innerHTML = html + `<div style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;">Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko</div>`; 
+        if(container) container.innerHTML = html; 
     }
     
     function updatePortfolioTotal() { 
@@ -2096,25 +2047,36 @@
             let ids = coins.map(c=>c.id).join(','); 
             let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
             let data = await res.json(); 
-            let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; 
-            let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', tether:'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; 
-            for(let coin of coins) { 
-                let coinData = data[coin.id]; 
-                if(coinData) { 
-                    let price = coinData.usd; 
-                    let change = coinData.usd_24h_change; 
-                    let changeClass = change>=0?'positive':'negative'; 
-                    html += `<tr onclick="showTrade('${coin.name.toUpperCase()}')" style="cursor:pointer;">
-                        <td>${coin.name}/USDT</td>
-                        <td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
-                        <td class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</td>
-                        <td>${volumes[coin.id]||'N/A'}</td>
-                    </tr>`; 
-                } 
-            } 
-            html += '</tbody></table>'; 
-            let marketTable = document.getElementById('marketTable');
-            if(marketTable) marketTable.innerHTML = html; 
+            
+            // Only show USDT in the markets table
+            let usdtData = data.tether;
+            if(usdtData) {
+                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let price = usdtData.usd;
+                let change = usdtData.usd_24h_change || 0;
+                let changeClass = change >= 0 ? 'positive' : 'negative';
+                html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
+                    <td>USDT/USDT</td>
+                    <td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
+                    <td class="${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</td>
+                    <td>480.48M</td>
+                </tr>`;
+                html += '</tbody></table>';
+                let marketTable = document.getElementById('marketTable');
+                if(marketTable) marketTable.innerHTML = html;
+            } else {
+                let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>';
+                html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
+                    <td>USDT/USDT</td>
+                    <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
+                    <td class="positive">0.00%</td>
+                    <td>480.48M</td>
+                </tr>`;
+                html += '</tbody><tr>';
+                let marketTable = document.getElementById('marketTable');
+                if(marketTable) marketTable.innerHTML = html;
+            }
+            
             let lastUpdated = document.getElementById('lastUpdated');
             if(lastUpdated) lastUpdated.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`; 
             updateMarqueePrices(); 
@@ -2180,7 +2142,6 @@
         }
     });
     
-    // Resize canvas on window resize
     window.addEventListener('resize', function() {
         if (document.getElementById('chartModal').style.display === 'block') {
             resizeCanvas();
