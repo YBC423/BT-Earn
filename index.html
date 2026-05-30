@@ -825,6 +825,36 @@
             color: white;
             cursor: pointer;
         }
+        .chart-icon-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 10px 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-icon-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .chart-icon {
+            width: 22px;
+            height: 22px;
+            position: relative;
+        }
+        .chart-icon span {
+            display: block;
+            position: absolute;
+            bottom: 0;
+            width: 4px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+        .chart-icon span:nth-child(1) { left: 2px; height: 8px; }
+        .chart-icon span:nth-child(2) { left: 9px; height: 14px; }
+        .chart-icon span:nth-child(3) { left: 16px; height: 5px; }
         .trade-price-card {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
@@ -931,28 +961,176 @@
             background: #e53e3e;
             color: white;
         }
-        .order-book {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
+
+        /* Chart Modal Styles */
+        .chart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        .chart-modal-content {
+            background: #0a0e27;
+            margin: 60px auto;
+            width: 95%;
+            max-width: 800px;
             border-radius: 20px;
-            padding: 15px;
+            padding: 20px;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .order-book h4 {
-            margin-bottom: 10px;
-            color: #a0a0c0;
+        .close-chart {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            color: white;
+            background: rgba(255,255,255,0.1);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .order-row {
+        .close-chart:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .chart-header {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .chart-header h3 {
+            font-size: 20px;
+        }
+        .time-intervals {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .time-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .time-btn.active {
+            background: #667eea;
+        }
+        .candlestick-chart {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            min-height: 350px;
+            position: relative;
+        }
+        .chart-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #a0a0c0;
+        }
+        .stat-value {
             font-size: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-weight: bold;
         }
-        .order-price {
-            color: #48bb78;
+        .indicators {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
-        .order-price.sell {
-            color: #e53e3e;
+        .indicator-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .indicator-btn.active {
+            background: #667eea;
+        }
+        .chart-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+        .chart-tab {
+            cursor: pointer;
+            font-size: 14px;
+            color: #a0a0c0;
+        }
+        .chart-tab.active {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+        }
+        .order-book-table {
+            width: 100%;
+            font-size: 12px;
+        }
+        .order-book-table th, .order-book-table td {
+            padding: 8px 5px;
+        }
+        .candle-container {
+            position: relative;
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+        .candle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 40px;
+        }
+        .candle-body {
+            width: 8px;
+            background: #48bb78;
+            border-radius: 2px;
+            transition: height 0.5s ease;
+        }
+        .candle-body.red {
+            background: #e53e3e;
+        }
+        .candle-line {
+            width: 2px;
+            background: #a0a0c0;
+            transition: height 0.5s ease;
+        }
+        .candle-price {
+            font-size: 10px;
+            margin-top: 4px;
+            color: #a0a0c0;
         }
 
         @media (max-width: 768px) {
@@ -966,6 +1144,8 @@
             .info-row, .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
             .chat-widget { bottom: 75px; right: 10px; padding: 10px 16px; font-size: 14px; }
             .trade-price { font-size: 28px; }
+            .chart-modal-content { margin: 80px auto; width: 98%; }
+            .candle { min-width: 30px; }
         }
     </style>
 </head>
@@ -1137,7 +1317,14 @@
                 <option value="BNB">BNB/USDT</option>
                 <option value="SOL">SOL/USDT</option>
             </select>
-            <button class="refresh-btn" onclick="refreshTradePrices()">⟳</button>
+            <div class="chart-icon-btn" onclick="openChartModal()">
+                <div class="chart-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span style="font-size: 12px;">Chart</span>
+            </div>
         </div>
         <div class="trade-price-card">
             <div class="trade-price" id="tradePrice">$0.00</div>
@@ -1162,23 +1349,6 @@
             </div>
             <button class="confirm-btn" id="tradeConfirmBtn" onclick="executeTrade()">Buy BTC</button>
         </div>
-        <div class="order-book">
-            <h4>Order Book</h4>
-            <div class="order-row">
-                <span>Price (USDT)</span>
-                <span>Quantity (BTC)</span>
-                <span>Total</span>
-            </div>
-            <div id="orderBookList">
-                <div class="order-row"><span class="order-price sell">74,055</span><span>0.0270</span><span>2,000</span></div>
-                <div class="order-row"><span class="order-price sell">74,050</span><span>0.6621</span><span>49,000</span></div>
-                <div class="order-row"><span class="order-price sell">74,045</span><span>0.2843</span><span>21,050</span></div>
-                <div class="order-row"><span class="order-price sell">74,040</span><span>0.0010</span><span>74</span></div>
-                <div class="order-row"><span class="order-price buy">74,060</span><span>0.1937</span><span>14,350</span></div>
-                <div class="order-row"><span class="order-price buy">74,065</span><span>0.0300</span><span>2,222</span></div>
-                <div class="order-row"><span class="order-price buy">74,070</span><span>2.5074</span><span>185,700</span></div>
-            </div>
-        </div>
     </div>
     <div class="bottom-nav">
         <div class="nav-item" data-nav="home">Home</div>
@@ -1186,6 +1356,57 @@
         <div class="nav-item" data-nav="trade" style="color: #667eea;">Trade</div>
         <div class="nav-item" data-nav="bots" onclick="alert('Bots feature coming soon')">Bots</div>
         <div class="nav-item" data-nav="profile">Profile</div>
+    </div>
+</div>
+
+<!-- Chart Modal -->
+<div id="chartModal" class="chart-modal">
+    <div class="chart-modal-content">
+        <div class="close-chart" onclick="closeChartModal()">×</div>
+        <div class="chart-header">
+            <h3 id="chartCoinTitle">BTC/USDT Chart</h3>
+            <div class="time-intervals" id="timeIntervals">
+                <button class="time-btn active" data-interval="15m">15m</button>
+                <button class="time-btn" data-interval="1h">1h</button>
+                <button class="time-btn" data-interval="4h">4h</button>
+                <button class="time-btn" data-interval="1D">1D</button>
+            </div>
+        </div>
+        <div class="candlestick-chart">
+            <div class="candle-container" id="candleContainer">
+                <!-- Candles will be dynamically generated here -->
+            </div>
+        </div>
+        <div class="chart-stats" id="chartStats">
+            <div class="stat-item"><div class="stat-label">24h High</div><div class="stat-value" id="statHigh">--</div></div>
+            <div class="stat-item"><div class="stat-label">24h Low</div><div class="stat-value" id="statLow">--</div></div>
+            <div class="stat-item"><div class="stat-label">24h Volume</div><div class="stat-value" id="statVolume">--</div></div>
+            <div class="stat-item"><div class="stat-label">MA7</div><div class="stat-value" id="statMA7">--</div></div>
+            <div class="stat-item"><div class="stat-label">MA14</div><div class="stat-value" id="statMA14">--</div></div>
+            <div class="stat-item"><div class="stat-label">MA28</div><div class="stat-value" id="statMA28">--</div></div>
+        </div>
+        <div class="indicators" id="indicators">
+            <button class="indicator-btn active" data-indicator="MA">MA</button>
+            <button class="indicator-btn" data-indicator="EMA">EMA</button>
+            <button class="indicator-btn" data-indicator="BOLL">BOLL</button>
+            <button class="indicator-btn" data-indicator="MACD">MACD</button>
+        </div>
+        <div class="chart-tabs">
+            <div class="chart-tab active" data-tab="orderbook">Order Book</div>
+            <div class="chart-tab" data-tab="trades">Trades</div>
+        </div>
+        <div id="orderBookPanel">
+            <table class="order-book-table" style="width:100%">
+                <thead><tr><th>Price (USDT)</th><th>Qty (BTC)</th><th>Total</th></tr></thead>
+                <tbody id="orderBookBody"></tbody>
+            </table>
+        </div>
+        <div id="tradesPanel" style="display:none;">
+            <table class="order-book-table" style="width:100%">
+                <thead><tr><th>Time</th><th>Price</th><th>Qty</th><th>Type</th></tr></thead>
+                <tbody id="tradesBody"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -1221,6 +1442,8 @@
     let currentPrices = {};
     let currentTradeCoin = 'BTC';
     let currentTradeMode = 'buy';
+    let chartUpdateInterval = null;
+    let historicalPrices = [];
     
     const FALLBACK_PRICES = {
         btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00,
@@ -1229,6 +1452,163 @@
     };
     
     currentPrices = { ...FALLBACK_PRICES };
+
+    // Generate historical price data for chart
+    function generateHistoricalPrices(basePrice, volatility = 0.02) {
+        let prices = [];
+        let currentPrice = basePrice;
+        for (let i = 0; i < 50; i++) {
+            let change = (Math.random() - 0.5) * volatility * currentPrice;
+            currentPrice = currentPrice + change;
+            prices.push(currentPrice);
+        }
+        return prices;
+    }
+
+    function updateChartWithCurrentPrice() {
+        let coinId = currentTradeCoin.toLowerCase();
+        let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+        
+        // Add new price to historical data
+        historicalPrices.push(currentPrice);
+        if (historicalPrices.length > 50) {
+            historicalPrices.shift();
+        }
+        
+        renderCandles();
+        updateChartStats();
+    }
+
+    function renderCandles() {
+        let container = document.getElementById('candleContainer');
+        if (!container) return;
+        
+        let prices = historicalPrices;
+        if (prices.length === 0) return;
+        
+        let maxPrice = Math.max(...prices);
+        let minPrice = Math.min(...prices);
+        let range = maxPrice - minPrice;
+        
+        let html = '';
+        for (let i = 0; i < prices.length; i++) {
+            let price = prices[i];
+            let prevPrice = i > 0 ? prices[i-1] : price;
+            let isGreen = price >= prevPrice;
+            let heightPercent = ((price - minPrice) / range) * 100;
+            let bodyHeight = Math.max(3, heightPercent * 0.7);
+            let lineHeight = heightPercent;
+            
+            html += `
+                <div class="candle">
+                    <div class="candle-line" style="height: ${lineHeight}px;"></div>
+                    <div class="candle-body ${isGreen ? '' : 'red'}" style="height: ${bodyHeight}px;"></div>
+                    <div class="candle-price">$${Math.round(price)}</div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    function updateChartStats() {
+        let coinId = currentTradeCoin.toLowerCase();
+        let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+        let change = currentPrices[coinId + 'Change'] || 0;
+        let high = currentPrice * (1 + Math.abs(change) / 100);
+        let low = currentPrice * (1 - Math.abs(change) / 100);
+        let volume = (Math.random() * 500 + 100).toFixed(2);
+        let ma7 = currentPrice * (1 + (Math.random() - 0.5) * 0.01);
+        let ma14 = currentPrice * (1 + (Math.random() - 0.5) * 0.008);
+        let ma28 = currentPrice * (1 + (Math.random() - 0.5) * 0.005);
+        
+        document.getElementById('statHigh').innerHTML = `$${high.toFixed(2)}`;
+        document.getElementById('statLow').innerHTML = `$${low.toFixed(2)}`;
+        document.getElementById('statVolume').innerHTML = `${volume}M`;
+        document.getElementById('statMA7').innerHTML = `$${ma7.toFixed(2)}`;
+        document.getElementById('statMA14').innerHTML = `$${ma14.toFixed(2)}`;
+        document.getElementById('statMA28').innerHTML = `$${ma28.toFixed(2)}`;
+        
+        // Update order book
+        let orderBookHtml = '';
+        for (let i = 0; i < 8; i++) {
+            let side = i < 4 ? 'sell' : 'buy';
+            let price = currentPrice * (1 + (Math.random() - 0.5) * 0.002);
+            let qty = (Math.random() * 2).toFixed(4);
+            let total = (price * qty).toFixed(2);
+            let priceColor = side === 'sell' ? '#e53e3e' : '#48bb78';
+            orderBookHtml += `<tr><td style="color:${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
+        }
+        document.getElementById('orderBookBody').innerHTML = orderBookHtml;
+        
+        // Update trades
+        let tradesHtml = '';
+        for (let i = 0; i < 10; i++) {
+            let type = Math.random() > 0.5 ? 'Buy' : 'Sell';
+            let typeColor = type === 'Buy' ? '#48bb78' : '#e53e3e';
+            let price = currentPrice * (1 + (Math.random() - 0.5) * 0.001);
+            let qty = (Math.random() * 1).toFixed(4);
+            let time = new Date(Date.now() - i * 60000).toLocaleTimeString();
+            tradesHtml += `<tr><td>${time}</td><td style="color:${typeColor}">$${price.toFixed(2)}</td><td>${qty}</td><td style="color:${typeColor}">${type}</td></tr>`;
+        }
+        document.getElementById('tradesBody').innerHTML = tradesHtml;
+    }
+
+    function openChartModal() {
+        let modal = document.getElementById('chartModal');
+        let coinId = currentTradeCoin.toLowerCase();
+        let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+        
+        // Initialize historical prices
+        historicalPrices = generateHistoricalPrices(currentPrice);
+        document.getElementById('chartCoinTitle').innerHTML = `${currentTradeCoin}/USDT Chart`;
+        
+        modal.style.display = 'block';
+        renderCandles();
+        updateChartStats();
+        
+        // Start real-time chart updates
+        if (chartUpdateInterval) clearInterval(chartUpdateInterval);
+        chartUpdateInterval = setInterval(() => {
+            let coinId = currentTradeCoin.toLowerCase();
+            let newPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+            historicalPrices.push(newPrice);
+            if (historicalPrices.length > 50) historicalPrices.shift();
+            renderCandles();
+            updateChartStats();
+        }, 3000);
+    }
+
+    function closeChartModal() {
+        document.getElementById('chartModal').style.display = 'none';
+        if (chartUpdateInterval) {
+            clearInterval(chartUpdateInterval);
+            chartUpdateInterval = null;
+        }
+    }
+
+    // Time interval buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('time-btn')) {
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+        }
+        if (e.target.classList.contains('indicator-btn')) {
+            document.querySelectorAll('.indicator-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+        }
+        if (e.target.classList.contains('chart-tab')) {
+            document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
+            e.target.classList.add('active');
+            let tab = e.target.getAttribute('data-tab');
+            if (tab === 'orderbook') {
+                document.getElementById('orderBookPanel').style.display = 'block';
+                document.getElementById('tradesPanel').style.display = 'none';
+            } else {
+                document.getElementById('orderBookPanel').style.display = 'none';
+                document.getElementById('tradesPanel').style.display = 'block';
+            }
+        }
+    });
 
     function showHomepage() { 
         document.getElementById('homepage').style.display = 'block'; 
@@ -1426,12 +1806,6 @@
         updatePortfolioTotal();
         renderCrypto();
         renderMarketsCrypto();
-    }
-
-    async function refreshTradePrices() {
-        await fetchPrices();
-        updateTradePriceDisplay();
-        calculateTotal();
     }
 
     function renderProfile() {
@@ -1648,7 +2022,7 @@
         } catch(e) { console.error(e); } 
     }
     
-    const coins = [{ id: 'bitcoin', name: 'BTC/USDT' },{ id: 'ethereum', name: 'ETH/USDT' },{ id: 'tron', name: 'TRX/USDT' },{ id: 'usd-coin', name: 'USDC/USDT' },{ id: 'ripple', name: 'XRP/USDT' },{ id: 'solana', name: 'SOL/USDT' },{ id: 'dogecoin', name: 'DOGE/USDT' },{ id: 'toncoin', name: 'TON/USDT' },{ id: 'binancecoin', name: 'BNB/USDT' },{ id: 'litecoin', name: 'LTC/USDT' }];
+    const coins = [{ id: 'bitcoin', name: 'BTC' },{ id: 'ethereum', name: 'ETH' },{ id: 'tron', name: 'TRX' },{ id: 'usd-coin', name: 'USDC' },{ id: 'ripple', name: 'XRP' },{ id: 'solana', name: 'SOL' },{ id: 'dogecoin', name: 'DOGE' },{ id: 'toncoin', name: 'TON' },{ id: 'binancecoin', name: 'BNB' },{ id: 'litecoin', name: 'LTC' }];
     
     async function fetchMarketData() { 
         try { 
@@ -1663,15 +2037,15 @@
                     let price = coinData.usd; 
                     let change = coinData.usd_24h_change; 
                     let changeClass = change>=0?'positive':'negative'; 
-                    html += `<tr onclick="showTrade('${coin.name.split('/')[0]}')" style="cursor:pointer;">
-                        <td>${coin.name}</td>
+                    html += `<tr onclick="showTrade('${coin.name.toUpperCase()}')" style="cursor:pointer;">
+                        <td>${coin.name}/USDT</td>
                         <td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
                         <td class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</td>
                         <td>${volumes[coin.id]||'N/A'}</td>
                     </tr>`; 
                 } 
             } 
-            html += '</tbody></tr>'; 
+            html += '</tbody></table>'; 
             let marketTable = document.getElementById('marketTable');
             if(marketTable) marketTable.innerHTML = html; 
             let lastUpdated = document.getElementById('lastUpdated');
