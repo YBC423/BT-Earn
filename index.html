@@ -102,7 +102,7 @@
             transform: scale(1.05);
         }
 
-        /* Stats Marquee */
+        /* Stats Marquee - Live prices */
         .stats-container {
             background: #0d1129;
             padding: 20px 0;
@@ -166,7 +166,7 @@
             line-height: 1.5;
         }
 
-        /* Market Table */
+        /* Market Table - Larger text */
         .market-section {
             padding: 0 60px 60px;
         }
@@ -179,11 +179,11 @@
         }
 
         .market-header h2 {
-            font-size: 24px;
+            font-size: 28px;
         }
 
         .last-updated {
-            font-size: 12px;
+            font-size: 14px;
             color: #48bb78;
         }
 
@@ -191,6 +191,7 @@
             color: #667eea;
             text-decoration: none;
             cursor: pointer;
+            font-size: 16px;
         }
 
         table {
@@ -202,7 +203,7 @@
         }
 
         th, td {
-            padding: 15px;
+            padding: 18px 15px;
             text-align: left;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
@@ -210,7 +211,11 @@
         th {
             color: #a0a0c0;
             font-weight: normal;
-            font-size: 14px;
+            font-size: 16px;
+        }
+
+        td {
+            font-size: 16px;
         }
 
         .positive {
@@ -421,6 +426,7 @@
         }
         .modal h2 {
             margin-bottom: 20px;
+            font-size: 28px;
         }
         .search-box {
             width: 100%;
@@ -443,6 +449,12 @@
             position: sticky;
             top: 0;
             background: #0a0e27;
+            font-size: 16px;
+            padding: 15px;
+        }
+        .market-table-container td {
+            font-size: 15px;
+            padding: 12px 15px;
         }
 
         @media (max-width: 768px) {
@@ -459,13 +471,17 @@
                 font-size: 18px;
             }
             th, td {
-                padding: 8px;
-                font-size: 12px;
+                padding: 10px 8px;
+                font-size: 13px;
             }
-            .modal-content {
-                margin: 20px;
-                padding: 20px;
-                width: auto;
+            th {
+                font-size: 13px;
+            }
+            .modal h2 {
+                font-size: 22px;
+            }
+            .market-header h2 {
+                font-size: 22px;
             }
         }
     </style>
@@ -488,33 +504,11 @@
         <button class="launch-btn" onclick="showSignup()">Launch the Bot</button>
     </div>
 
-    <!-- Stats Marquee -->
+    <!-- Stats Marquee - Now shows LIVE crypto prices (BTC, ETH, TRX, USDC, BNB, SOL) -->
     <div class="stats-container">
         <div class="stats-marquee" id="statsMarquee">
-            <span>+12.18$</span>
-            <span>+82.21$</span>
-            <span>+56.44$</span>
-            <span>+63.58$</span>
-            <span>+45.24$</span>
-            <span>+100.25$</span>
-            <span>+58.82$</span>
-            <span>+233.07$</span>
-            <span>+13.67$</span>
-            <span>+64.89$</span>
-            <span>+202.66$</span>
-            <span>+52.23$</span>
-            <span>+73.05$</span>
-            <span>+57.58$</span>
-            <span>+457.58$</span>
-            <span>+50.13$</span>
-            <span>+12.18$</span>
-            <span>+187.03$</span>
-            <span>+182.21$</span>
-            <span>+82.21$</span>
-            <span>+82.21$</span>
-            <span>+82.1$</span>
-            <span>+82.1$</span>
-            <span>+82.1$</span>
+            <!-- Live prices will be injected here by JavaScript -->
+            <span>Loading live prices...</span>
         </div>
     </div>
 
@@ -540,7 +534,7 @@
         </div>
     </div>
 
-    <!-- Market Section with LIVE Prices -->
+    <!-- Market Section with LIVE Prices (larger text) -->
     <div class="market-section">
         <div class="market-header">
             <h2>Markets</h2>
@@ -679,6 +673,43 @@
     </div>
 
     <script>
+        // ========== COINS FOR MARQUEE (BTC, ETH, TRX, USDC, BNB, SOL) ==========
+        const marqueeCoins = [
+            { id: 'bitcoin', name: 'BTC' },
+            { id: 'ethereum', name: 'ETH' },
+            { id: 'tron', name: 'TRX' },
+            { id: 'usd-coin', name: 'USDC' },
+            { id: 'binancecoin', name: 'BNB' },
+            { id: 'solana', name: 'SOL' }
+        ];
+
+        // Function to update the scrolling marquee with live prices
+        async function updateMarqueePrices() {
+            try {
+                const ids = marqueeCoins.map(c => c.id).join(',');
+                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                let marqueeHtml = '';
+                for (let coin of marqueeCoins) {
+                    const price = data[coin.id]?.usd;
+                    if (price) {
+                        marqueeHtml += `<span>${coin.name}: $${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</span>`;
+                    } else {
+                        marqueeHtml += `<span>${coin.name}: --</span>`;
+                    }
+                }
+                // Duplicate the content for seamless scrolling
+                const marqueeContainer = document.getElementById('statsMarquee');
+                if (marqueeContainer) {
+                    marqueeContainer.innerHTML = marqueeHtml + marqueeHtml;
+                }
+            } catch (err) {
+                console.error('Marquee price fetch error:', err);
+            }
+        }
+
         // ========== 100+ COINS LIST ==========
         const FULL_COINS_LIST = [
             { id: 'bitcoin', name: 'BTC/USDT' }, { id: 'ethereum', name: 'ETH/USDT' }, { id: 'tron', name: 'TRX/USDT' },
@@ -724,13 +755,9 @@
                             change: info.usd_24h_change
                         };
                     } else {
-                        return {
-                            name: coin.name,
-                            price: null,
-                            change: null
-                        };
+                        return null;
                     }
-                }).filter(item => item.price !== null);
+                }).filter(item => item !== null);
                 renderFullMarkets(currentFullMarketData);
             } catch (err) {
                 console.error(err);
@@ -747,9 +774,9 @@
                             <td>${item.name}</td>
                             <td>$${item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td>
                             <td class="${changeClass}">${changeSymbol}${item.change.toFixed(2)}%</td>
-                         </tr>`;
+                          </tr>`;
             }
-            html += `</tbody></table>`;
+            html += `</tbody>这些人`;
             document.getElementById('allMarketsTable').innerHTML = html;
         }
 
@@ -772,7 +799,7 @@
             document.getElementById('marketsModal').style.display = 'none';
         }
 
-        // Standard market table (top 10)
+        // Standard market table (top 10) with larger text
         const coins = [
             { id: 'bitcoin', name: 'BTC/USDT' }, { id: 'ethereum', name: 'ETH/USDT' }, { id: 'tron', name: 'TRX/USDT' },
             { id: 'usd-coin', name: 'USDC/USDT' }, { id: 'ripple', name: 'XRP/USDT' }, { id: 'solana', name: 'SOL/USDT' },
@@ -805,6 +832,9 @@
                 tableHtml += `</tbody></table>`;
                 document.getElementById('marketTable').innerHTML = tableHtml;
                 document.getElementById('lastUpdated').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+                
+                // Also update marquee prices whenever market data refreshes
+                updateMarqueePrices();
             } catch (error) {
                 document.getElementById('marketTable').innerHTML = '<div class="loading">⚠️ Unable to load live prices. Will retry...</div>';
             }
@@ -826,14 +856,31 @@
         function showSignup() { window.location.href = 'dashboard.html'; }
         function showChat() { alert('Chat support coming soon!\nFor now, email us at support@bt-earn.com'); }
 
+        // Initial load
         fetchMarketData();
         setInterval(fetchMarketData, 30000);
-        const marquee = document.querySelector('.stats-marquee');
-        if (marquee) {
-            const clone = marquee.cloneNode(true);
-            document.querySelector('.stats-container').appendChild(clone);
+        
+        // Marquee duplication for seamless scrolling
+        const marqueeContainerDiv = document.querySelector('.stats-marquee');
+        if (marqueeContainerDiv && !document.querySelector('.stats-marquee-clone')) {
+            // The clone will be handled by duplicating content inside updateMarqueePrices
+            // But we also need to ensure the parent gets the clone for animation
+            const statsContainer = document.querySelector('.stats-container');
+            const setupMarqueeClone = () => {
+                const originalMarquee = document.getElementById('statsMarquee');
+                if (originalMarquee && statsContainer.children.length === 1) {
+                    const clone = originalMarquee.cloneNode(true);
+                    clone.id = '';
+                    statsContainer.appendChild(clone);
+                }
+            };
+            setTimeout(setupMarqueeClone, 500);
         }
+        
         window.onclick = function(event) { if (event.target == document.getElementById('marketsModal')) closeMarketsModal(); };
+        
+        // Initial marquee update
+        updateMarqueePrices();
     </script>
 </body>
 </html>
