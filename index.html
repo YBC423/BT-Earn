@@ -556,6 +556,19 @@
             cursor: pointer;
             margin-top: 10px;
         }
+        .forgot-btn {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+            text-align: center;
+            width: 100%;
+        }
+        .forgot-btn:hover {
+            text-decoration: underline;
+        }
         .error-msg {
             color: #e53e3e;
             font-size: 12px;
@@ -774,6 +787,7 @@
                 <div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
                 <div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div>
                 <button class="auth-btn" onclick="handleLogin()">Login</button>
+                <button class="forgot-btn" onclick="alert('Password reset link sent to your email (demo).')">Forgot Password?</button>
             </div>
             <div id="signupForm" class="auth-form">
                 <h2>Create an account</h2>
@@ -821,7 +835,7 @@
     </div>
 </div>
 
-<div class="chat-widget" onclick="alert('Chat support coming soon! Email us at support@bt-earn.com')"><span>💬</span><span>Hi! How can we help?</span></div>
+<div class="chat-widget" onclick="alert('Chat support coming soon! Email us at support@bt-earn.com')"><span>💬</span><span>Hi!</span></div>
 
 <div id="marketsModal" class="modal"><div class="modal-content"><span class="close-modal" onclick="closeMarketsModal()">&times;</span><h2>All Markets (100+ Cryptocurrencies)</h2><input type="text" id="marketSearch" class="search-box" placeholder="Search coin..." onkeyup="filterMarkets()"><div class="market-table-container"><div id="allMarketsTable" class="loading">Loading...</div></div></div></div>
 
@@ -897,12 +911,12 @@
     const FULL_COINS_LIST = [{ id: 'bitcoin', name: 'BTC/USDT' },{ id: 'ethereum', name: 'ETH/USDT' },{ id: 'tron', name: 'TRX/USDT' },{ id: 'usd-coin', name: 'USDC/USDT' },{ id: 'ripple', name: 'XRP/USDT' },{ id: 'solana', name: 'SOL/USDT' },{ id: 'dogecoin', name: 'DOGE/USDT' },{ id: 'toncoin', name: 'TON/USDT' },{ id: 'binancecoin', name: 'BNB/USDT' },{ id: 'litecoin', name: 'LTC/USDT' }];
     let currentFullMarketData = [];
     async function fetchFullMarketData() { try { let ids = FULL_COINS_LIST.map(c=>c.id).join(','); let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); let data = await res.json(); currentFullMarketData = FULL_COINS_LIST.map(coin => { let info = data[coin.id]; if(info) return { name: coin.name, price: info.usd, change: info.usd_24h_change }; return null; }).filter(i=>i); renderFullMarkets(currentFullMarketData); } catch(e) { document.getElementById('allMarketsTable').innerHTML = '<div class="loading">Unable to load markets</div>'; } }
-    function renderFullMarkets(data) { let html = '<table><thead>痕<th>Contract</th><th>Last Price</th><th>24H Change</th></tr></thead><tbody>'; for(let item of data) { let changeClass = item.change >= 0 ? 'positive' : 'negative'; html += `<tr><td>${item.name}</td><td>$${item.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${item.change>=0?'+':''}${item.change.toFixed(2)}%</td></tr>`; } html += '</tbody>这些人'; document.getElementById('allMarketsTable').innerHTML = html; }
+    function renderFullMarkets(data) { let html = '<table style="width:100%"><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th></tr></thead><tbody>'; for(let item of data) { let changeClass = item.change >= 0 ? 'positive' : 'negative'; html += `<tr><td>${item.name}</td><td>$${item.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${item.change>=0?'+':''}${item.change.toFixed(2)}%</td></tr>`; } html += '</tbody></table>'; document.getElementById('allMarketsTable').innerHTML = html; }
     function filterMarkets() { let term = document.getElementById('marketSearch').value.toLowerCase(); let filtered = currentFullMarketData.filter(i=>i.name.toLowerCase().includes(term)); renderFullMarkets(filtered); }
     function openMarketsModal() { document.getElementById('marketsModal').style.display = 'block'; if(currentFullMarketData.length===0) fetchFullMarketData(); else renderFullMarkets(currentFullMarketData); }
     function closeMarketsModal() { document.getElementById('marketsModal').style.display = 'none'; }
     const coins = [{ id: 'bitcoin', name: 'BTC/USDT' },{ id: 'ethereum', name: 'ETH/USDT' },{ id: 'tron', name: 'TRX/USDT' },{ id: 'usd-coin', name: 'USDC/USDT' },{ id: 'ripple', name: 'XRP/USDT' },{ id: 'solana', name: 'SOL/USDT' },{ id: 'dogecoin', name: 'DOGE/USDT' },{ id: 'toncoin', name: 'TON/USDT' },{ id: 'binancecoin', name: 'BNB/USDT' },{ id: 'litecoin', name: 'LTC/USDT' }];
-    async function fetchMarketData() { try { let ids = coins.map(c=>c.id).join(','); let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); let data = await res.json(); let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', 'usd-coin':'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; for(let coin of coins) { let coinData = data[coin.id]; if(coinData) { let price = coinData.usd; let change = coinData.usd_24h_change; let changeClass = change>=0?'positive':'negative'; html += `<tr><td>${coin.name}</td><td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</td><td>${volumes[coin.id]||'N/A'}</td></tr>`; } } html += '</tbody>这些人'; document.getElementById('marketTable').innerHTML = html; document.getElementById('lastUpdated').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`; updateMarqueePrices(); } catch(e) { document.getElementById('marketTable').innerHTML = '<div class="loading">Unable to load prices</div>'; } }
+    async function fetchMarketData() { try { let ids = coins.map(c=>c.id).join(','); let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); let data = await res.json(); let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>'; let volumes = { bitcoin:'14.60K', ethereum:'259.94K', tron:'154.36M', 'usd-coin':'480.48M', ripple:'79.39M', solana:'1.89M', dogecoin:'530.46M', toncoin:'3.69M', binancecoin:'100.01K', litecoin:'272.90K' }; for(let coin of coins) { let coinData = data[coin.id]; if(coinData) { let price = coinData.usd; let change = coinData.usd_24h_change; let changeClass = change>=0?'positive':'negative'; html += `<tr><td>${coin.name}</td><td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</td><td>${volumes[coin.id]||'N/A'}</td></tr>`; } } html += '</tbody></table>'; document.getElementById('marketTable').innerHTML = html; document.getElementById('lastUpdated').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`; updateMarqueePrices(); } catch(e) { document.getElementById('marketTable').innerHTML = '<div class="loading">Unable to load prices</div>'; } }
     function toggleFAQ(el) { let ans = el.nextElementSibling; let plus = el.querySelector('.plus'); if(ans.style.display==='block') { ans.style.display='none'; plus.textContent='+'; } else { ans.style.display='block'; plus.textContent='−'; } }
     
     populateCountries();
