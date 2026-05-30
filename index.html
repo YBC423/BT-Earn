@@ -26,12 +26,20 @@
             padding: 20px 60px;
             background: #0a0e27;
             border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
         }
 
         .logo {
             font-size: 24px;
             font-weight: bold;
-            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .header-buttons {
@@ -43,6 +51,7 @@
             color: white;
             text-decoration: none;
             font-size: 16px;
+            cursor: pointer;
         }
 
         .login-link {
@@ -58,13 +67,17 @@
         /* Hero Section */
         .hero {
             text-align: center;
-            padding: 80px 20px 40px;
+            padding: 120px 20px 40px;
         }
 
         .hero h1 {
             font-size: 48px;
             font-weight: bold;
             margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff, #667eea);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .hero p {
@@ -82,9 +95,14 @@
             border-radius: 30px;
             color: white;
             cursor: pointer;
+            transition: 0.3s;
         }
 
-        /* Stats Marquee - Horizontal Scrolling */
+        .launch-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Stats Marquee */
         .stats-container {
             background: #0d1129;
             padding: 20px 0;
@@ -106,12 +124,8 @@
         }
 
         @keyframes scrollStats {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-50%);
-            }
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
 
         /* Features Grid */
@@ -133,6 +147,12 @@
             padding: 25px;
             border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.05);
         }
 
         .feature-box h3 {
@@ -160,6 +180,11 @@
 
         .market-header h2 {
             font-size: 24px;
+        }
+
+        .last-updated {
+            font-size: 12px;
+            color: #48bb78;
         }
 
         .see-all {
@@ -193,6 +218,12 @@
 
         .negative {
             color: #e53e3e;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a0a0c0;
         }
 
         /* Why Section */
@@ -258,6 +289,12 @@
             background: rgba(255,255,255,0.03);
             padding: 25px;
             border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.05);
         }
 
         .product-card h4 {
@@ -348,6 +385,7 @@
             display: flex;
             gap: 10px;
             cursor: pointer;
+            z-index: 1000;
         }
 
         @media (max-width: 768px) {
@@ -363,6 +401,10 @@
             .stats-marquee span {
                 font-size: 18px;
             }
+            th, td {
+                padding: 8px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -370,10 +412,10 @@
 
     <!-- Header -->
     <div class="header">
-        <div class="logo">BITEARN</div>
+        <div class="logo">💰 BITEARN</div>
         <div class="header-buttons">
-            <a href="#" class="login-link" onclick="showLogin()">Log in</a>
-            <a href="#" class="signup-link" onclick="showSignup()">Sign up</a>
+            <a class="login-link" onclick="showLogin()">Log in</a>
+            <a class="signup-link" onclick="showSignup()">Sign up</a>
         </div>
     </div>
 
@@ -384,35 +426,9 @@
         <button class="launch-btn" onclick="showSignup()">Launch the Bot</button>
     </div>
 
-    <!-- Stats Marquee - EXACTLY like your picture -->
+    <!-- Stats Marquee -->
     <div class="stats-container">
-        <div class="stats-marquee">
-            <span>+12.18$</span>
-            <span>+82.21$</span>
-            <span>+56.44$</span>
-            <span>+63.58$</span>
-            <span>+45.24$</span>
-            <span>+100.25$</span>
-            <span>+58.82$</span>
-            <span>+233.07$</span>
-            <span>+13.67$</span>
-            <span>+64.89$</span>
-            <span>+202.66$</span>
-            <span>+52.23$</span>
-            <span>+73.05$</span>
-            <span>+57.58$</span>
-            <span>+457.58$</span>
-            <span>+50.13$</span>
-            <span>+12.18$</span>
-            <span>+187.03$</span>
-            <span>+182.21$</span>
-            <span>+82.21$</span>
-            <span>+82.21$</span>
-            <span>+82.1$</span>
-            <span>+82.1$</span>
-            <span>+82.1$</span>
-        </div>
-        <div class="stats-marquee">
+        <div class="stats-marquee" id="statsMarquee">
             <span>+12.18$</span>
             <span>+82.21$</span>
             <span>+56.44$</span>
@@ -444,56 +460,45 @@
     <div class="features-section">
         <div class="features-grid">
             <div class="feature-box">
-                <h3>AI Algorithm</h3>
+                <h3>🤖 AI Algorithm</h3>
                 <p>Analyzes the market in milliseconds</p>
             </div>
             <div class="feature-box">
-                <h3>Custom Settings</h3>
+                <h3>⚙️ Custom Settings</h3>
                 <p>Adjust risk level, strategies, and more</p>
             </div>
             <div class="feature-box">
-                <h3>Multiple Trading Pairs</h3>
+                <h3>🔄 Multiple Trading Pairs</h3>
                 <p>Supports BTC, ETH, USDT, etc.</p>
             </div>
             <div class="feature-box">
-                <h3>Never misses a trading opportunity</h3>
+                <h3>⏱️ Never misses a trading opportunity</h3>
                 <p>24/7 automated trading</p>
             </div>
         </div>
     </div>
 
-    <!-- Market Section -->
+    <!-- Market Section with LIVE Prices -->
     <div class="market-section">
         <div class="market-header">
-            <h2>Markets</h2>
-            <a href="#" class="see-all">See All Markets →</a>
+            <h2>📊 Markets</h2>
+            <div>
+                <span class="last-updated" id="lastUpdated">Loading live prices...</span>
+                <a href="#" class="see-all" style="margin-left: 20px;">See All Markets →</a>
+            </div>
         </div>
-        <table>
-            <thead>
-                <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>BTC/USDT</td><td>73565.50</td><td class="negative">-0.28%</td><td>14.60K</td></tr>
-                <tr><td>ETH/USDT</td><td>2016.11</td><td class="positive">+0.16%</td><td>259.94K</td></tr>
-                <tr><td>TRX/USDT</td><td>0.343000</td><td class="negative">-0.12%</td><td>154.36M</td></tr>
-                <tr><td>USDC/USDT</td><td>1.0002</td><td class="positive">+0.00%</td><td>480.48M</td></tr>
-                <tr><td>XRP/USDT</td><td>1.3435</td><td class="positive">+1.44%</td><td>79.39M</td></tr>
-                <tr><td>SOL/USDT</td><td>82.2900</td><td class="negative">-0.18%</td><td>1.89M</td></tr>
-                <tr><td>DOGE/USDT</td><td>0.100880</td><td class="positive">+1.14%</td><td>530.46M</td></tr>
-                <tr><td>TON/USDT</td><td>1.256</td><td class="negative">-0.32%</td><td>3.69M</td></tr>
-                <tr><td>BNB/USDT</td><td>674.61</td><td class="positive">+5.49%</td><td>100.01K</td></tr>
-                <tr><td>LTC/USDT</td><td>52.6300</td><td class="positive">+1.60%</td><td>272.90K</td></tr>
-            </tbody>
-        </table>
+        <div id="marketTable">
+            <div class="loading">Loading real-time market data...</div>
+        </div>
     </div>
 
     <!-- Why Bittearn -->
     <div class="why-section">
         <h2>Why Bittearn?</h2>
         <div class="why-grid">
-            <div class="why-item"><h4>Meet and Copy Trading</h4><p>Copy successful traders automatically</p></div>
-            <div class="why-item"><h4>Hold to Maximize Your Asset</h4><p>Earn rewards by holding assets</p></div>
-            <div class="why-item"><h4>Bittearn Staking</h4><p>Stake and earn passive income</p></div>
+            <div class="why-item"><h4>👥 Meet and Copy Trading</h4><p>Copy successful traders automatically</p></div>
+            <div class="why-item"><h4>💰 Hold to Maximize Your Asset</h4><p>Earn rewards by holding assets</p></div>
+            <div class="why-item"><h4>🏦 Bittearn Staking</h4><p>Stake and earn passive income</p></div>
         </div>
     </div>
 
@@ -501,27 +506,27 @@
     <div class="security-section">
         <div class="security-grid">
             <div class="feature-box">
-                <h3>Reliable Security</h3>
+                <h3>🔒 Reliable Security</h3>
                 <p>Protect user funds with Fireblocks' security and Chainalysis' real-time monitoring.</p>
             </div>
             <div class="feature-box">
-                <h3>Derivatives Trading</h3>
+                <h3>📈 Derivatives Trading</h3>
                 <p>Enjoy spots, copy trading, earnings, and API access—all in one platform.</p>
             </div>
             <div class="feature-box">
-                <h3>Stable and Seamless</h3>
+                <h3>⚡ Stable and Seamless</h3>
                 <p>Experience ultra-low latency, fast processing, and stable systems for smooth trading.</p>
             </div>
             <div class="feature-box">
-                <h3>High Performance</h3>
+                <h3>🚀 High Performance</h3>
                 <p>Benefit from deep liquidity and powerful tools for efficient trade execution.</p>
             </div>
             <div class="feature-box">
-                <h3>Minimum commissions</h3>
+                <h3>💸 Minimum commissions</h3>
                 <p>0% deposit fees, low trading commissions, and extra discounts for active traders.</p>
             </div>
             <div class="feature-box">
-                <h3>Smart Trading Tools</h3>
+                <h3>🛠️ Smart Trading Tools</h3>
                 <p>Deep analytics and charts. Automated trading and AI bots. API support for PRO traders.</p>
             </div>
         </div>
@@ -529,7 +534,7 @@
 
     <!-- Products -->
     <div class="products-section">
-        <h2>Trading Products</h2>
+        <h2>📦 Trading Products</h2>
         <div class="products-grid">
             <div class="product-card">
                 <h4>Spot</h4>
@@ -600,6 +605,79 @@
     </div>
 
     <script>
+        // LIVE MARKET DATA FROM COINGECKO API
+        const coins = [
+            { id: 'bitcoin', symbol: 'BTC', name: 'BTC/USDT' },
+            { id: 'ethereum', symbol: 'ETH', name: 'ETH/USDT' },
+            { id: 'tron', symbol: 'TRX', name: 'TRX/USDT' },
+            { id: 'usd-coin', symbol: 'USDC', name: 'USDC/USDT' },
+            { id: 'ripple', symbol: 'XRP', name: 'XRP/USDT' },
+            { id: 'solana', symbol: 'SOL', name: 'SOL/USDT' },
+            { id: 'dogecoin', symbol: 'DOGE', name: 'DOGE/USDT' },
+            { id: 'toncoin', symbol: 'TON', name: 'TON/USDT' },
+            { id: 'binancecoin', symbol: 'BNB', name: 'BNB/USDT' },
+            { id: 'litecoin', symbol: 'LTC', name: 'LTC/USDT' }
+        ];
+
+        async function fetchMarketData() {
+            try {
+                const ids = coins.map(c => c.id).join(',');
+                const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                let tableHtml = `
+                    <table>
+                        <thead>
+                            <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                for (let coin of coins) {
+                    const coinData = data[coin.id];
+                    if (coinData) {
+                        const price = coinData.usd;
+                        const change24h = coinData.usd_24h_change;
+                        const changeClass = change24h >= 0 ? 'positive' : 'negative';
+                        const changeSymbol = change24h >= 0 ? '+' : '';
+                        const changeFormatted = `${changeSymbol}${change24h.toFixed(2)}%`;
+                        
+                        // Mock volume (API doesn't provide volume in this endpoint)
+                        const volumes = {
+                            'bitcoin': '14.60K', 'ethereum': '259.94K', 'tron': '154.36M',
+                            'usd-coin': '480.48M', 'ripple': '79.39M', 'solana': '1.89M',
+                            'dogecoin': '530.46M', 'toncoin': '3.69M', 'binancecoin': '100.01K',
+                            'litecoin': '272.90K'
+                        };
+                        
+                        tableHtml += `
+                            <tr>
+                                <td>${coin.name}</td>
+                                <td>${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td>
+                                <td class="${changeClass}">${changeFormatted}</td>
+                                <td>${volumes[coin.id] || 'N/A'}</td>
+                            </tr>
+                        `;
+                    }
+                }
+                
+                tableHtml += `</tbody></table>`;
+                document.getElementById('marketTable').innerHTML = tableHtml;
+                document.getElementById('lastUpdated').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+                
+            } catch (error) {
+                console.error('Error fetching market data:', error);
+                document.getElementById('marketTable').innerHTML = '<div class="loading">⚠️ Unable to load live prices. Will retry...</div>';
+            }
+        }
+
+        // Load market data immediately and every 30 seconds
+        fetchMarketData();
+        setInterval(fetchMarketData, 30000);
+
+        // FAQ toggle function
         function toggleFAQ(element) {
             const answer = element.nextElementSibling;
             const plus = element.querySelector('.plus');
@@ -612,6 +690,7 @@
             }
         }
 
+        // Navigation functions
         function showLogin() {
             window.location.href = 'dashboard.html';
         }
@@ -621,7 +700,14 @@
         }
 
         function showChat() {
-            alert('Chat support coming soon!');
+            alert('💬 Chat support coming soon!\nFor now, email us at support@bitearn.com');
+        }
+
+        // Marquee duplication for seamless scrolling
+        const marquee = document.querySelector('.stats-marquee');
+        if (marquee) {
+            const clone = marquee.cloneNode(true);
+            document.querySelector('.stats-container').appendChild(clone);
         }
     </script>
 </body>
