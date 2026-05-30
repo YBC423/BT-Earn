@@ -1,20 +1,331 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>BT-Earn Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BT-Earn - Earn Bitcoin Rewards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Auth Container */
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 32px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102,126,234,0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-google {
+            background: #db4437;
+            color: white;
+        }
+
+        .btn-google:hover {
+            background: #c53929;
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+
+        .btn-link {
+            background: none;
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #666;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            display: none;
+            background: #f5f5f5;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .navbar {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logout-btn {
+            background: #e53e3e;
+            color: white;
+            padding: 8px 20px;
+            width: auto;
+            margin: 0;
+        }
+
+        .content {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .tasks-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tasks-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .task-info h4 {
+            margin-bottom: 5px;
+        }
+
+        .task-info p {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .task-reward {
+            color: #48bb78;
+            font-weight: bold;
+        }
+
+        .complete-btn {
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            width: auto;
+            margin: 0;
+        }
+
+        .earnings {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .verified-badge {
+            background: #48bb78;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h2>BT-Earn - Sign Up / Login</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="signUp()">Sign Up</button>
-    <button onclick="signIn()">Login</button>
-    <button onclick="signInWithGoogle()">Google Login</button>
-    <button onclick="resetPassword()">Forgot Password?</button>
+    <!-- Auth Container -->
+    <div id="authContainer" class="auth-container">
+        <div class="logo">
+            <h1>💰 BT-Earn</h1>
+            <p>Earn Bitcoin by completing tasks</p>
+        </div>
+        
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password">
+        
+        <button class="btn-primary" onclick="signUp()">📝 Sign Up</button>
+        <button class="btn-primary" onclick="signIn()">🔐 Login</button>
+        <button class="btn-google" onclick="signInWithGoogle()">🌐 Continue with Google</button>
+        <button class="btn-link" onclick="resetPassword()">Forgot Password?</button>
+        
+        <div class="divider">
+            <span>Join thousands of earners</span>
+        </div>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div id="dashboardContainer" class="dashboard-container">
+        <div class="navbar">
+            <div class="nav-brand">💰 BT-Earn</div>
+            <div class="nav-user">
+                <span id="userEmail"></span>
+                <span id="verifyStatus"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="earnings" id="earningsBox">
+                <h3>Your Balance</h3>
+                <div style="font-size: 48px; font-weight: bold;" id="balance">0.0000 BTC</div>
+                <p>≈ $<span id="usdValue">0.00</span> USD</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Tasks Completed</h3>
+                    <div class="value" id="tasksCompleted">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Referral Earnings</h3>
+                    <div class="value" id="referralEarnings">0.0000 BTC</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Rank</h3>
+                    <div class="value" id="rank">Beginner</div>
+                </div>
+            </div>
+            
+            <div class="tasks-section">
+                <h2>📋 Available Tasks</h2>
+                <div id="tasksList"></div>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
         const config = {
             apiKey: "AIzaSyDv4lyKM3vIDPbf9TQmivKgXkKQn88uZE",
@@ -25,7 +336,137 @@
 
         const app = initializeApp(config);
         const auth = getAuth(app);
+        const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+
+        // Tasks data
+        const tasks = [
+            { id: 1, name: "Follow on Twitter", reward: 0.0005, link: "https://twitter.com" },
+            { id: 2, name: "Join Telegram", reward: 0.0003, link: "https://t.me" },
+            { id: 3, name: "Watch Video", reward: 0.0002, link: "https://youtube.com" },
+            { id: 4, name: "Daily Bonus", reward: 0.0001, link: "#" }
+        ];
+
+        // Initialize user data in Firestore
+        async function initUserData(userId) {
+            const userRef = doc(db, "users", userId);
+            const userDoc = await getDoc(userRef);
+            
+            if (!userDoc.exists()) {
+                await setDoc(userRef, {
+                    balance: 0,
+                    tasksCompleted: 0,
+                    referralEarnings: 0,
+                    completedTasks: [],
+                    rank: "Beginner"
+                });
+            }
+            return userRef;
+        }
+
+        // Update dashboard UI
+        async function updateDashboard() {
+            if (!currentUser) return;
+            
+            const userRef = doc(db, "users", currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                document.getElementById('balance').textContent = data.balance.toFixed(4) + " BTC";
+                document.getElementById('tasksCompleted').textContent = data.tasksCompleted;
+                document.getElementById('referralEarnings').textContent = data.referralEarnings.toFixed(4) + " BTC";
+                document.getElementById('rank').textContent = data.rank;
+                
+                // Update USD value (mock price $50,000 per BTC)
+                const usdValue = (data.balance * 50000).toFixed(2);
+                document.getElementById('usdValue').textContent = usdValue;
+            }
+            
+            displayTasks(userRef);
+        }
+
+        // Display tasks
+        async function displayTasks(userRef) {
+            const userDoc = await getDoc(userRef);
+            const completedTasks = userDoc.data()?.completedTasks || [];
+            
+            const tasksHtml = tasks.map(task => {
+                const isCompleted = completedTasks.includes(task.id);
+                return `
+                    <div class="task-item">
+                        <div class="task-info">
+                            <h4>${task.name}</h4>
+                            <p>Complete this task to earn rewards</p>
+                        </div>
+                        <div class="task-reward">+${task.reward.toFixed(4)} BTC</div>
+                        ${!isCompleted ? 
+                            `<button class="complete-btn" onclick="window.completeTask(${task.id}, ${task.reward})">Complete</button>` :
+                            '<span style="color: #48bb78;">✓ Completed</span>'
+                        }
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('tasksList').innerHTML = tasksHtml;
+        }
+
+        window.completeTask = async (taskId, reward) => {
+            if (!currentUser) return;
+            
+            const userRef = doc(db, "users", currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            const completedTasks = userDoc.data()?.completedTasks || [];
+            
+            if (!completedTasks.includes(taskId)) {
+                await updateDoc(userRef, {
+                    balance: increment(reward),
+                    tasksCompleted: increment(1),
+                    completedTasks: [...completedTasks, taskId]
+                });
+                
+                // Update rank based on tasks completed
+                const newTasksCount = (userDoc.data()?.tasksCompleted || 0) + 1;
+                let newRank = "Beginner";
+                if (newTasksCount >= 50) newRank = "Legend";
+                else if (newTasksCount >= 20) newRank = "Expert";
+                else if (newTasksCount >= 10) newRank = "Pro";
+                else if (newTasksCount >= 5) newRank = "Advanced";
+                
+                await updateDoc(userRef, { rank: newRank });
+                
+                alert(`✅ You earned ${reward.toFixed(4)} BTC!`);
+                updateDashboard();
+            } else {
+                alert("You already completed this task!");
+            }
+        };
+
+        // Auth state listener
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                await initUserData(user.uid);
+                
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('dashboardContainer').style.display = 'block';
+                document.getElementById('userEmail').textContent = user.email;
+                
+                if (user.emailVerified) {
+                    document.getElementById('verifyStatus').innerHTML = '<span class="verified-badge">✓ Verified</span>';
+                } else {
+                    document.getElementById('verifyStatus').innerHTML = '<button class="btn-link" onclick="sendVerification()" style="padding:5px; font-size:12px;">Verify Email</button>';
+                }
+                
+                await updateDashboard();
+            } else {
+                currentUser = null;
+                document.getElementById('authContainer').style.display = 'block';
+                document.getElementById('dashboardContainer').style.display = 'none';
+            }
+        });
 
         window.signUp = () => {
             const email = document.getElementById('email').value;
@@ -33,7 +474,7 @@
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     sendEmailVerification(userCredential.user);
-                    alert("Account created! Verification email sent.");
+                    alert("Account created! Verification email sent. Please verify your email before logging in.");
                 })
                 .catch((error) => alert(error.message));
         };
@@ -42,7 +483,12 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             signInWithEmailAndPassword(auth, email, password)
-                .then(() => alert("Logged in!"))
+                .then(() => {
+                    if (!auth.currentUser.emailVerified) {
+                        alert("Please verify your email first. Check your inbox!");
+                        auth.signOut();
+                    }
+                })
                 .catch((error) => alert(error.message));
         };
 
@@ -54,9 +500,20 @@
 
         window.resetPassword = () => {
             const email = prompt("Enter your email:");
-            sendPasswordResetEmail(auth, email)
-                .then(() => alert("Reset email sent!"))
-                .catch((error) => alert(error.message));
+            if (email) {
+                sendPasswordResetEmail(auth, email)
+                    .then(() => alert("Reset email sent!"))
+                    .catch((error) => alert(error.message));
+            }
+        };
+
+        window.sendVerification = () => {
+            sendEmailVerification(auth.currentUser)
+                .then(() => alert("Verification email sent!"));
+        };
+
+        window.logout = () => {
+            signOut(auth);
         };
     </script>
 </body>
