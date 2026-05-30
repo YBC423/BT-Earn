@@ -18,11 +18,12 @@
             overflow-x: hidden;
         }
 
-        /* Hide flash on refresh - prevents homepage flicker */
+        /* Hide flash on refresh */
         body:not(.loaded) #homepage,
         body:not(.loaded) #authPage,
         body:not(.loaded) #dashboard,
-        body:not(.loaded) #profilePage {
+        body:not(.loaded) #profilePage,
+        body:not(.loaded) #marketsPage {
             display: none;
         }
 
@@ -175,7 +176,7 @@
             line-height: 1.5;
         }
 
-        /* Market Table */
+        /* Market Section on Homepage */
         .market-section {
             padding: 0 60px 60px;
         }
@@ -193,13 +194,6 @@
             font-size: 28px;
         }
 
-        .market-buttons {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
         .last-updated {
             font-size: 14px;
             color: #48bb78;
@@ -210,30 +204,6 @@
             text-decoration: none;
             cursor: pointer;
             font-size: 16px;
-            background: rgba(102,126,234,0.15);
-            padding: 6px 15px;
-            border-radius: 20px;
-        }
-
-        .see-all.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .market-search {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 14px;
-        }
-
-        .market-search:focus {
-            outline: none;
-            border-color: #667eea;
         }
 
         table {
@@ -422,7 +392,7 @@
             font-size: 12px;
         }
 
-        /* Chat Widget - Draggable - MOVED UP */
+        /* Chat Widget */
         .chat-widget {
             position: fixed;
             bottom: 80px;
@@ -438,63 +408,6 @@
         }
         .chat-widget:active {
             cursor: grabbing;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            overflow-y: auto;
-        }
-        .modal-content {
-            background: #0a0e27;
-            margin: 60px auto;
-            width: 90%;
-            max-width: 1200px;
-            border-radius: 20px;
-            padding: 30px;
-            position: relative;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .close-modal {
-            position: absolute;
-            right: 30px;
-            top: 20px;
-            font-size: 30px;
-            cursor: pointer;
-            color: white;
-        }
-        .modal h2 {
-            margin-bottom: 20px;
-            font-size: 28px;
-        }
-        .search-box {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-        }
-        .market-table-container {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .market-table-container table {
-            width: 100%;
-        }
-        .market-table-container th {
-            position: sticky;
-            top: 0;
-            background: #0a0e27;
         }
 
         /* Auth Page Styles */
@@ -877,43 +790,110 @@
             background: rgba(229,62,62,0.3);
         }
 
-        /* Top 100 Markets Table */
-        .top100-container {
-            max-height: 600px;
-            overflow-y: auto;
-            border-radius: 12px;
+        /* Markets Page - Top 100 Scrollable List */
+        .markets-container {
+            padding: 100px 20px 80px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .top100-table {
+        .markets-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .markets-header h1 {
+            font-size: 32px;
+        }
+        .markets-search {
             width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
             font-size: 14px;
         }
-        .top100-table th {
-            position: sticky;
-            top: 0;
-            background: #0a0e27;
-            padding: 15px 10px;
-            font-size: 14px;
+        .markets-search:focus {
+            outline: none;
+            border-color: #667eea;
         }
-        .top100-table td {
-            padding: 12px 10px;
-            font-size: 14px;
+        .top100-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 65vh;
+            overflow-y: auto;
+            padding-right: 5px;
         }
-        .rank-cell {
-            width: 60px;
+        .top100-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .top100-list::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        .top100-list::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        .market-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            transition: 0.3s;
+        }
+        .market-card:hover {
+            background: rgba(255,255,255,0.05);
+            transform: translateX(5px);
+        }
+        .market-rank {
+            font-size: 14px;
             color: #a0a0c0;
+            min-width: 45px;
         }
-        .coin-name-cell {
+        .market-coin {
+            min-width: 120px;
+        }
+        .market-coin h4 {
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+        .market-coin p {
+            color: #a0a0c0;
+            font-size: 11px;
+        }
+        .market-price {
+            text-align: right;
+            min-width: 100px;
+        }
+        .market-price .price {
+            font-size: 16px;
             font-weight: bold;
         }
-        .coin-symbol {
-            color: #a0a0c0;
+        .market-change {
+            min-width: 80px;
+            text-align: right;
+        }
+        .market-stats {
+            text-align: right;
+            min-width: 140px;
+        }
+        .market-stats div {
             font-size: 12px;
-            margin-left: 8px;
+            color: #a0a0c0;
         }
-        .price-cell {
-            font-weight: 500;
+        .market-stats .market-cap {
+            color: white;
         }
-
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
             .features-section, .market-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
@@ -921,12 +901,14 @@
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
             .nav-item { font-size: 16px; }
-            .profile-container { padding: 80px 15px 80px; }
-            .info-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .profile-container, .markets-container { padding: 80px 15px 80px; }
+            .info-row, .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
             .chat-widget { bottom: 75px; right: 10px; padding: 10px 16px; font-size: 14px; }
-            .top100-table th, .top100-table td { padding: 10px 6px; font-size: 12px; }
-            .rank-cell { width: 45px; }
+            .market-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .market-rank, .market-coin, .market-price, .market-change, .market-stats { width: 100%; text-align: left; }
+            .market-price { text-align: left; }
+            .market-change { text-align: left; }
+            .market-stats { text-align: left; }
         }
     </style>
 </head>
@@ -963,10 +945,7 @@
     <div class="market-section">
         <div class="market-header">
             <h2>Markets</h2>
-            <div class="market-buttons">
-                <span class="last-updated" id="lastUpdated">Loading...</span>
-                <a class="see-all" id="seeTop100Btn" onclick="toggleTop100Modal()">Top 100 →</a>
-            </div>
+            <div><span class="last-updated" id="lastUpdated">Loading...</span></div>
         </div>
         <div id="marketTable"><div class="loading">Loading...</div></div>
     </div>
@@ -1041,9 +1020,9 @@
     </div>
     <div class="bottom-nav">
         <div class="nav-item" data-nav="home">Home</div>
-        <div class="nav-item" data-nav="markets" onclick="alert('Markets')">Markets</div>
-        <div class="nav-item" data-nav="trade" onclick="alert('Trade')">Trade</div>
-        <div class="nav-item" data-nav="bots" onclick="alert('Bots')">Bots</div>
+        <div class="nav-item" data-nav="markets">Markets</div>
+        <div class="nav-item" data-nav="trade" onclick="alert('Trade feature coming soon')">Trade</div>
+        <div class="nav-item" data-nav="bots" onclick="alert('Bots feature coming soon')">Bots</div>
         <div class="nav-item" data-nav="profile">Profile</div>
     </div>
 </div>
@@ -1056,29 +1035,38 @@
     <div class="profile-container" id="profileContainer"></div>
     <div class="bottom-nav">
         <div class="nav-item" data-nav="home">Home</div>
-        <div class="nav-item" data-nav="markets" onclick="alert('Markets')">Markets</div>
-        <div class="nav-item" data-nav="trade" onclick="alert('Trade')">Trade</div>
-        <div class="nav-item" data-nav="bots" onclick="alert('Bots')">Bots</div>
+        <div class="nav-item" data-nav="markets">Markets</div>
+        <div class="nav-item" data-nav="trade" onclick="alert('Trade feature coming soon')">Trade</div>
+        <div class="nav-item" data-nav="bots" onclick="alert('Bots feature coming soon')">Bots</div>
         <div class="nav-item" data-nav="profile" style="color: #667eea;">Profile</div>
+    </div>
+</div>
+
+<div id="marketsPage" style="display:none;">
+    <div class="header">
+        <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
+        <div></div>
+    </div>
+    <div class="markets-container">
+        <div class="markets-header">
+            <h1>Markets</h1>
+            <button class="refresh-btn" id="refreshMarketsBtn" onclick="refreshMarkets()">Refresh Prices</button>
+        </div>
+        <input type="text" id="marketsSearchInput" class="markets-search" placeholder="Search cryptocurrency..." onkeyup="filterMarketsList()">
+        <div id="top100MarketsList" class="top100-list"><div class="loading">Loading top 100 cryptocurrencies...</div></div>
+    </div>
+    <div class="bottom-nav">
+        <div class="nav-item" data-nav="home">Home</div>
+        <div class="nav-item" data-nav="markets" style="color: #667eea;">Markets</div>
+        <div class="nav-item" data-nav="trade" onclick="alert('Trade feature coming soon')">Trade</div>
+        <div class="nav-item" data-nav="bots" onclick="alert('Bots feature coming soon')">Bots</div>
+        <div class="nav-item" data-nav="profile">Profile</div>
     </div>
 </div>
 
 <div class="chat-widget" id="chatWidget" onclick="alert('Chat support coming soon! Email us at support@bt-earn.com')"><span>💬</span><span>Hi!</span></div>
 
-<!-- Top 100 Markets Modal -->
-<div id="top100Modal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeTop100Modal()">&times;</span>
-        <h2>Top 100 Cryptocurrencies</h2>
-        <input type="text" id="top100Search" class="search-box" placeholder="Search coin..." onkeyup="filterTop100()">
-        <div class="market-table-container">
-            <div id="top100Table" class="loading">Loading top 100 coins...</div>
-        </div>
-    </div>
-</div>
-
 <script>
-    // Full countries list
     const countriesList = [
         "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
         "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
@@ -1106,23 +1094,13 @@
     let currentUser = null;
     let holdings = { btc: 0.01, eth: 0.25, bnb: 1.5, sol: 2.5 };
     let currentPrices = {};
-    let top100Data = [];
-    let filteredTop100Data = [];
+    let top100FullList = [];
+    let filteredTop100List = [];
     
-    // Fallback prices
     const FALLBACK_PRICES = {
-        btc: 73786.00,
-        eth: 2022.64,
-        bnb: 580.00,
-        sol: 145.00,
-        trx: 0.12,
-        usdc: 1.00,
-        xrp: 0.52,
-        doge: 0.12,
-        btcChange: -0.48,
-        ethChange: -0.84,
-        bnbChange: 0.32,
-        solChange: 1.24
+        btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00,
+        trx: 0.12, usdc: 1.00, xrp: 0.52, doge: 0.12,
+        btcChange: -0.48, ethChange: -0.84, bnbChange: 0.32, solChange: 1.24
     };
     
     currentPrices = { ...FALLBACK_PRICES };
@@ -1132,6 +1110,7 @@
         document.getElementById('authPage').style.display = 'none'; 
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'none';
+        document.getElementById('marketsPage').style.display = 'none';
     }
     
     function showAuthPage() { 
@@ -1139,6 +1118,7 @@
         document.getElementById('authPage').style.display = 'block'; 
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'none';
+        document.getElementById('marketsPage').style.display = 'none';
     }
     
     function showDashboard() { 
@@ -1146,6 +1126,7 @@
         document.getElementById('authPage').style.display = 'none'; 
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('profilePage').style.display = 'none';
+        document.getElementById('marketsPage').style.display = 'none';
         loadDashboard(); 
     }
     
@@ -1154,87 +1135,119 @@
         document.getElementById('authPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'block';
+        document.getElementById('marketsPage').style.display = 'none';
         renderProfile();
+    }
+    
+    function showMarkets() {
+        document.getElementById('homepage').style.display = 'none';
+        document.getElementById('authPage').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('profilePage').style.display = 'none';
+        document.getElementById('marketsPage').style.display = 'block';
+        loadTop100Markets();
+    }
+
+    async function loadTop100Markets() {
+        let container = document.getElementById('top100MarketsList');
+        container.innerHTML = '<div class="loading">Loading top 100 cryptocurrencies...</div>';
+        try {
+            let url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false';
+            let res = await fetch(url);
+            if (!res.ok) throw new Error('API failed');
+            let data = await res.json();
+            top100FullList = data.map((coin, index) => ({
+                rank: index + 1,
+                name: coin.name,
+                symbol: coin.symbol.toUpperCase(),
+                price: coin.current_price || 0,
+                change: coin.price_change_percentage_24h || 0,
+                marketCap: coin.market_cap || 0,
+                volume: coin.total_volume || 0
+            }));
+            filteredTop100List = [...top100FullList];
+            renderMarketsList();
+        } catch(e) {
+            console.error('Failed to load top 100:', e);
+            container.innerHTML = '<div class="loading">Unable to load markets. Please try again.</div>';
+        }
+    }
+
+    function renderMarketsList() {
+        let container = document.getElementById('top100MarketsList');
+        let html = '';
+        for (let coin of filteredTop100List) {
+            let changeClass = coin.change >= 0 ? 'positive' : 'negative';
+            let changeSymbol = coin.change >= 0 ? '+' : '';
+            let marketCapB = (coin.marketCap / 1000000000).toFixed(2);
+            let volumeM = (coin.volume / 1000000).toFixed(2);
+            html += `
+                <div class="market-card">
+                    <div class="market-rank">#${coin.rank}</div>
+                    <div class="market-coin">
+                        <h4>${coin.name}</h4>
+                        <p>${coin.symbol}</p>
+                    </div>
+                    <div class="market-price">
+                        <div class="price">$${coin.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
+                    </div>
+                    <div class="market-change ${changeClass}">${changeSymbol}${coin.change.toFixed(2)}%</div>
+                    <div class="market-stats">
+                        <div class="market-cap">MCap: $${marketCapB}B</div>
+                        <div>Vol: $${volumeM}M</div>
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    function filterMarketsList() {
+        let searchTerm = document.getElementById('marketsSearchInput').value.toLowerCase();
+        filteredTop100List = top100FullList.filter(coin => 
+            coin.name.toLowerCase().includes(searchTerm) || 
+            coin.symbol.toLowerCase().includes(searchTerm)
+        );
+        renderMarketsList();
+    }
+
+    async function refreshMarkets() {
+        await loadTop100Markets();
     }
 
     function renderProfile() {
         if (!currentUser) return;
-        
         const memberSince = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
         const phoneNumber = currentUser.phone || 'Not provided';
-        
         const profileHTML = `
             <div class="profile-header">
                 <div class="profile-avatar">${currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}</div>
                 <h2>${currentUser.name || 'User'}</h2>
                 <p>Member since ${memberSince}</p>
             </div>
-            
             <div class="profile-section">
                 <h3>Personal Information</h3>
-                <div class="info-row">
-                    <span class="info-label">Full Name</span>
-                    <span class="info-value">${currentUser.name || 'Not set'}</span>
-                    <button class="edit-btn" onclick="alert('Edit name feature coming soon')">Edit</button>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Email Address</span>
-                    <span class="info-value">${currentUser.email || 'Not set'}</span>
-                    <button class="edit-btn" onclick="alert('Edit email feature coming soon')">Edit</button>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Phone Number</span>
-                    <span class="info-value">${phoneNumber}</span>
-                    <button class="edit-btn" onclick="alert('Edit phone feature coming soon')">Edit</button>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Account Type</span>
-                    <span class="info-value">Standard</span>
-                </div>
+                <div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${currentUser.name || 'Not set'}</span><button class="edit-btn" onclick="alert('Edit name feature coming soon')">Edit</button></div>
+                <div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span><button class="edit-btn" onclick="alert('Edit email feature coming soon')">Edit</button></div>
+                <div class="info-row"><span class="info-label">Phone Number</span><span class="info-value">${phoneNumber}</span><button class="edit-btn" onclick="alert('Edit phone feature coming soon')">Edit</button></div>
+                <div class="info-row"><span class="info-label">Account Type</span><span class="info-value">Standard</span></div>
             </div>
-            
             <div class="profile-section">
                 <h3>Account Security</h3>
-                <div class="info-row">
-                    <span class="info-label">Last password change</span>
-                    <span class="info-value">Never</span>
-                    <button class="edit-btn" onclick="alert('Change password feature coming soon')">Change</button>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Two-Factor Authentication</span>
-                    <span class="status-badge disabled">Disabled</span>
-                    <button class="edit-btn" onclick="alert('Enable 2FA feature coming soon')">Enable</button>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Last Login</span>
-                    <span class="info-value">${new Date().toLocaleString()}</span>
-                </div>
+                <div class="info-row"><span class="info-label">Last password change</span><span class="info-value">Never</span><button class="edit-btn" onclick="alert('Change password feature coming soon')">Change</button></div>
+                <div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span><button class="edit-btn" onclick="alert('Enable 2FA feature coming soon')">Enable</button></div>
+                <div class="info-row"><span class="info-label">Last Login</span><span class="info-value">${new Date().toLocaleString()}</span></div>
             </div>
-            
             <div class="profile-section">
                 <h3>Preferences</h3>
-                <div class="preference-row">
-                    <span class="preference-label">Theme</span>
-                    <span class="preference-value">Dark</span>
-                </div>
-                <div class="preference-row">
-                    <span class="preference-label">Language</span>
-                    <span class="preference-value">English</span>
-                </div>
-                <div class="preference-row">
-                    <span class="preference-label">Notification</span>
-                    <span class="preference-value">Email Only</span>
-                </div>
-                <div class="preference-row">
-                    <span class="preference-label">Timezone</span>
-                    <span class="preference-value">UTC</span>
-                </div>
+                <div class="preference-row"><span class="preference-label">Theme</span><span class="preference-value">Dark</span></div>
+                <div class="preference-row"><span class="preference-label">Language</span><span class="preference-value">English</span></div>
+                <div class="preference-row"><span class="preference-label">Notification</span><span class="preference-value">Email Only</span></div>
+                <div class="preference-row"><span class="preference-label">Timezone</span><span class="preference-value">UTC</span></div>
                 <button class="edit-btn" style="margin-top: 15px; width: 100%;" onclick="alert('Edit preferences coming soon')">Edit Preferences</button>
             </div>
-            
             <button class="profile-logout-btn" onclick="logout()">Logout</button>
         `;
-        
         document.getElementById('profileContainer').innerHTML = profileHTML;
     }
 
@@ -1311,14 +1324,8 @@
             let ids = ['bitcoin','ethereum','binancecoin','solana','tron','usd-coin','ripple','dogecoin'];
             let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`;
             let res = await fetch(url);
-            
-            if (!res.ok) {
-                console.warn(`API returned ${res.status}, keeping fallback prices`);
-                return true;
-            }
-            
+            if (!res.ok) return true;
             let data = await res.json();
-            
             if (data.bitcoin?.usd !== undefined) {
                 currentPrices = {
                     btc: data.bitcoin?.usd || FALLBACK_PRICES.btc,
@@ -1336,107 +1343,7 @@
                 };
             }
             return true;
-        } catch(e) { 
-            console.error('API fetch failed, using fallback prices:', e);
-            return true;
-        }
-    }
-
-    // Fetch Top 100 Cryptocurrencies
-    async function fetchTop100() {
-        try {
-            let url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false';
-            let res = await fetch(url);
-            
-            if (!res.ok) {
-                console.warn('Failed to fetch top 100, using fallback');
-                return false;
-            }
-            
-            let data = await res.json();
-            top100Data = data.map((coin, index) => ({
-                rank: index + 1,
-                name: coin.name,
-                symbol: coin.symbol.toUpperCase(),
-                price: coin.current_price || 0,
-                change: coin.price_change_percentage_24h || 0,
-                marketCap: coin.market_cap || 0,
-                volume: coin.total_volume || 0
-            }));
-            
-            filteredTop100Data = [...top100Data];
-            renderTop100Table();
-            return true;
-        } catch(e) {
-            console.error('Failed to fetch top 100:', e);
-            return false;
-        }
-    }
-
-    function renderTop100Table() {
-        let tableHtml = `
-            <table class="top100-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Coin</th>
-                        <th>Price</th>
-                        <th>24h Change</th>
-                        <th>Market Cap</th>
-                        <th>Volume (24h)</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        
-        for (let coin of filteredTop100Data) {
-            let changeClass = coin.change >= 0 ? 'positive' : 'negative';
-            let changeSymbol = coin.change >= 0 ? '+' : '';
-            
-            tableHtml += `
-                <tr>
-                    <td class="rank-cell">${coin.rank}</td>
-                    <td class="coin-name-cell">
-                        ${coin.name}
-                        <span class="coin-symbol">${coin.symbol}</span>
-                    </td>
-                    <td class="price-cell">$${coin.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</td>
-                    <td class="${changeClass}">${changeSymbol}${coin.change.toFixed(2)}%</td>
-                    <td>$${(coin.marketCap / 1000000000).toFixed(2)}B</td>
-                    <td>$${(coin.volume / 1000000).toFixed(2)}M</td>
-                </tr>
-            `;
-        }
-        
-        tableHtml += `</tbody></table>`;
-        document.getElementById('top100Table').innerHTML = tableHtml;
-    }
-
-    function filterTop100() {
-        let searchTerm = document.getElementById('top100Search').value.toLowerCase();
-        filteredTop100Data = top100Data.filter(coin => 
-            coin.name.toLowerCase().includes(searchTerm) || 
-            coin.symbol.toLowerCase().includes(searchTerm)
-        );
-        renderTop100Table();
-    }
-
-    function toggleTop100Modal() {
-        let modal = document.getElementById('top100Modal');
-        if (modal.style.display === 'block') {
-            modal.style.display = 'none';
-        } else {
-            modal.style.display = 'block';
-            if (top100Data.length === 0) {
-                fetchTop100();
-            } else {
-                renderTop100Table();
-            }
-        }
-    }
-
-    function closeTop100Modal() {
-        document.getElementById('top100Modal').style.display = 'none';
+        } catch(e) { return true; }
     }
 
     async function loadDashboard() { 
@@ -1501,53 +1408,6 @@
             let marquee = document.getElementById('statsMarquee'); 
             if(marquee) marquee.innerHTML = html+html; 
         } catch(e) { console.error(e); } 
-    }
-    
-    const FULL_COINS_LIST = [{ id: 'bitcoin', name: 'BTC/USDT' },{ id: 'ethereum', name: 'ETH/USDT' },{ id: 'tron', name: 'TRX/USDT' },{ id: 'usd-coin', name: 'USDC/USDT' },{ id: 'ripple', name: 'XRP/USDT' },{ id: 'solana', name: 'SOL/USDT' },{ id: 'dogecoin', name: 'DOGE/USDT' },{ id: 'toncoin', name: 'TON/USDT' },{ id: 'binancecoin', name: 'BNB/USDT' },{ id: 'litecoin', name: 'LTC/USDT' }];
-    let currentFullMarketData = [];
-    
-    async function fetchFullMarketData() { 
-        try { 
-            let ids = FULL_COINS_LIST.map(c=>c.id).join(','); 
-            let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
-            let data = await res.json(); 
-            currentFullMarketData = FULL_COINS_LIST.map(coin => { 
-                let info = data[coin.id]; 
-                if(info) return { name: coin.name, price: info.usd, change: info.usd_24h_change }; 
-                return null; 
-            }).filter(i=>i); 
-            renderFullMarkets(currentFullMarketData); 
-        } catch(e) { 
-            let table = document.getElementById('allMarketsTable');
-            if(table) table.innerHTML = '<div class="loading">Unable to load markets</div>'; 
-        } 
-    }
-    
-    function renderFullMarkets(data) { 
-        let html = '<table style="width:100%"><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th></tr></thead><tbody>'; 
-        for(let item of data) { 
-            let changeClass = item.change >= 0 ? 'positive' : 'negative'; 
-            html += `<tr><td>${item.name}</td><td>$${item.price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td><td class="${changeClass}">${item.change>=0?'+':''}${item.change.toFixed(2)}%</td></tr>`; 
-        } 
-        html += '</tbody></tr>'; 
-        let table = document.getElementById('allMarketsTable');
-        if(table) table.innerHTML = html; 
-    }
-    
-    function filterMarkets() { 
-        let term = document.getElementById('marketSearch').value.toLowerCase(); 
-        let filtered = currentFullMarketData.filter(i=>i.name.toLowerCase().includes(term)); 
-        renderFullMarkets(filtered); 
-    }
-    
-    function openMarketsModal() { 
-        document.getElementById('marketsModal').style.display = 'block'; 
-        if(currentFullMarketData.length===0) fetchFullMarketData(); 
-        else renderFullMarkets(currentFullMarketData); 
-    }
-    
-    function closeMarketsModal() { 
-        document.getElementById('marketsModal').style.display = 'none'; 
     }
     
     const coins = [{ id: 'bitcoin', name: 'BTC/USDT' },{ id: 'ethereum', name: 'ETH/USDT' },{ id: 'tron', name: 'TRX/USDT' },{ id: 'usd-coin', name: 'USDC/USDT' },{ id: 'ripple', name: 'XRP/USDT' },{ id: 'solana', name: 'SOL/USDT' },{ id: 'dogecoin', name: 'DOGE/USDT' },{ id: 'toncoin', name: 'TON/USDT' },{ id: 'binancecoin', name: 'BNB/USDT' },{ id: 'litecoin', name: 'LTC/USDT' }];
@@ -1625,16 +1485,13 @@
         }
     }
     
-    // Navigation handlers
     document.addEventListener('click', function(e) {
         const navItem = e.target.closest('.nav-item');
         if(navItem) {
             const navType = navItem.getAttribute('data-nav');
-            if(navType === 'home') {
-                showDashboard();
-            } else if(navType === 'profile') {
-                showProfile();
-            }
+            if(navType === 'home') { showDashboard(); }
+            else if(navType === 'profile') { showProfile(); }
+            else if(navType === 'markets') { showMarkets(); }
         }
     });
     
@@ -1652,10 +1509,6 @@
     setInterval(fetchMarketData, 30000); 
     updateMarqueePrices(); 
     setInterval(updateMarqueePrices, 30000); 
-    window.onclick = function(e) { 
-        if(e.target == document.getElementById('marketsModal')) closeMarketsModal(); 
-        if(e.target == document.getElementById('top100Modal')) closeTop100Modal();
-    };
     
     document.body.classList.add('loaded');
 </script>
