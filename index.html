@@ -556,7 +556,20 @@
             color: #48bb78;
             margin-bottom: 20px;
         }
+        .portfolio-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
         .deposit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            padding: 10px 30px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+        }
+        .withdraw-btn {
             background: linear-gradient(135deg, #667eea, #764ba2);
             border: none;
             padding: 10px 30px;
@@ -1497,6 +1510,9 @@
         .bot-stat-card .stat-value {
             font-size: 28px;
             font-weight: bold;
+        }
+
+        .bot-stat-card .stat-value.positive {
             color: #48bb78;
         }
 
@@ -1594,6 +1610,8 @@
             .stat-card .stat-value { font-size: 24px; }
             .config-modal-content { margin: 80px auto; width: 95%; padding: 20px; }
             .bot-stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .portfolio-buttons { flex-direction: column; }
+            .deposit-btn, .withdraw-btn { width: 100%; }
         }
     </style>
 </head>
@@ -1695,7 +1713,10 @@
             <h3>REAL PORTFOLIO</h3>
             <div class="portfolio-balance" id="portfolioBalance">$0.00</div>
             <div class="portfolio-change" id="portfolioChange">+0.00%</div>
-            <button class="deposit-btn" onclick="alert('Deposit feature coming soon!')">Deposit</button>
+            <div class="portfolio-buttons">
+                <button class="deposit-btn" onclick="alert('Deposit feature coming soon!')">Deposit</button>
+                <button class="withdraw-btn" onclick="alert('Withdraw feature coming soon!')">Withdraw</button>
+            </div>
         </div>
         <div class="section-title">Your Crypto <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div>
         <div id="cryptoContainer" class="crypto-scroll"></div>
@@ -2069,6 +2090,20 @@
     
     currentPrices = { ...FALLBACK_PRICES };
 
+    // Load saved balance from localStorage
+    function loadSavedBalance() {
+        let savedBalance = localStorage.getItem('userBalance');
+        if (savedBalance && !isNaN(parseFloat(savedBalance))) {
+            holdings.usdt = parseFloat(savedBalance);
+        } else {
+            holdings.usdt = 1000.00;
+        }
+    }
+    
+    function saveBalance() {
+        localStorage.setItem('userBalance', holdings.usdt.toFixed(8));
+    }
+
     function generateCandleData(basePrice, count = 30) {
         let candles = [];
         let currentPrice = basePrice;
@@ -2392,7 +2427,6 @@
     }
     
     function showBotDetail(botName) {
-        // Load bot configuration
         let savedConfig = localStorage.getItem('botConfig_' + botName);
         if (!savedConfig) {
             alert('Please configure the bot first before starting');
@@ -2401,7 +2435,6 @@
         
         let config = JSON.parse(savedConfig);
         
-        // Initialize bot stats
         activeBot = botName;
         botStats = {
             botName: botName,
@@ -2417,19 +2450,16 @@
             logs: []
         };
         
-        // Add initial logs
         addBotLog(`High-Frequency Trading System loaded`, 'info');
         addBotLog(`Account Balance: $${holdings.usdt.toFixed(2)}`, 'info');
         addBotLog(`STANDARD Tier Active - Optimized for consistent small profits`, 'info');
-        addBotLog(`Base win rate: 65-72% | Target: ${(botStats.amountPerTrade * 0.03).toFixed(2)}-${(botStats.amountPerTrade * 0.15).toFixed(2)} per trade`, 'info');
+        addBotLog(`Base win rate: 65-72% | Target: $${(botStats.amountPerTrade * 0.03).toFixed(2)}-$${(botStats.amountPerTrade * 0.15).toFixed(2)} per trade`, 'info');
         
-        // Update UI
         document.getElementById('botDetailTitle').innerHTML = botName === 'Bitcoin Accumulation' ? 'Bitcoin Accumulation Bot' : 'ETH DCA Pro Bot';
         document.getElementById('botBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
         document.getElementById('botDetailStatus').className = 'bot-status-badge stopped';
         document.getElementById('botDetailStatus').innerHTML = 'Stopped';
         
-        // Enable/disable buttons
         document.getElementById('startBotBtn').disabled = false;
         document.getElementById('pauseBotBtn').disabled = true;
         document.getElementById('stopBotBtn').disabled = true;
@@ -2446,7 +2476,6 @@
         let logEntry = { time: timeStr, message: message, type: type };
         botStats.logs.unshift(logEntry);
         
-        // Keep only last 100 logs
         if (botStats.logs.length > 100) botStats.logs.pop();
         
         updateLogsDisplay();
@@ -2469,11 +2498,10 @@
     }
     
     function updateBotStatsDisplay() {
-        let plClass = botStats.totalPL >= 0 ? '' : 'negative';
         let plElement = document.getElementById('botPL');
         if (plElement) {
             plElement.innerHTML = `${botStats.totalPL >= 0 ? '+' : ''}$${botStats.totalPL.toFixed(2)}`;
-            plElement.className = `stat-value ${botStats.totalPL < 0 ? 'negative' : ''}`;
+            plElement.className = `stat-value ${botStats.totalPL >= 0 ? 'positive' : 'negative'}`;
         }
         let runsElement = document.getElementById('botRuns');
         if (runsElement) runsElement.innerHTML = botStats.totalRuns;
@@ -2487,19 +2515,15 @@
     }
     
     function calculateProfitLoss(amount) {
-        // 65-72% win chance
         let isWin = Math.random() * 100 <= 68;
         let profitPercent = 0;
         
         if (isWin) {
-            // Profit: 3% to 15% of investment amount
             profitPercent = (Math.random() * 12 + 3) / 100;
             let profit = amount * profitPercent;
-            // Ensure minimum profit of $0.30 for small amounts
             if (profit < 0.30 && amount >= 10) profit = 0.30;
             return { profit: profit, isWin: true, percent: profitPercent * 100 };
         } else {
-            // Loss: 2% to 8% of investment amount
             let lossPercent = (Math.random() * 6 + 2) / 100;
             let loss = amount * lossPercent;
             if (loss < 0.20 && amount >= 10) loss = 0.20;
@@ -2515,30 +2539,26 @@
         let profit = result.profit;
         let isWin = result.isWin;
         
-        // Add BUY log (always green)
         addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${amount.toFixed(2)}`, 'buy');
         
-        // Add SELL log with color based on profit/loss
         if (profit >= 0) {
             addBotLog(`SELL ORDER: +$${profit.toFixed(2)} profit (${result.percent.toFixed(1)}%)`, 'sell-profit');
         } else {
             addBotLog(`SELL ORDER: -$${Math.abs(profit).toFixed(2)} loss (${result.percent.toFixed(1)}%)`, 'sell-loss');
         }
         
-        // Update bot stats
         if (isWin) botStats.wins++;
         botStats.totalPL += profit;
         botStats.botBalance += profit;
         botStats.totalTrades++;
         botStats.totalRuns++;
         
-        // Update real holdings balance
         holdings.usdt += profit;
+        saveBalance();
         updatePortfolioTotal();
         renderCrypto();
         renderMarketsCrypto();
         
-        // Add balance update log
         addBotLog(`New Balance: $${holdings.usdt.toFixed(2)}`, 'info');
         
         updateBotStatsDisplay();
@@ -2559,7 +2579,6 @@
         addBotLog(`Bot started - Trading ${botStats.asset}/USDT`, 'info');
         addBotLog(`Investment amount: $${botStats.amountPerTrade.toFixed(2)} per trade`, 'info');
         
-        // Execute trade every 12-20 seconds
         botInterval = setInterval(() => {
             executeBotTrade();
         }, Math.random() * 8000 + 12000);
@@ -2606,7 +2625,6 @@
         
         addBotLog(`Bot stopped - Final P/L: ${botStats.totalPL >= 0 ? '+' : ''}$${botStats.totalPL.toFixed(2)}`, 'info');
         
-        // Reset bot card to Not Configured
         let botKey = activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
         let botStatusSpan = document.getElementById(`botStatus${botKey}`);
         let botPerfSpan = document.getElementById(`botPerf${botKey}`);
@@ -2621,12 +2639,11 @@
             botPerfSpan.style.color = '#a0a0c0';
         }
         
-        // Remove bot configuration from localStorage
         localStorage.removeItem('botConfig_' + activeBot);
+        saveBalance();
         
         activeBot = null;
         
-        // Go back to bots page after 2 seconds
         setTimeout(() => {
             showBots();
         }, 2000);
@@ -2689,7 +2706,7 @@
         let html = `<div class="crypto-item" onclick="showTrade('USDT')">
             <div><h4>USDT</h4><p>Tether</p><div class="positive">0.00%</div></div>
             <div style="text-align:right;"><div class="price">$${usdtPrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
-            <div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt} USDT</div>
+            <div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt.toFixed(4)} USDT</div>
             <div>Value: $${usdtValue.toFixed(2)}</div>
             <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('USDT')">Trade</button></div>
         </div>`; 
@@ -2793,6 +2810,7 @@
             holdings.usdt = holdings.usdt + total;
         }
         
+        saveBalance();
         document.getElementById('tradeQuantityInput').value = '';
         updateTradePriceDisplay();
         updatePortfolioTotal();
@@ -2800,7 +2818,6 @@
         renderMarketsCrypto();
         updateLastUpdatedText();
         
-        // Update bot balance if bot is active
         if (activeBot && botStats) {
             botStats.botBalance = holdings.usdt;
             updateBotStatsDisplay();
@@ -2976,7 +2993,7 @@
         let html = `<div class="crypto-item" onclick="showTrade('USDT')">
             <div><h4>USDT</h4><p>Tether</p><div class="positive">0.00%</div></div>
             <div style="text-align:right;"><div class="price">$${usdtPrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
-            <div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt} USDT</div>
+            <div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt.toFixed(4)} USDT</div>
             <div>Value: $${usdtValue.toFixed(2)}</div>
             <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('USDT')">Trade</button></div>
         </div>`; 
@@ -2989,6 +3006,7 @@
         let total = holdings.usdt * (currentPrices.usdt || 1.00);
         let balanceElement = document.getElementById('portfolioBalance');
         if(balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`; 
+        saveBalance();
     }
 
     function updateLastUpdatedText() {
@@ -3033,7 +3051,7 @@
             
             let usdtData = data.tether;
             if(usdtData) {
-                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 let price = usdtData.usd;
                 let change = usdtData.usd_24h_change || 0;
                 let changeClass = change >= 0 ? 'positive' : 'negative';
@@ -3047,7 +3065,7 @@
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             } else {
-                let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>';
+                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
                     <td>USDT/USDT</td>
                     <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
@@ -3217,6 +3235,8 @@
     if(chatWidget) makeDraggable(chatWidget);
     
     populateCountries();
+    loadSavedBalance();
+    
     if(localStorage.getItem('currentUser')) { 
         currentUser = JSON.parse(localStorage.getItem('currentUser')); 
         showDashboard(); 
