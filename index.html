@@ -24,7 +24,8 @@
         body:not(.loaded) #profilePage,
         body:not(.loaded) #marketsPage,
         body:not(.loaded) #tradePage,
-        body:not(.loaded) #botsPage {
+        body:not(.loaded) #botsPage,
+        body:not(.loaded) #botDetailPage {
             display: none;
         }
 
@@ -1409,6 +1410,169 @@
             transform: scale(1.02);
         }
 
+        /* Bot Detail Page Styles */
+        .bot-detail-container {
+            padding: 100px 20px 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .bot-detail-header {
+            margin-bottom: 30px;
+        }
+
+        .bot-detail-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .bot-detail-header .bot-id {
+            font-size: 13px;
+            color: #a0a0c0;
+        }
+
+        .bot-control-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .bot-control-btn {
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+        }
+
+        .bot-control-btn.start {
+            background: #48bb78;
+            color: white;
+        }
+
+        .bot-control-btn.pause {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .bot-control-btn.stop {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .bot-control-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .bot-control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .bot-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .bot-stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .bot-stat-card .stat-label {
+            font-size: 13px;
+            color: #a0a0c0;
+            margin-bottom: 8px;
+        }
+
+        .bot-stat-card .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #48bb78;
+        }
+
+        .bot-stat-card .stat-value.negative {
+            color: #e53e3e;
+        }
+
+        .bot-logs-section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .bot-logs-section h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .logs-container {
+            background: #0a0e27;
+            border-radius: 12px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .log-entry {
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #a0a0c0;
+        }
+
+        .log-entry .time {
+            color: #667eea;
+            margin-right: 10px;
+        }
+
+        .log-entry.success {
+            color: #48bb78;
+        }
+
+        .log-entry.warning {
+            color: #f59e0b;
+        }
+
+        .log-entry.error {
+            color: #e53e3e;
+        }
+
+        .bot-status-badge {
+            display: inline-block;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        .bot-status-badge.running {
+            background: rgba(72,187,120,0.2);
+            color: #48bb78;
+        }
+
+        .bot-status-badge.paused {
+            background: rgba(245,158,11,0.2);
+            color: #f59e0b;
+        }
+
+        .bot-status-badge.stopped {
+            background: rgba(229,62,62,0.2);
+            color: #e53e3e;
+        }
+
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
             .features-section, .market-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
@@ -1416,7 +1580,7 @@
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
             .nav-item { font-size: 16px; }
-            .profile-container, .markets-container, .trade-container, .bots-container { padding: 80px 15px 80px; }
+            .profile-container, .markets-container, .trade-container, .bots-container, .bot-detail-container { padding: 80px 15px 80px; }
             .info-row, .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
             .chat-widget { bottom: 75px; right: 10px; padding: 10px 16px; font-size: 14px; }
             .trade-price { font-size: 28px; }
@@ -1426,6 +1590,7 @@
             .bot-card { padding: 20px; }
             .stat-card .stat-value { font-size: 24px; }
             .config-modal-content { margin: 80px auto; width: 95%; padding: 20px; }
+            .bot-stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -1674,27 +1839,27 @@
         </div>
         <div class="bots-grid">
             <div class="bot-card">
-                <div class="bot-status">Not Configured</div>
+                <div class="bot-status" id="botStatusBitcoin">Not Configured</div>
                 <div class="bot-title">Bitcoin Accumulation</div>
                 <div class="bot-type">Weekly • DCA</div>
                 <div class="bot-description">Dollar-cost averaging into Bitcoin on a weekly basis</div>
                 <div class="bot-risk">Risk: <span class="risk-value">Low</span></div>
-                <div class="bot-performance">Performance: --</div>
+                <div class="bot-performance" id="botPerfBitcoin">Performance: --</div>
                 <div class="bot-buttons">
                     <button class="bot-config-btn" onclick="openConfigModal('Bitcoin Accumulation')">Configure</button>
-                    <button class="bot-start-btn" onclick="alert('Bitcoin Accumulation bot started')">Start BA Bot</button>
+                    <button class="bot-start-btn" onclick="startBotFromCard('Bitcoin Accumulation')">Start BA Bot</button>
                 </div>
             </div>
             <div class="bot-card">
-                <div class="bot-status">Not Configured</div>
+                <div class="bot-status" id="botStatusETH">Not Configured</div>
                 <div class="bot-title">ETH DCA Pro</div>
                 <div class="bot-type">Daily • DCA</div>
                 <div class="bot-description">Dynamic DCA based on RSI and volume indicators</div>
                 <div class="bot-risk">Risk: <span class="risk-value">Medium</span></div>
-                <div class="bot-performance">Performance: --</div>
+                <div class="bot-performance" id="botPerfETH">Performance: --</div>
                 <div class="bot-buttons">
                     <button class="bot-config-btn" onclick="openConfigModal('ETH DCA Pro')">Configure</button>
-                    <button class="bot-start-btn" onclick="alert('ETH DCA Pro bot started')">Start DCA Pro</button>
+                    <button class="bot-start-btn" onclick="startBotFromCard('ETH DCA Pro')">Start DCA Pro</button>
                 </div>
             </div>
         </div>
@@ -1705,6 +1870,61 @@
         <div class="nav-item" data-nav="markets">Markets</div>
         <div class="nav-item" data-nav="trade">Trade</div>
         <div class="nav-item" data-nav="bots" style="color: #667eea;">Bots</div>
+        <div class="nav-item" data-nav="profile">Profile</div>
+    </div>
+</div>
+
+<div id="botDetailPage" style="display:none;">
+    <div class="header">
+        <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
+        <div></div>
+    </div>
+    <div class="bot-detail-container">
+        <div class="bot-detail-header">
+            <h1 id="botDetailTitle">Bitcoin Accumulation Bot</h1>
+            <div class="bot-id">Bot ID: dca-1 • Account: Real</div>
+            <div id="botDetailStatus" class="bot-status-badge stopped">Stopped</div>
+        </div>
+        <div class="bot-control-buttons">
+            <button id="startBotBtn" class="bot-control-btn start" onclick="controlBotAction('start')">Start Bot</button>
+            <button id="pauseBotBtn" class="bot-control-btn pause" onclick="controlBotAction('pause')" disabled>Pause Bot</button>
+            <button id="stopBotBtn" class="bot-control-btn stop" onclick="controlBotAction('stop')" disabled>Stop Bot</button>
+        </div>
+        <div class="bot-stats-grid">
+            <div class="bot-stat-card">
+                <div class="stat-label">Total P/L</div>
+                <div class="stat-value" id="botPL">+$0.00</div>
+            </div>
+            <div class="bot-stat-card">
+                <div class="stat-label">Total Runs</div>
+                <div class="stat-value" id="botRuns">0</div>
+            </div>
+            <div class="bot-stat-card">
+                <div class="stat-label">Total Trades</div>
+                <div class="stat-value" id="botTrades">0</div>
+            </div>
+            <div class="bot-stat-card">
+                <div class="stat-label">Win Rate</div>
+                <div class="stat-value" id="botWinRate">0.0%</div>
+            </div>
+            <div class="bot-stat-card">
+                <div class="stat-label">Balance</div>
+                <div class="stat-value" id="botBalance">$0.00</div>
+            </div>
+        </div>
+        <div class="bot-logs-section">
+            <h3>Bot Logs <span id="logCount">0</span> entries</h3>
+            <div class="logs-container" id="botLogs">
+                <div class="log-entry">[--:--:--.--] Waiting for bot to start...</div>
+            </div>
+        </div>
+        <div style="height:80px;"></div>
+    </div>
+    <div class="bottom-nav">
+        <div class="nav-item" data-nav="home">Home</div>
+        <div class="nav-item" data-nav="markets">Markets</div>
+        <div class="nav-item" data-nav="trade">Trade</div>
+        <div class="nav-item" data-nav="bots">Bots</div>
         <div class="nav-item" data-nav="profile">Profile</div>
     </div>
 </div>
@@ -1820,6 +2040,23 @@
     let chartUpdateInterval = null;
     let candleData = [];
     let currentConfigBot = null;
+    
+    // Bot state variables
+    let activeBot = null;
+    let botInterval = null;
+    let botStats = {
+        botName: '',
+        asset: '',
+        amountPerTrade: 100,
+        totalPL: 0,
+        totalRuns: 0,
+        totalTrades: 0,
+        wins: 0,
+        botBalance: 0,
+        isRunning: false,
+        isPaused: false,
+        logs: []
+    };
     
     const FALLBACK_PRICES = {
         btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00, usdt: 1.00,
@@ -2076,6 +2313,7 @@
         document.getElementById('marketsPage').style.display = 'none';
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
+        document.getElementById('botDetailPage').style.display = 'none';
     }
     
     function showAuthPage() { 
@@ -2086,6 +2324,7 @@
         document.getElementById('marketsPage').style.display = 'none';
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
+        document.getElementById('botDetailPage').style.display = 'none';
     }
     
     function showDashboard() { 
@@ -2096,6 +2335,7 @@
         document.getElementById('marketsPage').style.display = 'none';
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
+        document.getElementById('botDetailPage').style.display = 'none';
         loadDashboard(); 
     }
     
@@ -2107,6 +2347,7 @@
         document.getElementById('marketsPage').style.display = 'none';
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
+        document.getElementById('botDetailPage').style.display = 'none';
         renderProfile();
     }
     
@@ -2118,6 +2359,7 @@
         document.getElementById('marketsPage').style.display = 'block';
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
+        document.getElementById('botDetailPage').style.display = 'none';
         loadMarketsPage();
     }
     
@@ -2130,6 +2372,7 @@
         document.getElementById('marketsPage').style.display = 'none';
         document.getElementById('tradePage').style.display = 'block';
         document.getElementById('botsPage').style.display = 'none';
+        document.getElementById('botDetailPage').style.display = 'none';
         loadTradePage();
     }
     
@@ -2141,7 +2384,242 @@
         document.getElementById('marketsPage').style.display = 'none';
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'block';
+        document.getElementById('botDetailPage').style.display = 'none';
         loadSavedBotConfigs();
+    }
+    
+    function showBotDetail(botName) {
+        // Load bot configuration
+        let savedConfig = localStorage.getItem('botConfig_' + botName);
+        if (!savedConfig) {
+            alert('Please configure the bot first before starting');
+            return;
+        }
+        
+        let config = JSON.parse(savedConfig);
+        
+        // Initialize bot stats
+        activeBot = botName;
+        botStats = {
+            botName: botName,
+            asset: config.asset,
+            amountPerTrade: parseFloat(config.amount),
+            totalPL: 0,
+            totalRuns: 0,
+            totalTrades: 0,
+            wins: 0,
+            botBalance: holdings.usdt,
+            isRunning: false,
+            isPaused: false,
+            logs: []
+        };
+        
+        // Add initial logs
+        addBotLog(`High-Frequency Trading System loaded`, 'info');
+        addBotLog(`Account Balance: $${holdings.usdt.toFixed(2)}`, 'info');
+        addBotLog(`STANDARD Tier Active - Optimized for consistent small profits`, 'info');
+        addBotLog(`Base win rate: 72.0% | Target: $2-15 per trade`, 'info');
+        
+        // Update UI
+        document.getElementById('botDetailTitle').innerHTML = botName === 'Bitcoin Accumulation' ? 'Bitcoin Accumulation Bot' : 'ETH DCA Pro Bot';
+        document.getElementById('botBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
+        document.getElementById('botDetailStatus').className = 'bot-status-badge stopped';
+        document.getElementById('botDetailStatus').innerHTML = 'Stopped';
+        
+        // Enable/disable buttons
+        document.getElementById('startBotBtn').disabled = false;
+        document.getElementById('pauseBotBtn').disabled = true;
+        document.getElementById('stopBotBtn').disabled = true;
+        
+        document.getElementById('botsPage').style.display = 'none';
+        document.getElementById('botDetailPage').style.display = 'block';
+        
+        updateBotStatsDisplay();
+    }
+    
+    function addBotLog(message, type = 'info') {
+        let time = new Date();
+        let timeStr = `${time.getHours().toString().padStart(2,'0')}:${time.getMinutes().toString().padStart(2,'0')}:${time.getSeconds().toString().padStart(2,'0')}.${time.getMilliseconds().toString().padStart(3,'0')}`;
+        let logEntry = { time: timeStr, message: message, type: type };
+        botStats.logs.unshift(logEntry);
+        
+        // Keep only last 100 logs
+        if (botStats.logs.length > 100) botStats.logs.pop();
+        
+        updateLogsDisplay();
+    }
+    
+    function updateLogsDisplay() {
+        let logsContainer = document.getElementById('botLogs');
+        let logCount = document.getElementById('logCount');
+        
+        if (logsContainer) {
+            logsContainer.innerHTML = '';
+            for (let log of botStats.logs) {
+                let logDiv = document.createElement('div');
+                logDiv.className = 'log-entry';
+                if (log.type === 'success') logDiv.classList.add('success');
+                else if (log.type === 'warning') logDiv.classList.add('warning');
+                else if (log.type === 'error') logDiv.classList.add('error');
+                logDiv.innerHTML = `<span class="time">[${log.time}]</span> ${log.message}`;
+                logsContainer.appendChild(logDiv);
+            }
+            if (logCount) logCount.innerHTML = botStats.logs.length;
+        }
+    }
+    
+    function updateBotStatsDisplay() {
+        let plClass = botStats.totalPL >= 0 ? '' : 'negative';
+        document.getElementById('botPL').innerHTML = `${botStats.totalPL >= 0 ? '+' : ''}$${botStats.totalPL.toFixed(2)}`;
+        document.getElementById('botPL').className = `stat-value ${botStats.totalPL < 0 ? 'negative' : ''}`;
+        document.getElementById('botRuns').innerHTML = botStats.totalRuns;
+        document.getElementById('botTrades').innerHTML = botStats.totalTrades;
+        let winRate = botStats.totalTrades > 0 ? (botStats.wins / botStats.totalTrades * 100) : 0;
+        document.getElementById('botWinRate').innerHTML = `${winRate.toFixed(1)}%`;
+        document.getElementById('botBalance').innerHTML = `$${botStats.botBalance.toFixed(2)}`;
+    }
+    
+    function executeBotTrade() {
+        if (!botStats.isRunning || botStats.isPaused) return;
+        
+        // Simulate a trade
+        let winChance = Math.random() * 100;
+        let isWin = winChance <= 72; // 72% win rate
+        let profit = 0;
+        
+        if (isWin) {
+            profit = Math.random() * 13 + 2; // $2 to $15 profit
+            botStats.wins++;
+            addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${botStats.amountPerTrade}`, 'success');
+            addBotLog(`SELL ORDER: +$${profit.toFixed(2)} profit (${(profit/botStats.amountPerTrade*100).toFixed(1)}%)`, 'success');
+        } else {
+            profit = -(Math.random() * 8 + 1); // -$1 to -$9 loss
+            addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${botStats.amountPerTrade}`, 'info');
+            addBotLog(`SELL ORDER: $${Math.abs(profit).toFixed(2)} loss (${(Math.abs(profit)/botStats.amountPerTrade*100).toFixed(1)}%)`, 'error');
+        }
+        
+        botStats.totalPL += profit;
+        botStats.botBalance += profit;
+        botStats.totalTrades++;
+        botStats.totalRuns++;
+        
+        // Update real holdings balance with profit/loss
+        holdings.usdt += profit;
+        updatePortfolioTotal();
+        renderCrypto();
+        renderMarketsCrypto();
+        
+        updateBotStatsDisplay();
+    }
+    
+    function startBotTrading() {
+        if (botInterval) clearInterval(botInterval);
+        
+        botStats.isRunning = true;
+        botStats.isPaused = false;
+        
+        document.getElementById('botDetailStatus').className = 'bot-status-badge running';
+        document.getElementById('botDetailStatus').innerHTML = 'Running';
+        document.getElementById('startBotBtn').disabled = true;
+        document.getElementById('pauseBotBtn').disabled = false;
+        document.getElementById('stopBotBtn').disabled = false;
+        
+        addBotLog(`Bot started - Trading ${botStats.asset}/USDT`, 'success');
+        addBotLog(`Investment amount: $${botStats.amountPerTrade} per trade`, 'info');
+        
+        // Execute trade every 10-15 seconds
+        botInterval = setInterval(() => {
+            executeBotTrade();
+        }, Math.random() * 5000 + 10000);
+    }
+    
+    function pauseBotTrading() {
+        if (botStats.isRunning && !botStats.isPaused) {
+            botStats.isPaused = true;
+            document.getElementById('botDetailStatus').className = 'bot-status-badge paused';
+            document.getElementById('botDetailStatus').innerHTML = 'Paused';
+            document.getElementById('startBotBtn').disabled = false;
+            document.getElementById('pauseBotBtn').disabled = true;
+            document.getElementById('stopBotBtn').disabled = false;
+            addBotLog(`Bot paused - Trading stopped temporarily`, 'warning');
+        }
+    }
+    
+    function resumeBotTrading() {
+        if (botStats.isRunning && botStats.isPaused) {
+            botStats.isPaused = false;
+            document.getElementById('botDetailStatus').className = 'bot-status-badge running';
+            document.getElementById('botDetailStatus').innerHTML = 'Running';
+            document.getElementById('startBotBtn').disabled = true;
+            document.getElementById('pauseBotBtn').disabled = false;
+            document.getElementById('stopBotBtn').disabled = false;
+            addBotLog(`Bot resumed - Trading active`, 'success');
+        }
+    }
+    
+    function stopBotTrading() {
+        if (botInterval) {
+            clearInterval(botInterval);
+            botInterval = null;
+        }
+        
+        botStats.isRunning = false;
+        botStats.isPaused = false;
+        
+        document.getElementById('botDetailStatus').className = 'bot-status-badge stopped';
+        document.getElementById('botDetailStatus').innerHTML = 'Stopped';
+        document.getElementById('startBotBtn').disabled = false;
+        document.getElementById('pauseBotBtn').disabled = true;
+        document.getElementById('stopBotBtn').disabled = true;
+        
+        addBotLog(`Bot stopped - Final P/L: ${botStats.totalPL >= 0 ? '+' : ''}$${botStats.totalPL.toFixed(2)}`, 'info');
+        
+        // Reset bot card to Not Configured
+        let botStatusSpan = document.getElementById(`botStatus${activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'}`);
+        let botPerfSpan = document.getElementById(`botPerf${activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'}`);
+        
+        if (botStatusSpan) {
+            botStatusSpan.innerHTML = 'Not Configured';
+            botStatusSpan.style.background = 'rgba(229,62,62,0.2)';
+            botStatusSpan.style.color = '#e53e3e';
+        }
+        if (botPerfSpan) {
+            botPerfSpan.innerHTML = 'Performance: --';
+            botPerfSpan.style.color = '#a0a0c0';
+        }
+        
+        // Remove bot configuration from localStorage
+        localStorage.removeItem('botConfig_' + activeBot);
+        
+        activeBot = null;
+        
+        // Go back to bots page after 2 seconds
+        setTimeout(() => {
+            showBots();
+        }, 2000);
+    }
+    
+    function controlBotAction(action) {
+        if (action === 'start') {
+            if (botStats.isPaused) {
+                resumeBotTrading();
+            } else {
+                startBotTrading();
+            }
+        } else if (action === 'pause') {
+            pauseBotTrading();
+        } else if (action === 'stop') {
+            stopBotTrading();
+        }
+    }
+    
+    function startBotFromCard(botName) {
+        let savedConfig = localStorage.getItem('botConfig_' + botName);
+        if (!savedConfig) {
+            alert('Please configure the bot first before starting');
+            return;
+        }
+        showBotDetail(botName);
     }
 
     function loadMarketsPage() {
@@ -2288,6 +2766,12 @@
         renderCrypto();
         renderMarketsCrypto();
         updateLastUpdatedText();
+        
+        // Update bot balance if bot is active
+        if (activeBot && botStats) {
+            botStats.botBalance = holdings.usdt;
+            updateBotStatsDisplay();
+        }
     }
 
     function renderProfile() {
@@ -2537,7 +3021,7 @@
                     <td class="positive">0.00%</td>
                     <td>480.48M</td>
                 </tr>`;
-                html += '</tbody></table>';
+                html += '</tbody><tr>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             }
@@ -2655,48 +3139,36 @@
     }
 
     function updateBotCardUI(botName, asset, amount) {
-        let botCards = document.querySelectorAll('.bot-card');
-        for (let card of botCards) {
-            let title = card.querySelector('.bot-title');
-            if (title && title.innerText === botName) {
-                let statusSpan = card.querySelector('.bot-status');
-                if (statusSpan) {
-                    statusSpan.innerHTML = 'Configured';
-                    statusSpan.style.background = 'rgba(72,187,120,0.2)';
-                    statusSpan.style.color = '#48bb78';
-                }
-                
-                let performanceDiv = card.querySelector('.bot-performance');
-                if (performanceDiv) {
-                    performanceDiv.innerHTML = `Performance: $${amount} per trade (${asset})`;
-                    performanceDiv.style.color = '#48bb78';
-                }
-                break;
-            }
+        let botStatusSpan = document.getElementById(`botStatus${botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'}`);
+        let botPerfSpan = document.getElementById(`botPerf${botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'}`);
+        
+        if (botStatusSpan) {
+            botStatusSpan.innerHTML = 'Configured';
+            botStatusSpan.style.background = 'rgba(72,187,120,0.2)';
+            botStatusSpan.style.color = '#48bb78';
+        }
+        
+        if (botPerfSpan) {
+            botPerfSpan.innerHTML = `Performance: $${amount} per trade (${asset})`;
+            botPerfSpan.style.color = '#48bb78';
         }
     }
 
     function loadSavedBotConfigs() {
-        let botCards = document.querySelectorAll('.bot-card');
-        for (let card of botCards) {
-            let title = card.querySelector('.bot-title');
-            if (title) {
-                let botName = title.innerText;
-                let savedConfig = localStorage.getItem('botConfig_' + botName);
-                if (savedConfig) {
-                    let config = JSON.parse(savedConfig);
-                    let statusSpan = card.querySelector('.bot-status');
-                    if (statusSpan) {
-                        statusSpan.innerHTML = 'Configured';
-                        statusSpan.style.background = 'rgba(72,187,120,0.2)';
-                        statusSpan.style.color = '#48bb78';
-                    }
-                    let performanceDiv = card.querySelector('.bot-performance');
-                    if (performanceDiv) {
-                        performanceDiv.innerHTML = `Performance: $${config.amount} per trade (${config.asset})`;
-                        performanceDiv.style.color = '#48bb78';
-                    }
-                }
+        let botNames = ['Bitcoin Accumulation', 'ETH DCA Pro'];
+        for (let botName of botNames) {
+            let savedConfig = localStorage.getItem('botConfig_' + botName);
+            let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
+            let botStatusSpan = document.getElementById(`botStatus${botKey}`);
+            let botPerfSpan = document.getElementById(`botPerf${botKey}`);
+            
+            if (savedConfig && botStatusSpan && botPerfSpan) {
+                let config = JSON.parse(savedConfig);
+                botStatusSpan.innerHTML = 'Configured';
+                botStatusSpan.style.background = 'rgba(72,187,120,0.2)';
+                botStatusSpan.style.color = '#48bb78';
+                botPerfSpan.innerHTML = `Performance: $${config.amount} per trade (${config.asset})`;
+                botPerfSpan.style.color = '#48bb78';
             }
         }
     }
