@@ -8,8 +8,8 @@
     <script type="module">
         // Import Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
         
         // Firebase configuration
         const firebaseConfig = {
@@ -26,6 +26,11 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
+        // Set persistence to LOCAL so user stays logged in after refresh
+        setPersistence(auth, browserLocalPersistence).catch((error) => {
+            console.error("Persistence error:", error);
+        });
 
         // Make auth and db available globally
         window.auth = auth;
@@ -38,8 +43,6 @@
         window.setDoc = setDoc;
         window.getDoc = getDoc;
         window.updateDoc = updateDoc;
-        window.collection = collection;
-        window.getDocs = getDocs;
     </script>
     <style>
         * {
@@ -2306,7 +2309,7 @@
                 <p>Enter your details to create a new account</p>
                 <div class="input-group"><label>Full Name</label><input type="text" id="signupName" placeholder="John Doe"></div>
                 <div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div>
-                <div class="input-group"><label>Phone Number</label><input type="text" id="signupPhone" placeholder="123456789"></div>
+                <div class="input-group"><label>Phone Number</label><input type="tel" id="signupPhone" placeholder="Enter your phone number"></div>
                 <div class="input-group"><label>Country</label><select id="signupCountry"></select></div>
                 <div class="input-group"><label>Password</label><input type="password" id="signupPassword" placeholder="Enter your password"></div>
                 <div class="input-group"><label>Confirm Password</label><input type="password" id="signupConfirmPassword" placeholder="Confirm your password"></div>
@@ -2798,7 +2801,7 @@
 <div class="chat-widget" id="chatWidget" onclick="showCustomModal('Chat Support', 'Chat support coming soon! Email us at support@bt-earn.com', 'info')"><span>💬</span><span>Hi!</span></div>
 
 <script type="module">
-    // Import Firebase functions (already imported in module)
+    // Import Firebase functions
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
     
@@ -2853,8 +2856,22 @@
         "United Kingdom", "United States"
     ];
     
+    // Populate countries
+    function populateCountries() {
+        let countrySelect = document.getElementById('signupCountry');
+        if (countrySelect) {
+            countrySelect.innerHTML = '';
+            for (let country of countriesList) {
+                let option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countrySelect.appendChild(option);
+            }
+        }
+    }
+    
     // Custom Modal Function
-    function showCustomModal(title, message, type = 'error') {
+    window.showCustomModal = function(title, message, type = 'error') {
         const modal = document.getElementById('customModal');
         const modalIcon = document.getElementById('modalIcon');
         const modalTitle = document.getElementById('modalTitle');
@@ -2878,7 +2895,7 @@
         }
         
         modal.classList.add('active');
-    }
+    };
     
     window.closeCustomModal = function() {
         document.getElementById('customModal').classList.remove('active');
@@ -2942,7 +2959,6 @@
             withdrawals: withdrawals,
             lastUpdated: new Date().toISOString()
         }).catch(() => {
-            // If doc doesn't exist, create it
             setDoc(doc(db, "users", uid), {
                 holdings: holdings,
                 withdrawals: withdrawals,
@@ -2976,8 +2992,7 @@
         let originalText = showButtonLoading(loginBtn, 'Logging in');
         
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            // Login successful - auth state will trigger showDashboard
+            await signInWithEmailAndPassword(auth, email, password);
             hideButtonLoading(loginBtn, originalText);
         } catch (error) {
             hideButtonLoading(loginBtn, originalText);
@@ -3024,7 +3039,6 @@
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             
-            // Save user profile to Firestore
             await setDoc(doc(db, "users", user.uid), {
                 name: name,
                 email: email,
@@ -3037,7 +3051,6 @@
             
             hideButtonLoading(signupBtn, originalText);
             showCustomModal('Success!', 'Account created successfully!', 'success');
-            // Auth state will trigger showDashboard
         } catch (error) {
             hideButtonLoading(signupBtn, originalText);
             if (error.code === 'auth/email-already-in-use') {
@@ -3061,7 +3074,7 @@
         showHomepage();
     };
     
-    // Auth state listener
+    // Auth state listener - persists across page refreshes due to browserLocalPersistence
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
@@ -3211,20 +3224,6 @@
         }
         renderWithdrawalHistory();
     };
-    
-    // Populate countries
-    function populateCountries() {
-        let countrySelect = document.getElementById('signupCountry');
-        if (countrySelect) {
-            countrySelect.innerHTML = '';
-            for (let country of countriesList) {
-                let option = document.createElement('option');
-                option.value = country;
-                option.textContent = country;
-                countrySelect.appendChild(option);
-            }
-        }
-    }
     
     // Tab switching
     document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -3564,7 +3563,7 @@
                 <td>${w.asset}</td>
                 <td class="address-truncated">${truncatedAddress}</td>
                 <td class="${statusClass}">${w.status}</td>
-            </tr>`;
+             </tr>`;
         }
         tbody.innerHTML = html;
     }
@@ -3710,7 +3709,7 @@
         document.getElementById('profileContainer').innerHTML = profileHTML;
     }
     
-    // Bot functions (simplified for demo)
+    // Bot functions
     window.openConfigModal = function(botName) {
         currentConfigBot = botName;
         let modal = document.getElementById('configModal');
@@ -3884,7 +3883,7 @@
         }
     }
     
-    // Chart functions (simplified)
+    // Chart functions
     window.openChartModal = function() {
         showCustomModal('Chart', 'Chart feature coming soon!', 'info');
     };
