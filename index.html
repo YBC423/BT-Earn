@@ -2072,6 +2072,7 @@
     // Bot state variables
     let activeBot = null;
     let botInterval = null;
+    let lastTradeResult = null; // 'win' or 'loss'
     let botStats = {
         botName: '',
         asset: '',
@@ -2440,6 +2441,7 @@
         let config = JSON.parse(savedConfig);
         
         activeBot = botName;
+        lastTradeResult = null;
         botStats = {
             botName: botName,
             asset: config.asset,
@@ -2457,7 +2459,7 @@
         addBotLog(`High-Frequency Trading System loaded`, 'info');
         addBotLog(`Account Balance: $${holdings.usdt.toFixed(2)}`, 'info');
         addBotLog(`STANDARD Tier Active - Optimized for consistent small profits`, 'info');
-        addBotLog(`Base win rate: 65-72% | Target: $${(botStats.amountPerTrade * 0.03).toFixed(2)}-$${(botStats.amountPerTrade * 0.15).toFixed(2)} per trade`, 'info');
+        addBotLog(`Base win rate: 65-72% | Target: $${(botStats.amountPerTrade * 0.01).toFixed(2)}-$${(botStats.amountPerTrade * 0.05).toFixed(2)} per trade`, 'info');
         
         document.getElementById('botDetailTitle').innerHTML = botName === 'Bitcoin Accumulation' ? 'Bitcoin Accumulation Bot' : 'ETH DCA Pro Bot';
         document.getElementById('botBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
@@ -2467,6 +2469,12 @@
         document.getElementById('startBotBtn').disabled = false;
         document.getElementById('pauseBotBtn').disabled = true;
         document.getElementById('stopBotBtn').disabled = true;
+        
+        // Reset PL color
+        let plElement = document.getElementById('botPL');
+        if (plElement) {
+            plElement.className = 'stat-value';
+        }
         
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'block';
@@ -2506,9 +2514,11 @@
         if (plElement) {
             let plValue = botStats.totalPL;
             plElement.innerHTML = `${plValue >= 0 ? '+' : ''}$${Math.abs(plValue).toFixed(2)}`;
-            if (plValue > 0) {
+            
+            // Color based on last trade result
+            if (lastTradeResult === 'win') {
                 plElement.className = 'stat-value positive';
-            } else if (plValue < 0) {
+            } else if (lastTradeResult === 'loss') {
                 plElement.className = 'stat-value negative';
             } else {
                 plElement.className = 'stat-value';
@@ -2526,18 +2536,22 @@
     }
     
     function calculateProfitLoss(amount) {
-        let isWin = Math.random() * 100 <= 68;
+        // 65% win chance for more realistic trading
+        let isWin = Math.random() * 100 <= 65;
         let profitPercent = 0;
         
         if (isWin) {
-            profitPercent = (Math.random() * 12 + 3) / 100;
+            // Profit: 1% to 5% of investment amount (reduced)
+            profitPercent = (Math.random() * 4 + 1) / 100;
             let profit = amount * profitPercent;
-            if (profit < 0.30 && amount >= 10) profit = 0.30;
+            // Minimum profit of $0.05 for small amounts
+            if (profit < 0.05 && amount >= 10) profit = 0.05;
             return { profit: profit, isWin: true, percent: profitPercent * 100 };
         } else {
-            let lossPercent = (Math.random() * 6 + 2) / 100;
+            // Loss: 0.5% to 3% of investment amount (reduced)
+            let lossPercent = (Math.random() * 2.5 + 0.5) / 100;
             let loss = amount * lossPercent;
-            if (loss < 0.20 && amount >= 10) loss = 0.20;
+            if (loss < 0.03 && amount >= 10) loss = 0.03;
             return { profit: -loss, isWin: false, percent: lossPercent * 100 };
         }
     }
@@ -2549,6 +2563,9 @@
         let result = calculateProfitLoss(amount);
         let profit = result.profit;
         let isWin = result.isWin;
+        
+        // Update last trade result for color
+        lastTradeResult = isWin ? 'win' : 'loss';
         
         addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${amount.toFixed(2)}`, 'buy');
         
@@ -2589,10 +2606,12 @@
         
         addBotLog(`Bot started - Trading ${botStats.asset}/USDT`, 'info');
         addBotLog(`Investment amount: $${botStats.amountPerTrade.toFixed(2)} per trade`, 'info');
+        addBotLog(`Trading interval: 4 seconds`, 'info');
         
+        // Execute trade every 4 seconds
         botInterval = setInterval(() => {
             executeBotTrade();
-        }, Math.random() * 8000 + 12000);
+        }, 4000);
     }
     
     function pauseBotTrading() {
@@ -2654,6 +2673,7 @@
         saveBalance();
         
         activeBot = null;
+        lastTradeResult = null;
         
         setTimeout(() => {
             showBots();
