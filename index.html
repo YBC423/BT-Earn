@@ -7,6 +7,61 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #0a0e27; color: white; overflow-x: hidden; }
+        
+        /* ============ LOADING SCREEN ============ */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0e27;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        .loading-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loading-logo {
+            font-size: 64px;
+            font-weight: bold;
+            display: flex;
+            gap: 8px;
+            letter-spacing: 2px;
+        }
+        .loading-logo .loading-letter {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: loadingPulse 0.8s ease-in-out infinite;
+            display: inline-block;
+        }
+        .loading-logo .loading-letter:nth-child(1) { animation-delay: 0s; }
+        .loading-logo .loading-letter:nth-child(2) { animation-delay: 0.1s; }
+        .loading-logo .loading-letter:nth-child(3) { animation-delay: 0.2s; }
+        .loading-logo .loading-letter:nth-child(4) { animation-delay: 0.3s; }
+        .loading-logo .loading-letter:nth-child(5) { animation-delay: 0.4s; }
+        .loading-logo .loading-letter:nth-child(6) { animation-delay: 0.5s; }
+        .loading-logo .loading-letter:nth-child(7) { animation-delay: 0.6s; }
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.85); }
+        }
+        
+        /* Hide homepage initially */
+        #homepage {
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        #homepage.visible {
+            opacity: 1;
+        }
+        
         .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; background: #0a0e27; border-bottom: 1px solid rgba(255,255,255,0.08); position: fixed; width: 100%; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
         .logo { font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; cursor: pointer; }
         .header-right { display: flex; align-items: center; gap: 20px; }
@@ -111,7 +166,7 @@
         .custom-modal-btn { background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 12px 30px; border-radius: 30px; color: white; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .custom-modal-btn:hover { transform: scale(1.02); }
         
-        /* BT-EARN Logo Spinner */
+        /* BT-EARN Logo Spinner for Buttons */
         .logo-spinner { display: inline-flex; align-items: center; justify-content: center; gap: 3px; }
         .logo-spinner .spinner-letter { font-size: 18px; font-weight: bold; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; animation: spinLetter 0.8s ease-in-out infinite; display: inline-block; }
         .logo-spinner .spinner-letter:nth-child(1) { animation-delay: 0s; }
@@ -121,7 +176,6 @@
         .logo-spinner .spinner-letter:nth-child(5) { animation-delay: 0.4s; }
         .logo-spinner .spinner-letter:nth-child(6) { animation-delay: 0.5s; }
         .logo-spinner .spinner-letter:nth-child(7) { animation-delay: 0.6s; }
-        .logo-spinner .spinner-letter:nth-child(8) { animation-delay: 0.7s; }
         @keyframes spinLetter { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.8); } }
         
         .btn-loading { opacity: 0.8; cursor: wait !important; pointer-events: none; }
@@ -356,10 +410,24 @@
             .history-table th, .history-table td { padding: 10px 5px; font-size: 11px; }
             .tx-modal-content { margin: 100px auto; width: 95%; }
             .sidebar { width: 260px; }
+            .loading-logo { font-size: 40px; }
         }
     </style>
 </head>
 <body>
+
+<!-- ============ LOADING SCREEN ============ -->
+<div id="loadingScreen" class="loading-screen">
+    <div class="loading-logo">
+        <span class="loading-letter">B</span>
+        <span class="loading-letter">T</span>
+        <span class="loading-letter">-</span>
+        <span class="loading-letter">E</span>
+        <span class="loading-letter">A</span>
+        <span class="loading-letter">R</span>
+        <span class="loading-letter">N</span>
+    </div>
+</div>
 
 <div id="customModal" class="custom-modal">
     <div class="custom-modal-content">
@@ -733,7 +801,7 @@
             <div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div>
             <button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">Withdraw</button>
         </div>
-        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody></table></div>
+        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody>}</div>
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
@@ -796,6 +864,21 @@
 <div class="chat-widget" id="chatWidget" onclick="showCustomModal('Chat Support', 'Chat support coming soon! Email us at support@bt-earn.com', 'info')"><span>💬</span><span>Hi!</span></div>
 
 <script>
+    // ============ HOMEPAGE LOADING SCREEN ============
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const homepage = document.getElementById('homepage');
+            
+            loadingScreen.classList.add('fade-out');
+            homepage.classList.add('visible');
+            
+            setTimeout(function() {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        }, 4000);
+    });
+    
     // ============ BT-EARN LOGO SPINNER FUNCTION ============
     function getLogoSpinner() {
         return `<div class="logo-spinner">
@@ -1076,10 +1159,6 @@
         currentUser = user;
     }
     
-    // Keep original functions for internal use
-    function handleSignupOriginal() { /* kept for reference */ }
-    function handleLoginOriginal() { /* kept for reference */ }
-    
     function logout() {
         logoutWithSpinner();
     }
@@ -1287,9 +1366,7 @@
         } 
     });
     
-    // All existing chart, dashboard, trade, bot functions remain the same...
-    // (Keeping all the original functionality to save space - they work exactly as before)
-    
+    // Chart Functions
     function generateCandleData(basePrice, count) { 
         let candles = []; 
         let currentPrice = basePrice; 
@@ -2116,7 +2193,8 @@
         }
         showDashboard();
     } else {
-        showHomepage();
+        // Homepage will be shown after loading screen fades out
+        // Loading screen handles visibility
     }
     
     document.body.classList.add('loaded');
