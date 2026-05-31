@@ -52,64 +52,6 @@
             overflow-x: hidden;
         }
 
-        body:not(.loaded) #homepage,
-        body:not(.loaded) #authPage,
-        body:not(.loaded) #dashboard,
-        body:not(.loaded) #profilePage,
-        body:not(.loaded) #marketsPage,
-        body:not(.loaded) #tradePage,
-        body:not(.loaded) #botsPage,
-        body:not(.loaded) #botDetailPage,
-        body:not(.loaded) #withdrawalPage {
-            display: none;
-        }
-
-        /* ========== LOADING SCREEN ========== */
-        body:not(.loaded) {
-            background: #0a0e27;
-            min-height: 100vh;
-        }
-
-        body:not(.loaded)::before {
-            content: "BT-EARN";
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            z-index: 9999;
-            white-space: nowrap;
-        }
-
-        body:not(.loaded)::after {
-            content: "";
-            position: fixed;
-            top: 60%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(102,126,234,0.2);
-            border-top-color: #667eea;
-            border-radius: 50%;
-            animation: loadingSpin 0.8s linear infinite;
-            z-index: 9999;
-        }
-
-        @keyframes loadingSpin {
-            to { transform: translateX(-50%) rotate(360deg); }
-        }
-
-        /* Hide chat widget until page loads */
-        body:not(.loaded) .chat-widget {
-            display: none;
-        }
-
         .header {
             display: flex;
             justify-content: space-between;
@@ -4267,7 +4209,7 @@
             
             let usdtData = data.tether;
             if(usdtData) {
-                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '</table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 let price = usdtData.usd;
                 let change = usdtData.usd_24h_change || 0;
                 let changeClass = change >= 0 ? 'positive' : 'negative';
@@ -4281,14 +4223,14 @@
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             } else {
-                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<table class="market-table"><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
                     <td>USDT/USDT</td>
                     <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
                     <td class="positive">0.00%</td>
                     <td>480.48M</td>
                 </tr>`;
-                html += '</tbody><table>';
+                html += '</tbody></table>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             }
@@ -4457,14 +4399,6 @@
     setInterval(fetchMarketData, 30000); 
     updateMarqueePrices(); 
     setInterval(updateMarqueePrices, 30000); 
-    
-    // Force show content after 5 seconds even if there's an error (fallback)
-    setTimeout(function() {
-        if (!document.body.classList.contains('loaded')) {
-            console.warn("Loading timeout - forcing page to show");
-            document.body.classList.add('loaded');
-        }
-    }, 5000);
     
     document.body.classList.add('loaded');
 </script>
