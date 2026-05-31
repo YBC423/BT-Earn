@@ -25,7 +25,8 @@
         body:not(.loaded) #marketsPage,
         body:not(.loaded) #tradePage,
         body:not(.loaded) #botsPage,
-        body:not(.loaded) #botDetailPage {
+        body:not(.loaded) #botDetailPage,
+        body:not(.loaded) #withdrawalPage {
             display: none;
         }
 
@@ -1597,6 +1598,252 @@
             color: #e53e3e;
         }
 
+        /* Withdrawal Page Styles */
+        .withdrawal-container {
+            padding: 100px 20px 80px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .withdrawal-container h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .withdrawal-container .subtitle {
+            color: #a0a0c0;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .balance-card .label {
+            font-size: 14px;
+            color: #a0a0c0;
+            margin-bottom: 10px;
+        }
+
+        .balance-card .amount {
+            font-size: 42px;
+            font-weight: bold;
+            color: #48bb78;
+        }
+
+        .withdraw-form {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .asset-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 40px;
+            padding: 5px;
+        }
+
+        .asset-option {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 35px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            color: #a0a0c0;
+        }
+
+        .asset-option.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .network-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .network-info span {
+            color: #667eea;
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        .input-field label {
+            display: block;
+            font-size: 14px;
+            color: #a0a0c0;
+            margin-bottom: 8px;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .input-field input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .withdraw-submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .withdraw-submit-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .history-section {
+            margin-top: 30px;
+        }
+
+        .history-section h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            text-align: left;
+            padding: 12px 10px;
+            color: #a0a0c0;
+            font-weight: normal;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .history-table td {
+            padding: 14px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .history-table tr:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .status-pending {
+            color: #f59e0b;
+        }
+
+        .status-approved {
+            color: #48bb78;
+        }
+
+        .address-truncated {
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        /* Transaction Details Modal */
+        .tx-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2002;
+            overflow-y: auto;
+        }
+
+        .tx-modal-content {
+            background: #0a0e27;
+            margin: 80px auto;
+            width: 95%;
+            max-width: 500px;
+            border-radius: 20px;
+            padding: 25px;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .close-tx {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            color: white;
+            background: rgba(255,255,255,0.1);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-tx:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tx-modal-content h2 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .tx-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .tx-detail-label {
+            color: #a0a0c0;
+            font-size: 14px;
+        }
+
+        .tx-detail-value {
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: right;
+            word-break: break-all;
+        }
+
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
             .features-section, .market-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
@@ -1604,7 +1851,7 @@
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
             .nav-item { font-size: 16px; }
-            .profile-container, .markets-container, .trade-container, .bots-container, .bot-detail-container { padding: 80px 15px 80px; }
+            .profile-container, .markets-container, .trade-container, .bots-container, .bot-detail-container, .withdrawal-container { padding: 80px 15px 80px; }
             .info-row, .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
             .chat-widget { bottom: 75px; right: 10px; padding: 10px 16px; font-size: 14px; }
             .trade-price { font-size: 28px; }
@@ -1616,6 +1863,8 @@
             .config-modal-content { margin: 80px auto; width: 95%; padding: 20px; }
             .bot-stats-grid { grid-template-columns: repeat(2, 1fr); }
             .portfolio-buttons { flex-direction: row; justify-content: space-between; }
+            .history-table th, .history-table td { padding: 10px 5px; font-size: 11px; }
+            .tx-modal-content { margin: 100px auto; width: 95%; }
         }
     </style>
 </head>
@@ -1719,7 +1968,7 @@
             <div class="portfolio-change" id="portfolioChange">+0.00%</div>
             <div class="portfolio-buttons">
                 <button class="deposit-btn" onclick="alert('Deposit feature coming soon!')">Deposit</button>
-                <button class="withdraw-btn" onclick="alert('Withdraw feature coming soon!')">Withdraw</button>
+                <button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button>
             </div>
         </div>
         <div class="section-title">Your Crypto <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div>
@@ -1957,6 +2206,112 @@
     </div>
 </div>
 
+<div id="withdrawalPage" style="display:none;">
+    <div class="header">
+        <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
+        <div></div>
+    </div>
+    <div class="withdrawal-container">
+        <h1>Withdraw Funds</h1>
+        <p class="subtitle">Choose your preferred withdrawal method below</p>
+
+        <div class="balance-card">
+            <div class="label">Available Balance</div>
+            <div class="amount" id="withdrawBalance">$0.00</div>
+        </div>
+
+        <div class="withdraw-form">
+            <div class="asset-selector" id="assetSelector">
+                <div class="asset-option active" data-asset="BTC">Bitcoin</div>
+                <div class="asset-option" data-asset="USDT">USDT</div>
+            </div>
+
+            <div class="network-info" id="networkInfo">
+                Network: <span id="networkName">BTC Network</span>
+            </div>
+
+            <div class="input-field">
+                <label>Amount (USD)</label>
+                <input type="number" id="withdrawAmount" placeholder="0.00" min="10">
+            </div>
+
+            <div class="input-field">
+                <label id="walletAddressLabel">Bitcoin Wallet Address</label>
+                <input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address">
+            </div>
+
+            <button class="withdraw-submit-btn" onclick="submitWithdrawal()">Withdraw</button>
+        </div>
+
+        <div class="history-section">
+            <h3>Withdrawal History</h3>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Amount</th>
+                        <th>Asset</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="withdrawalHistoryBody">
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="height:80px;"></div>
+    </div>
+    <div class="bottom-nav">
+        <div class="nav-item" data-nav="home">Home</div>
+        <div class="nav-item" data-nav="markets">Markets</div>
+        <div class="nav-item" data-nav="trade">Trade</div>
+        <div class="nav-item" data-nav="bots">Bots</div>
+        <div class="nav-item" data-nav="profile">Profile</div>
+    </div>
+</div>
+
+<!-- Transaction Details Modal -->
+<div id="txDetailModal" class="tx-modal">
+    <div class="tx-modal-content">
+        <div class="close-tx" onclick="closeTxModal()">×</div>
+        <h2>Transaction Details</h2>
+        <div class="tx-detail-row">
+            <span class="tx-detail-label">Date & Time</span>
+            <span class="tx-detail-value" id="txDateTime">--</span>
+        </div>
+        <div class="tx-detail-row">
+            <span class="tx-detail-label">Amount</span>
+            <span class="tx-detail-value" id="txAmount">--</span>
+        </div>
+        <div class="tx-detail-row">
+            <span class="tx-detail-label">Asset</span>
+            <span class="tx-detail-value" id="txAsset">--</span>
+        </div>
+        <div class="tx-detail-row">
+            <span class="tx-detail-label">Network</span>
+            <span class="tx-detail-value" id="txNetwork">--</span>
+        </div>
+        <div class="tx-detail-row">
+            <span class="tx-detail-label">Wallet Address</span>
+            <span class="tx-detail-value" id="txAddress">--</span>
+        </div>
+        <div class="tx-detail-row">
+            <span class="tx-detail-label">Network Fee</span>
+            <span class="tx-detail-value" id="txFee">--</span>
+        </div>
+        <div class="tx-detail-row">
+            <span class="tx-detail-label">Transaction ID</span>
+            <span class="tx-detail-value" id="txId">--</span>
+        </div>
+        <div class="tx-detail-row">
+            <span class="tx-detail-label">Status</span>
+            <span class="tx-detail-value" id="txStatus">--</span>
+        </div>
+    </div>
+</div>
+
 <div id="chartModal" class="chart-modal">
     <div class="chart-modal-content">
         <div class="close-chart" onclick="closeChartModal()">×</div>
@@ -2069,10 +2424,14 @@
     let candleData = [];
     let currentConfigBot = null;
     
+    // Withdrawal variables
+    let withdrawals = [];
+    let currentSelectedTx = null;
+    
     // Bot state variables
     let activeBot = null;
     let botInterval = null;
-    let lastTradeResult = null; // 'win' or 'loss'
+    let lastTradeResult = null;
     let botStats = {
         botName: '',
         asset: '',
@@ -2108,6 +2467,176 @@
     function saveBalance() {
         localStorage.setItem('userBalance', holdings.usdt.toFixed(8));
     }
+    
+    // Load withdrawals from localStorage
+    function loadWithdrawals() {
+        let savedWithdrawals = localStorage.getItem('withdrawals');
+        if (savedWithdrawals) {
+            withdrawals = JSON.parse(savedWithdrawals);
+            // Re-start timers for pending withdrawals
+            withdrawals.forEach(w => {
+                if (w.status === 'Pending' && w.pendingEndTime) {
+                    let remaining = w.pendingEndTime - Date.now();
+                    if (remaining > 0) {
+                        setTimeout(() => approveWithdrawal(w.id), remaining);
+                    } else {
+                        approveWithdrawal(w.id);
+                    }
+                }
+            });
+        } else {
+            withdrawals = [];
+        }
+    }
+    
+    function saveWithdrawals() {
+        localStorage.setItem('withdrawals', JSON.stringify(withdrawals));
+    }
+    
+    function generateTxId() {
+        return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    }
+    
+    function approveWithdrawal(id) {
+        let index = withdrawals.findIndex(w => w.id === id);
+        if (index !== -1 && withdrawals[index].status === 'Pending') {
+            withdrawals[index].status = 'Approved';
+            saveWithdrawals();
+            renderWithdrawalHistory();
+        }
+    }
+    
+    function submitWithdrawal() {
+        let amount = parseFloat(document.getElementById('withdrawAmount').value);
+        let address = document.getElementById('walletAddress').value;
+        let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
+        
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
+        
+        if (amount < 10) {
+            alert('Minimum withdrawal amount is $10');
+            return;
+        }
+        
+        if (amount > holdings.usdt) {
+            alert(`Insufficient balance. You have $${holdings.usdt.toFixed(2)} available`);
+            return;
+        }
+        
+        if (!address || address.trim() === '') {
+            alert('Please enter a valid wallet address');
+            return;
+        }
+        
+        // Deduct balance
+        holdings.usdt -= amount;
+        saveBalance();
+        updatePortfolioTotal();
+        renderCrypto();
+        renderMarketsCrypto();
+        
+        // Update withdrawal page balance
+        let withdrawBalanceEl = document.getElementById('withdrawBalance');
+        if (withdrawBalanceEl) {
+            withdrawBalanceEl.innerHTML = `$${holdings.usdt.toFixed(2)}`;
+        }
+        
+        // Create withdrawal record
+        let networkFee = asset === 'BTC' ? 1.50 : 0.80;
+        let newWithdrawal = {
+            id: Date.now(),
+            dateTime: new Date().toLocaleString(),
+            amount: amount,
+            asset: asset,
+            network: asset === 'BTC' ? 'BTC Network' : 'TRC20',
+            address: address,
+            fee: networkFee,
+            txId: generateTxId(),
+            status: 'Pending',
+            pendingEndTime: Date.now() + 30000 // 30 seconds
+        };
+        
+        withdrawals.unshift(newWithdrawal);
+        saveWithdrawals();
+        renderWithdrawalHistory();
+        
+        // Set timeout to approve after 30 seconds
+        setTimeout(() => approveWithdrawal(newWithdrawal.id), 30000);
+        
+        alert(`Withdrawal request submitted!\nAmount: $${amount}\nAsset: ${asset}\nAddress: ${address}\nStatus: Pending (will be approved in 30 seconds)`);
+        
+        // Clear form
+        document.getElementById('withdrawAmount').value = '';
+        document.getElementById('walletAddress').value = '';
+    }
+    
+    function renderWithdrawalHistory() {
+        let tbody = document.getElementById('withdrawalHistoryBody');
+        if (!tbody) return;
+        
+        if (withdrawals.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        for (let w of withdrawals) {
+            let truncatedAddress = w.address.length > 15 ? w.address.substring(0, 12) + '...' : w.address;
+            let statusClass = w.status === 'Pending' ? 'status-pending' : 'status-approved';
+            html += `<tr onclick="showTransactionDetails(${w.id})">
+                <td>$${w.amount.toFixed(2)}</td>
+                <td>${w.asset}</td>
+                <td class="address-truncated">${truncatedAddress}</td>
+                <td class="${statusClass}">${w.status}</td>
+            </tr>`;
+        }
+        tbody.innerHTML = html;
+    }
+    
+    function showTransactionDetails(id) {
+        let tx = withdrawals.find(w => w.id === id);
+        if (!tx) return;
+        
+        document.getElementById('txDateTime').innerHTML = tx.dateTime;
+        document.getElementById('txAmount').innerHTML = `$${tx.amount.toFixed(2)}`;
+        document.getElementById('txAsset').innerHTML = tx.asset;
+        document.getElementById('txNetwork').innerHTML = tx.network;
+        document.getElementById('txAddress').innerHTML = tx.address;
+        document.getElementById('txFee').innerHTML = `$${tx.fee.toFixed(2)}`;
+        document.getElementById('txId').innerHTML = tx.txId;
+        document.getElementById('txStatus').innerHTML = tx.status;
+        
+        document.getElementById('txDetailModal').style.display = 'block';
+    }
+    
+    function closeTxModal() {
+        document.getElementById('txDetailModal').style.display = 'none';
+    }
+    
+    // Asset selector for withdrawal
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('asset-option')) {
+            document.querySelectorAll('.asset-option').forEach(opt => opt.classList.remove('active'));
+            e.target.classList.add('active');
+            let asset = e.target.getAttribute('data-asset');
+            let networkName = document.getElementById('networkName');
+            let walletLabel = document.getElementById('walletAddressLabel');
+            let walletInput = document.getElementById('walletAddress');
+            
+            if (asset === 'BTC') {
+                networkName.innerHTML = 'BTC Network';
+                walletLabel.innerHTML = 'Bitcoin Wallet Address';
+                walletInput.placeholder = 'Enter your Bitcoin wallet address';
+            } else {
+                networkName.innerHTML = 'TRC20';
+                walletLabel.innerHTML = 'USDT (TRC20) Wallet Address';
+                walletInput.placeholder = 'Enter your USDT TRC20 wallet address';
+            }
+        }
+    });
 
     function generateCandleData(basePrice, count = 30) {
         let candles = [];
@@ -2357,6 +2886,7 @@
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
+        document.getElementById('withdrawalPage').style.display = 'none';
     }
     
     function showAuthPage() { 
@@ -2368,6 +2898,7 @@
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
+        document.getElementById('withdrawalPage').style.display = 'none';
     }
     
     function showDashboard() { 
@@ -2379,6 +2910,7 @@
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
+        document.getElementById('withdrawalPage').style.display = 'none';
         loadDashboard(); 
     }
     
@@ -2391,6 +2923,7 @@
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
+        document.getElementById('withdrawalPage').style.display = 'none';
         renderProfile();
     }
     
@@ -2403,6 +2936,7 @@
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
+        document.getElementById('withdrawalPage').style.display = 'none';
         loadMarketsPage();
     }
     
@@ -2416,6 +2950,7 @@
         document.getElementById('tradePage').style.display = 'block';
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
+        document.getElementById('withdrawalPage').style.display = 'none';
         loadTradePage();
     }
     
@@ -2428,7 +2963,27 @@
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'block';
         document.getElementById('botDetailPage').style.display = 'none';
+        document.getElementById('withdrawalPage').style.display = 'none';
         loadSavedBotConfigs();
+    }
+    
+    function showWithdrawalPage() {
+        document.getElementById('homepage').style.display = 'none';
+        document.getElementById('authPage').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('profilePage').style.display = 'none';
+        document.getElementById('marketsPage').style.display = 'none';
+        document.getElementById('tradePage').style.display = 'none';
+        document.getElementById('botsPage').style.display = 'none';
+        document.getElementById('botDetailPage').style.display = 'none';
+        document.getElementById('withdrawalPage').style.display = 'block';
+        
+        // Update balance on withdrawal page
+        let balanceEl = document.getElementById('withdrawBalance');
+        if (balanceEl) {
+            balanceEl.innerHTML = `$${holdings.usdt.toFixed(2)}`;
+        }
+        renderWithdrawalHistory();
     }
     
     function showBotDetail(botName) {
@@ -2470,7 +3025,6 @@
         document.getElementById('pauseBotBtn').disabled = true;
         document.getElementById('stopBotBtn').disabled = true;
         
-        // Reset PL color
         let plElement = document.getElementById('botPL');
         if (plElement) {
             plElement.className = 'stat-value';
@@ -2515,7 +3069,6 @@
             let plValue = botStats.totalPL;
             plElement.innerHTML = `${plValue >= 0 ? '+' : ''}$${Math.abs(plValue).toFixed(2)}`;
             
-            // Color based on last trade result
             if (lastTradeResult === 'win') {
                 plElement.className = 'stat-value positive';
             } else if (lastTradeResult === 'loss') {
@@ -2536,19 +3089,15 @@
     }
     
     function calculateProfitLoss(amount) {
-        // 65% win chance for more realistic trading
         let isWin = Math.random() * 100 <= 65;
         let profitPercent = 0;
         
         if (isWin) {
-            // Profit: 1% to 5% of investment amount (reduced)
             profitPercent = (Math.random() * 4 + 1) / 100;
             let profit = amount * profitPercent;
-            // Minimum profit of $0.05 for small amounts
             if (profit < 0.05 && amount >= 10) profit = 0.05;
             return { profit: profit, isWin: true, percent: profitPercent * 100 };
         } else {
-            // Loss: 0.5% to 3% of investment amount (reduced)
             let lossPercent = (Math.random() * 2.5 + 0.5) / 100;
             let loss = amount * lossPercent;
             if (loss < 0.03 && amount >= 10) loss = 0.03;
@@ -2564,7 +3113,6 @@
         let profit = result.profit;
         let isWin = result.isWin;
         
-        // Update last trade result for color
         lastTradeResult = isWin ? 'win' : 'loss';
         
         addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${amount.toFixed(2)}`, 'buy');
@@ -2608,7 +3156,6 @@
         addBotLog(`Investment amount: $${botStats.amountPerTrade.toFixed(2)} per trade`, 'info');
         addBotLog(`Trading interval: 4 seconds`, 'info');
         
-        // Execute trade every 4 seconds
         botInterval = setInterval(() => {
             executeBotTrade();
         }, 4000);
@@ -3103,7 +3650,7 @@
                     <td class="positive">0.00%</td>
                     <td>480.48M</td>
                 </tr>`;
-                html += '</tbody></table>';
+                html += '</tbody><table>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             }
@@ -3267,6 +3814,7 @@
     
     populateCountries();
     loadSavedBalance();
+    loadWithdrawals();
     
     if(localStorage.getItem('currentUser')) { 
         currentUser = JSON.parse(localStorage.getItem('currentUser')); 
