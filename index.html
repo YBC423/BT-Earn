@@ -82,7 +82,7 @@
             border-radius: 20px;
         }
 
-        /* Hamburger Menu */
+        /* Hamburger Menu - hidden on homepage and authPage */
         .hamburger {
             cursor: pointer;
             display: flex;
@@ -280,11 +280,11 @@
             line-height: 1.5;
         }
 
-        .market-section {
+        .watchlist-section {
             padding: 0 60px 60px;
         }
 
-        .market-header {
+        .watchlist-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -293,37 +293,51 @@
             gap: 15px;
         }
 
-        .market-header h2 {
+        .watchlist-header h2 {
             font-size: 28px;
         }
 
-        .last-updated {
-            font-size: 14px;
-            color: #48bb78;
+        .watchlist-scroll {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .watchlist-item {
             background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
             border-radius: 12px;
-            overflow: hidden;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
-        th, td {
-            padding: 18px 15px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+        .watchlist-item:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(5px);
         }
 
-        th {
+        .coin-info h4 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .coin-info p {
             color: #a0a0c0;
-            font-weight: normal;
-            font-size: 16px;
+            font-size: 12px;
         }
 
-        td {
-            font-size: 16px;
+        .coin-price {
+            text-align: right;
+        }
+
+        .coin-price .price {
+            font-size: 20px;
+            font-weight: bold;
         }
 
         .positive {
@@ -697,12 +711,12 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .watchlist-scroll, .crypto-scroll {
+        .crypto-scroll {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        .watchlist-item, .crypto-item {
+        .crypto-item {
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 12px;
@@ -714,7 +728,7 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .watchlist-item:hover, .crypto-item:hover {
+        .crypto-item:hover {
             background: rgba(255,255,255,0.08);
             transform: translateX(5px);
         }
@@ -1951,7 +1965,7 @@
 
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
-            .features-section, .market-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
+            .features-section, .watchlist-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
             .hero h1 { font-size: 32px; }
             .portfolio-balance { font-size: 32px; }
             .auth-card { padding: 25px; }
@@ -1997,11 +2011,7 @@
                 <a class="login-link" onclick="showAuthPage()">Log in</a>
                 <a class="signup-link" onclick="showAuthPage()">Sign up</a>
             </div>
-            <div class="hamburger" onclick="toggleSidebar()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+            <!-- Hamburger menu removed from homepage -->
         </div>
     </div>
 
@@ -2024,12 +2034,13 @@
         </div>
     </div>
 
-    <div class="market-section">
-        <div class="market-header">
-            <h2>Markets</h2>
-            <div><span class="last-updated" id="lastUpdated">Loading...</span></div>
+    <!-- Watchlist Section - Replaced Markets -->
+    <div class="watchlist-section">
+        <div class="watchlist-header">
+            <h2>Watchlist</h2>
+            <div><span class="last-updated" id="lastUpdatedWatchlist">Loading...</span></div>
         </div>
-        <div id="marketTable"><div class="loading">Loading...</div></div>
+        <div id="homepageWatchlist" class="watchlist-scroll"><div class="loading">Loading watchlist...</div></div>
     </div>
 
     <div class="why-section"><h2>Why BT-EARN?</h2><div class="why-grid"><div class="why-item"><h4>Meet and Copy Trading</h4><p>Copy successful traders automatically</p></div><div class="why-item"><h4>Hold to Maximize Your Asset</h4><p>Earn rewards by holding assets</p></div><div class="why-item"><h4>BT-EARN Staking</h4><p>Stake and earn passive income</p></div></div></div>
@@ -2047,11 +2058,7 @@
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
         <div class="header-right">
-            <div class="hamburger" onclick="toggleSidebar()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+            <!-- Hamburger menu removed from authPage -->
         </div>
     </div>
     <div class="auth-container">
@@ -2735,6 +2742,7 @@
         updatePortfolioTotal();
         renderCrypto();
         renderMarketsCrypto();
+        renderHomepageWatchlist();
         
         // Update withdrawal page balance
         let withdrawBalanceEl = document.getElementById('withdrawBalance');
@@ -3083,6 +3091,7 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
+        renderHomepageWatchlist();
     }
     
     function showAuthPage() { 
@@ -3329,6 +3338,7 @@
         updatePortfolioTotal();
         renderCrypto();
         renderMarketsCrypto();
+        renderHomepageWatchlist();
         
         addBotLog(`New Balance: $${holdings.usdt.toFixed(2)}`, 'info');
         
@@ -3498,6 +3508,32 @@
     function refreshMarketsPrices() {
         loadMarketsPage();
     }
+    
+    // Render homepage watchlist
+    function renderHomepageWatchlist() {
+        let watchCoins = [
+            {id:'btc', name:'BTC', full:'Bitcoin'},
+            {id:'eth', name:'ETH', full:'Ethereum'},
+            {id:'usdt', name:'USDT', full:'Tether'},
+            {id:'usdc', name:'USDC', full:'USD Coin'}
+        ]; 
+        let html = ''; 
+        for(let coin of watchCoins) { 
+            let price = currentPrices[coin.id] || 0; 
+            let change = currentPrices[coin.id+'Change'] || 0; 
+            let changeClass = change >= 0 ? 'positive' : 'negative'; 
+            html += `<div class="watchlist-item" onclick="showTrade('${coin.name}')">
+                <div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div>
+                <div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
+                <div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
+            </div>`; 
+        } 
+        let container = document.getElementById('homepageWatchlist');
+        if(container) container.innerHTML = html;
+        
+        let lastUpdated = document.getElementById('lastUpdatedWatchlist');
+        if(lastUpdated) lastUpdated.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+    }
 
     function loadTradePage() {
         document.getElementById('tradeCoinSelect').value = currentTradeCoin;
@@ -3589,6 +3625,7 @@
         updatePortfolioTotal();
         renderCrypto();
         renderMarketsCrypto();
+        renderHomepageWatchlist();
         updateLastUpdatedText();
         
         if (activeBot && botStats) {
@@ -3736,6 +3773,7 @@
         renderWatchlist(); 
         updatePortfolioTotal();
         updateLastUpdatedText();
+        renderHomepageWatchlist();
     }
     
     function renderWatchlist() { 
@@ -3795,6 +3833,7 @@
         renderWatchlist(); 
         updatePortfolioTotal();
         updateLastUpdatedText();
+        renderHomepageWatchlist();
     }
 
     const marqueeCoins = [{ id: 'bitcoin', name: 'BTC' },{ id: 'ethereum', name: 'ETH' },{ id: 'tron', name: 'TRX' },{ id: 'tether', name: 'USDT' },{ id: 'binancecoin', name: 'BNB' },{ id: 'solana', name: 'SOL' }];
@@ -3824,7 +3863,7 @@
             
             let usdtData = data.tether;
             if(usdtData) {
-                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th><tr>\n                </thead><tbody>';
                 let price = usdtData.usd;
                 let change = usdtData.usd_24h_change || 0;
                 let changeClass = change >= 0 ? 'positive' : 'negative';
@@ -3838,7 +3877,7 @@
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             } else {
-                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
                     <td>USDT/USDT</td>
                     <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
@@ -3853,6 +3892,7 @@
             let lastUpdated = document.getElementById('lastUpdated');
             if(lastUpdated) lastUpdated.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`; 
             updateMarqueePrices(); 
+            renderHomepageWatchlist();
         } catch(e) { 
             let marketTable = document.getElementById('marketTable');
             if(marketTable) marketTable.innerHTML = '<div class="loading">Unable to load prices</div>'; 
