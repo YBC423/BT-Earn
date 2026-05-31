@@ -1530,7 +1530,6 @@
         .log-entry {
             padding: 6px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            color: #a0a0c0;
         }
 
         .log-entry .time {
@@ -1538,16 +1537,20 @@
             margin-right: 10px;
         }
 
-        .log-entry.success {
+        .log-entry.buy {
             color: #48bb78;
         }
 
-        .log-entry.warning {
-            color: #f59e0b;
+        .log-entry.sell-profit {
+            color: #48bb78;
         }
 
-        .log-entry.error {
+        .log-entry.sell-loss {
             color: #e53e3e;
+        }
+
+        .log-entry.info {
+            color: #a0a0c0;
         }
 
         .bot-status-badge {
@@ -1915,7 +1918,7 @@
         <div class="bot-logs-section">
             <h3>Bot Logs <span id="logCount">0</span> entries</h3>
             <div class="logs-container" id="botLogs">
-                <div class="log-entry">[--:--:--.--] Waiting for bot to start...</div>
+                <div class="log-entry info"><span class="time">[--:--:--.--]</span> Waiting for bot to start...</div>
             </div>
         </div>
         <div style="height:80px;"></div>
@@ -2418,7 +2421,7 @@
         addBotLog(`High-Frequency Trading System loaded`, 'info');
         addBotLog(`Account Balance: $${holdings.usdt.toFixed(2)}`, 'info');
         addBotLog(`STANDARD Tier Active - Optimized for consistent small profits`, 'info');
-        addBotLog(`Base win rate: 72.0% | Target: $2-15 per trade`, 'info');
+        addBotLog(`Base win rate: 65-72% | Target: ${(botStats.amountPerTrade * 0.03).toFixed(2)}-${(botStats.amountPerTrade * 0.15).toFixed(2)} per trade`, 'info');
         
         // Update UI
         document.getElementById('botDetailTitle').innerHTML = botName === 'Bitcoin Accumulation' ? 'Bitcoin Accumulation Bot' : 'ETH DCA Pro Bot';
@@ -2457,10 +2460,7 @@
             logsContainer.innerHTML = '';
             for (let log of botStats.logs) {
                 let logDiv = document.createElement('div');
-                logDiv.className = 'log-entry';
-                if (log.type === 'success') logDiv.classList.add('success');
-                else if (log.type === 'warning') logDiv.classList.add('warning');
-                else if (log.type === 'error') logDiv.classList.add('error');
+                logDiv.className = 'log-entry ' + log.type;
                 logDiv.innerHTML = `<span class="time">[${log.time}]</span> ${log.message}`;
                 logsContainer.appendChild(logDiv);
             }
@@ -2470,44 +2470,76 @@
     
     function updateBotStatsDisplay() {
         let plClass = botStats.totalPL >= 0 ? '' : 'negative';
-        document.getElementById('botPL').innerHTML = `${botStats.totalPL >= 0 ? '+' : ''}$${botStats.totalPL.toFixed(2)}`;
-        document.getElementById('botPL').className = `stat-value ${botStats.totalPL < 0 ? 'negative' : ''}`;
-        document.getElementById('botRuns').innerHTML = botStats.totalRuns;
-        document.getElementById('botTrades').innerHTML = botStats.totalTrades;
+        let plElement = document.getElementById('botPL');
+        if (plElement) {
+            plElement.innerHTML = `${botStats.totalPL >= 0 ? '+' : ''}$${botStats.totalPL.toFixed(2)}`;
+            plElement.className = `stat-value ${botStats.totalPL < 0 ? 'negative' : ''}`;
+        }
+        let runsElement = document.getElementById('botRuns');
+        if (runsElement) runsElement.innerHTML = botStats.totalRuns;
+        let tradesElement = document.getElementById('botTrades');
+        if (tradesElement) tradesElement.innerHTML = botStats.totalTrades;
         let winRate = botStats.totalTrades > 0 ? (botStats.wins / botStats.totalTrades * 100) : 0;
-        document.getElementById('botWinRate').innerHTML = `${winRate.toFixed(1)}%`;
-        document.getElementById('botBalance').innerHTML = `$${botStats.botBalance.toFixed(2)}`;
+        let winRateElement = document.getElementById('botWinRate');
+        if (winRateElement) winRateElement.innerHTML = `${winRate.toFixed(1)}%`;
+        let balanceElement = document.getElementById('botBalance');
+        if (balanceElement) balanceElement.innerHTML = `$${botStats.botBalance.toFixed(2)}`;
+    }
+    
+    function calculateProfitLoss(amount) {
+        // 65-72% win chance
+        let isWin = Math.random() * 100 <= 68;
+        let profitPercent = 0;
+        
+        if (isWin) {
+            // Profit: 3% to 15% of investment amount
+            profitPercent = (Math.random() * 12 + 3) / 100;
+            let profit = amount * profitPercent;
+            // Ensure minimum profit of $0.30 for small amounts
+            if (profit < 0.30 && amount >= 10) profit = 0.30;
+            return { profit: profit, isWin: true, percent: profitPercent * 100 };
+        } else {
+            // Loss: 2% to 8% of investment amount
+            let lossPercent = (Math.random() * 6 + 2) / 100;
+            let loss = amount * lossPercent;
+            if (loss < 0.20 && amount >= 10) loss = 0.20;
+            return { profit: -loss, isWin: false, percent: lossPercent * 100 };
+        }
     }
     
     function executeBotTrade() {
         if (!botStats.isRunning || botStats.isPaused) return;
         
-        // Simulate a trade
-        let winChance = Math.random() * 100;
-        let isWin = winChance <= 72; // 72% win rate
-        let profit = 0;
+        let amount = botStats.amountPerTrade;
+        let result = calculateProfitLoss(amount);
+        let profit = result.profit;
+        let isWin = result.isWin;
         
-        if (isWin) {
-            profit = Math.random() * 13 + 2; // $2 to $15 profit
-            botStats.wins++;
-            addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${botStats.amountPerTrade}`, 'success');
-            addBotLog(`SELL ORDER: +$${profit.toFixed(2)} profit (${(profit/botStats.amountPerTrade*100).toFixed(1)}%)`, 'success');
+        // Add BUY log (always green)
+        addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${amount.toFixed(2)}`, 'buy');
+        
+        // Add SELL log with color based on profit/loss
+        if (profit >= 0) {
+            addBotLog(`SELL ORDER: +$${profit.toFixed(2)} profit (${result.percent.toFixed(1)}%)`, 'sell-profit');
         } else {
-            profit = -(Math.random() * 8 + 1); // -$1 to -$9 loss
-            addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${botStats.amountPerTrade}`, 'info');
-            addBotLog(`SELL ORDER: $${Math.abs(profit).toFixed(2)} loss (${(Math.abs(profit)/botStats.amountPerTrade*100).toFixed(1)}%)`, 'error');
+            addBotLog(`SELL ORDER: -$${Math.abs(profit).toFixed(2)} loss (${result.percent.toFixed(1)}%)`, 'sell-loss');
         }
         
+        // Update bot stats
+        if (isWin) botStats.wins++;
         botStats.totalPL += profit;
         botStats.botBalance += profit;
         botStats.totalTrades++;
         botStats.totalRuns++;
         
-        // Update real holdings balance with profit/loss
+        // Update real holdings balance
         holdings.usdt += profit;
         updatePortfolioTotal();
         renderCrypto();
         renderMarketsCrypto();
+        
+        // Add balance update log
+        addBotLog(`New Balance: $${holdings.usdt.toFixed(2)}`, 'info');
         
         updateBotStatsDisplay();
     }
@@ -2524,13 +2556,13 @@
         document.getElementById('pauseBotBtn').disabled = false;
         document.getElementById('stopBotBtn').disabled = false;
         
-        addBotLog(`Bot started - Trading ${botStats.asset}/USDT`, 'success');
-        addBotLog(`Investment amount: $${botStats.amountPerTrade} per trade`, 'info');
+        addBotLog(`Bot started - Trading ${botStats.asset}/USDT`, 'info');
+        addBotLog(`Investment amount: $${botStats.amountPerTrade.toFixed(2)} per trade`, 'info');
         
-        // Execute trade every 10-15 seconds
+        // Execute trade every 12-20 seconds
         botInterval = setInterval(() => {
             executeBotTrade();
-        }, Math.random() * 5000 + 10000);
+        }, Math.random() * 8000 + 12000);
     }
     
     function pauseBotTrading() {
@@ -2541,7 +2573,7 @@
             document.getElementById('startBotBtn').disabled = false;
             document.getElementById('pauseBotBtn').disabled = true;
             document.getElementById('stopBotBtn').disabled = false;
-            addBotLog(`Bot paused - Trading stopped temporarily`, 'warning');
+            addBotLog(`Bot paused - Trading stopped temporarily`, 'info');
         }
     }
     
@@ -2553,7 +2585,7 @@
             document.getElementById('startBotBtn').disabled = true;
             document.getElementById('pauseBotBtn').disabled = false;
             document.getElementById('stopBotBtn').disabled = false;
-            addBotLog(`Bot resumed - Trading active`, 'success');
+            addBotLog(`Bot resumed - Trading active`, 'info');
         }
     }
     
@@ -2575,8 +2607,9 @@
         addBotLog(`Bot stopped - Final P/L: ${botStats.totalPL >= 0 ? '+' : ''}$${botStats.totalPL.toFixed(2)}`, 'info');
         
         // Reset bot card to Not Configured
-        let botStatusSpan = document.getElementById(`botStatus${activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'}`);
-        let botPerfSpan = document.getElementById(`botPerf${activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'}`);
+        let botKey = activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
+        let botStatusSpan = document.getElementById(`botStatus${botKey}`);
+        let botPerfSpan = document.getElementById(`botPerf${botKey}`);
         
         if (botStatusSpan) {
             botStatusSpan.innerHTML = 'Not Configured';
@@ -3021,7 +3054,7 @@
                     <td class="positive">0.00%</td>
                     <td>480.48M</td>
                 </tr>`;
-                html += '</tbody><tr>';
+                html += '</tbody></table>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             }
@@ -3139,8 +3172,9 @@
     }
 
     function updateBotCardUI(botName, asset, amount) {
-        let botStatusSpan = document.getElementById(`botStatus${botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'}`);
-        let botPerfSpan = document.getElementById(`botPerf${botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'}`);
+        let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
+        let botStatusSpan = document.getElementById(`botStatus${botKey}`);
+        let botPerfSpan = document.getElementById(`botPerf${botKey}`);
         
         if (botStatusSpan) {
             botStatusSpan.innerHTML = 'Configured';
