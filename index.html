@@ -873,7 +873,6 @@
         document.getElementById('botsPage').style.display = 'none'; 
         document.getElementById('botDetailPage').style.display = 'none'; 
         document.getElementById('withdrawalPage').style.display = 'none';
-        // FIX: Populate countries when auth page is shown
         populateCountries();
     }
     function showDashboard() { document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; loadDashboard(); }
@@ -915,7 +914,6 @@
     
     function renderProfile() { if(!currentUser) return; const memberSince = new Date().toLocaleString('en-US',{month:'long',year:'numeric'}); const profileHTML = `<div class="profile-header"><div class="profile-avatar">${currentUser.email ? currentUser.email.charAt(0).toUpperCase() : 'U'}</div><h2>${currentUser.email || 'User'}</h2><p>Member since ${memberSince}</p></div><div class="profile-section"><h3>Personal Information</h3><div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span></div><div class="info-row"><span class="info-label">Account Type</span><span class="info-value">Standard</span></div></div><div class="profile-section"><h3>Account Security</h3><div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span></div><div class="info-row"><span class="info-label">Last Login</span><span class="info-value">${new Date().toLocaleString()}</span></div></div><div class="profile-section"><h3>Preferences</h3><div class="preference-row"><span class="preference-label">Theme</span><span class="preference-value">Dark</span></div><div class="preference-row"><span class="preference-label">Language</span><span class="preference-value">English</span></div></div><button class="profile-logout-btn" onclick="logout()">Logout</button>`; document.getElementById('profileContainer').innerHTML = profileHTML; }
     
-    // FIXED: populateCountries function now properly fills the dropdown
     function populateCountries() { 
         let countrySelect = document.getElementById('signupCountry'); 
         if(countrySelect) { 
@@ -955,15 +953,94 @@
     function updateBotCardUI(botName, asset, amount) { let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'; let botStatusSpan = document.getElementById(`botStatus${botKey}`); let botPerfSpan = document.getElementById(`botPerf${botKey}`); if(botStatusSpan) { botStatusSpan.innerHTML = 'Configured'; botStatusSpan.style.background = 'rgba(72,187,120,0.2)'; botStatusSpan.style.color = '#48bb78'; } if(botPerfSpan) { botPerfSpan.innerHTML = `Performance: $${amount} per trade (${asset})`; botPerfSpan.style.color = '#48bb78'; } }
     function loadSavedBotConfigs() { let botNames = ['Bitcoin Accumulation', 'ETH DCA Pro']; for(let botName of botNames) { let savedConfig = localStorage.getItem('botConfig_' + botName); let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'; let botStatusSpan = document.getElementById(`botStatus${botKey}`); let botPerfSpan = document.getElementById(`botPerf${botKey}`); if(savedConfig && botStatusSpan && botPerfSpan) { let config = JSON.parse(savedConfig); botStatusSpan.innerHTML = 'Configured'; botStatusSpan.style.background = 'rgba(72,187,120,0.2)'; botStatusSpan.style.color = '#48bb78'; botPerfSpan.innerHTML = `Performance: $${config.amount} per trade (${config.asset})`; botPerfSpan.style.color = '#48bb78'; } } }
     
-    // FIREBASE FUNCTIONS
     async function loadUserData(uid) { try { const userDoc = await getDoc(doc(db,"users",uid)); if(userDoc.exists()) { const data = userDoc.data(); holdings = data.holdings || { usdt:100 }; withdrawals = data.withdrawals || []; } else { holdings = { usdt:100 }; withdrawals = []; await setDoc(doc(db,"users",uid), { holdings:holdings, withdrawals:withdrawals, createdAt:new Date().toISOString() }); } updatePortfolioTotal(); renderCrypto(); renderMarketsCrypto(); renderHomepageWatchlist(); } catch(error) { console.error("Error loading user data:",error); } }
     async function saveUserData(uid) { if(!uid) return; try { await updateDoc(doc(db,"users",uid), { holdings:holdings, withdrawals:withdrawals, lastUpdated:new Date().toISOString() }); } catch(error) { console.error("Error saving user data:",error); } }
     async function saveBalance() { if(currentUser?.uid) await saveUserData(currentUser.uid); }
-    async function handleLogin() { let email = document.getElementById('loginEmail').value; let password = document.getElementById('loginPassword').value; if(!email.includes('@')) { showCustomModal('Invalid Email','Please enter a valid email address.','error'); return; } if(password.length<8) { showCustomModal('Invalid Password','Password must be at least 8 characters.','error'); return; } try { await signInWithEmailAndPassword(auth,email,password); } catch(error) { if(error.code==='auth/user-not-found') showCustomModal('Login Failed','No account found with this email.','error'); else if(error.code==='auth/wrong-password') showCustomModal('Login Failed','Incorrect password.','error'); else showCustomModal('Login Failed',error.message,'error'); } }
-    async function handleSignup() { let name = document.getElementById('signupName').value; let email = document.getElementById('signupEmail').value; let phone = document.getElementById('signupPhone').value; let country = document.getElementById('signupCountry').value; let password = document.getElementById('signupPassword').value; let confirm = document.getElementById('signupConfirmPassword').value; if(!name||!email||!phone||!country) { showCustomModal('Missing Fields','Please fill all fields.','error'); return; } if(!email.includes('@')) { showCustomModal('Invalid Email','Email must contain @','error'); return; } if(password.length<8) { showCustomModal('Invalid Password','Password must be at least 8 characters','error'); return; } if(password!==confirm) { showCustomModal('Password Mismatch','Passwords do not match','error'); return; } try { const userCredential = await createUserWithEmailAndPassword(auth,email,password); const user = userCredential.user; await setDoc(doc(db,"users",user.uid), { name:name, email:email, phone:phone, country:country, holdings:{usdt:100}, withdrawals:[], createdAt:new Date().toISOString() }); showCustomModal('Success!','Account created successfully!','success'); } catch(error) { if(error.code==='auth/email-already-in-use') showCustomModal('Email Exists','Email already registered','error'); else showCustomModal('Signup Failed',error.message,'error'); } }
+    
+    // FIXED: handleLogin function
+    async function handleLogin() { 
+        let email = document.getElementById('loginEmail').value; 
+        let password = document.getElementById('loginPassword').value; 
+        if(!email.includes('@')) { 
+            showCustomModal('Invalid Email','Please enter a valid email address.','error'); 
+            return; 
+        } 
+        if(password.length<8) { 
+            showCustomModal('Invalid Password','Password must be at least 8 characters.','error'); 
+            return; 
+        } 
+        try { 
+            await signInWithEmailAndPassword(auth,email,password); 
+            showCustomModal('Success','Logged in successfully!','success');
+        } catch(error) { 
+            if(error.code==='auth/user-not-found') showCustomModal('Login Failed','No account found with this email.','error'); 
+            else if(error.code==='auth/wrong-password') showCustomModal('Login Failed','Incorrect password.','error'); 
+            else showCustomModal('Login Failed',error.message,'error'); 
+        } 
+    }
+    
+    // FIXED: handleSignup function - properly reads email and creates account
+    async function handleSignup() { 
+        let name = document.getElementById('signupName').value; 
+        let email = document.getElementById('signupEmail').value; 
+        let phone = document.getElementById('signupPhone').value; 
+        let country = document.getElementById('signupCountry').value; 
+        let password = document.getElementById('signupPassword').value; 
+        let confirm = document.getElementById('signupConfirmPassword').value; 
+        
+        if(!name || !email || !phone || !country) { 
+            showCustomModal('Missing Fields','Please fill all fields.','error'); 
+            return; 
+        } 
+        if(!email.includes('@')) { 
+            showCustomModal('Invalid Email','Email must contain @','error'); 
+            return; 
+        } 
+        if(password.length < 8) { 
+            showCustomModal('Invalid Password','Password must be at least 8 characters','error'); 
+            return; 
+        } 
+        if(password !== confirm) { 
+            showCustomModal('Password Mismatch','Passwords do not match','error'); 
+            return; 
+        } 
+        
+        try { 
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password); 
+            const user = userCredential.user; 
+            await setDoc(doc(db, "users", user.uid), { 
+                name: name, 
+                email: email, 
+                phone: phone, 
+                country: country, 
+                holdings: { usdt: 100 }, 
+                withdrawals: [], 
+                createdAt: new Date().toISOString() 
+            }); 
+            showCustomModal('Success!', 'Account created successfully!', 'success');
+            // Dashboard will automatically show via onAuthStateChanged
+        } catch(error) { 
+            if(error.code === 'auth/email-already-in-use') { 
+                showCustomModal('Email Exists', 'Email already registered. Please login instead.', 'error'); 
+            } else { 
+                showCustomModal('Signup Failed', error.message, 'error'); 
+            } 
+        } 
+    }
+    
     async function logout() { await signOut(auth); showHomepage(); }
     
-    onAuthStateChanged(auth, async (user) => { if(user) { currentUser = user; await loadUserData(user.uid); showDashboard(); } else { currentUser = null; holdings = { usdt:100 }; showHomepage(); } });
+    onAuthStateChanged(auth, async (user) => { 
+        if(user) { 
+            currentUser = user; 
+            await loadUserData(user.uid); 
+            showDashboard(); 
+        } else { 
+            currentUser = null; 
+            holdings = { usdt: 100 }; 
+            showHomepage(); 
+        } 
+    });
     
     async function saveWithdrawals() { if(currentUser?.uid) await saveUserData(currentUser.uid); }
     
@@ -984,12 +1061,10 @@
     
     window.addEventListener('resize', function() { if(document.getElementById('chartModal').style.display === 'block') resizeCanvas(); });
     let chatWidget = document.getElementById('chatWidget'); if(chatWidget) makeDraggable(chatWidget);
-    // Initial call - but also called when auth page is shown
     populateCountries();
     updateMarqueePrices(); setInterval(updateMarqueePrices,30000);
     document.body.classList.add('loaded');
     
-    // FIX TAB SWITCHING - Make Login and Sign Up tabs work properly
     var loginTabBtn = document.querySelector('.auth-tab[data-tab="login"]');
     var signupTabBtn = document.querySelector('.auth-tab[data-tab="signup"]');
     function switchToLogin() { document.querySelector('.auth-tab[data-tab="login"]').classList.add('active'); document.querySelector('.auth-tab[data-tab="signup"]').classList.remove('active'); document.getElementById('loginForm').classList.add('active'); document.getElementById('signupForm').classList.remove('active'); }
