@@ -559,6 +559,7 @@
         .portfolio-buttons {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             gap: 15px;
         }
         .deposit-btn {
@@ -568,6 +569,8 @@
             border-radius: 30px;
             color: white;
             cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
         }
         .withdraw-btn {
             background: linear-gradient(135deg, #667eea, #764ba2);
@@ -576,6 +579,8 @@
             border-radius: 30px;
             color: white;
             cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
         }
         .section-title {
             font-size: 24px;
@@ -1610,8 +1615,7 @@
             .stat-card .stat-value { font-size: 24px; }
             .config-modal-content { margin: 80px auto; width: 95%; padding: 20px; }
             .bot-stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .portfolio-buttons { flex-direction: column; }
-            .deposit-btn, .withdraw-btn { width: 100%; }
+            .portfolio-buttons { flex-direction: row; justify-content: space-between; }
         }
     </style>
 </head>
@@ -2500,8 +2504,15 @@
     function updateBotStatsDisplay() {
         let plElement = document.getElementById('botPL');
         if (plElement) {
-            plElement.innerHTML = `${botStats.totalPL >= 0 ? '+' : ''}$${botStats.totalPL.toFixed(2)}`;
-            plElement.className = `stat-value ${botStats.totalPL >= 0 ? 'positive' : 'negative'}`;
+            let plValue = botStats.totalPL;
+            plElement.innerHTML = `${plValue >= 0 ? '+' : ''}$${Math.abs(plValue).toFixed(2)}`;
+            if (plValue > 0) {
+                plElement.className = 'stat-value positive';
+            } else if (plValue < 0) {
+                plElement.className = 'stat-value negative';
+            } else {
+                plElement.className = 'stat-value';
+            }
         }
         let runsElement = document.getElementById('botRuns');
         if (runsElement) runsElement.innerHTML = botStats.totalRuns;
@@ -2623,7 +2634,7 @@
         document.getElementById('pauseBotBtn').disabled = true;
         document.getElementById('stopBotBtn').disabled = true;
         
-        addBotLog(`Bot stopped - Final P/L: ${botStats.totalPL >= 0 ? '+' : ''}$${botStats.totalPL.toFixed(2)}`, 'info');
+        addBotLog(`Bot stopped - Final P/L: ${botStats.totalPL >= 0 ? '+' : ''}$${Math.abs(botStats.totalPL).toFixed(2)}`, 'info');
         
         let botKey = activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
         let botStatusSpan = document.getElementById(`botStatus${botKey}`);
@@ -3051,7 +3062,7 @@
             
             let usdtData = data.tether;
             if(usdtData) {
-                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 let price = usdtData.usd;
                 let change = usdtData.usd_24h_change || 0;
                 let changeClass = change >= 0 ? 'positive' : 'negative';
@@ -3065,7 +3076,7 @@
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             } else {
-                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>';
                 html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
                     <td>USDT/USDT</td>
                     <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
