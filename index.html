@@ -1287,6 +1287,128 @@
             transform: scale(1.02);
         }
 
+        /* Configuration Modal Styles */
+        .config-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2001;
+            overflow-y: auto;
+        }
+
+        .config-modal-content {
+            background: #0a0e27;
+            margin: 100px auto;
+            width: 95%;
+            max-width: 500px;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .close-config {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            color: white;
+            background: rgba(255,255,255,0.1);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-config:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .config-modal-content h2 {
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: white;
+        }
+
+        .config-field {
+            margin-bottom: 25px;
+        }
+
+        .config-field label {
+            display: block;
+            font-size: 14px;
+            color: #a0a0c0;
+            margin-bottom: 8px;
+        }
+
+        .config-field select, .config-field input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .config-field select:focus, .config-field input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .config-field .helper-text {
+            font-size: 12px;
+            color: #a0a0c0;
+            margin-top: 8px;
+        }
+
+        .config-field .sub-text {
+            font-size: 12px;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        .config-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .config-cancel-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .config-save-btn {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .config-save-btn:hover, .config-cancel-btn:hover {
+            transform: scale(1.02);
+        }
+
         @media (max-width: 768px) {
             .header { padding: 15px 20px; }
             .features-section, .market-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
@@ -1303,6 +1425,7 @@
             .bots-grid { grid-template-columns: 1fr; }
             .bot-card { padding: 20px; }
             .stat-card .stat-value { font-size: 24px; }
+            .config-modal-content { margin: 80px auto; width: 95%; padding: 20px; }
         }
     </style>
 </head>
@@ -1558,7 +1681,7 @@
                 <div class="bot-risk">Risk: <span class="risk-value">Low</span></div>
                 <div class="bot-performance">Performance: --</div>
                 <div class="bot-buttons">
-                    <button class="bot-config-btn" onclick="alert('Configuration setup coming soon')">Configure</button>
+                    <button class="bot-config-btn" onclick="openConfigModal('Bitcoin Accumulation')">Configure</button>
                     <button class="bot-start-btn" onclick="alert('Bitcoin Accumulation bot started')">Start BA Bot</button>
                 </div>
             </div>
@@ -1570,7 +1693,7 @@
                 <div class="bot-risk">Risk: <span class="risk-value">Medium</span></div>
                 <div class="bot-performance">Performance: --</div>
                 <div class="bot-buttons">
-                    <button class="bot-config-btn" onclick="alert('Configuration setup coming soon')">Configure</button>
+                    <button class="bot-config-btn" onclick="openConfigModal('ETH DCA Pro')">Configure</button>
                     <button class="bot-start-btn" onclick="alert('ETH DCA Pro bot started')">Start DCA Pro</button>
                 </div>
             </div>
@@ -1636,6 +1759,32 @@
     </div>
 </div>
 
+<div id="configModal" class="config-modal">
+    <div class="config-modal-content">
+        <div class="close-config" onclick="closeConfigModal()">×</div>
+        <h2 id="configModalTitle">Configure Bot</h2>
+        <div class="config-field">
+            <label>Select Asset</label>
+            <select id="configAssetSelect">
+                <option value="BTC">Bitcoin (BTC)</option>
+                <option value="ETH">Ethereum (ETH)</option>
+                <option value="USDT">Tether (USDT)</option>
+                <option value="USDC">USD Coin (USDC)</option>
+            </select>
+        </div>
+        <div class="config-field">
+            <label>Investment Amount per Trade (USD)</label>
+            <input type="number" id="configAmount" value="100" min="10" max="10000">
+            <div class="helper-text">Minimum: $10 · Maximum: $10,000</div>
+            <div class="sub-text">Enter the amount you want to invest per trade</div>
+        </div>
+        <div class="config-buttons">
+            <button class="config-cancel-btn" onclick="closeConfigModal()">Cancel</button>
+            <button class="config-save-btn" onclick="saveConfig()">Save Configuration</button>
+        </div>
+    </div>
+</div>
+
 <div class="chat-widget" id="chatWidget" onclick="alert('Chat support coming soon! Email us at support@bt-earn.com')"><span>💬</span><span>Hi!</span></div>
 
 <script>
@@ -1670,6 +1819,7 @@
     let currentTradeMode = 'buy';
     let chartUpdateInterval = null;
     let candleData = [];
+    let currentConfigBot = null;
     
     const FALLBACK_PRICES = {
         btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00, usdt: 1.00,
@@ -1991,6 +2141,7 @@
         document.getElementById('marketsPage').style.display = 'none';
         document.getElementById('tradePage').style.display = 'none';
         document.getElementById('botsPage').style.display = 'block';
+        loadSavedBotConfigs();
     }
 
     function loadMarketsPage() {
@@ -2365,7 +2516,7 @@
             
             let usdtData = data.tether;
             if(usdtData) {
-                let html = '<table><thead>\n                     <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 let price = usdtData.usd;
                 let change = usdtData.usd_24h_change || 0;
                 let changeClass = change >= 0 ? 'positive' : 'negative';
@@ -2442,6 +2593,111 @@
         function closeDragElement() {
             document.onmouseup = null;
             document.onmousemove = null;
+        }
+    }
+    
+    function openConfigModal(botName) {
+        currentConfigBot = botName;
+        let modal = document.getElementById('configModal');
+        let title = document.getElementById('configModalTitle');
+        let assetSelect = document.getElementById('configAssetSelect');
+        
+        if (botName === 'Bitcoin Accumulation') {
+            title.innerHTML = 'Configure Bitcoin Accumulation Bot';
+            assetSelect.value = 'BTC';
+        } else if (botName === 'ETH DCA Pro') {
+            title.innerHTML = 'Configure ETH DCA Pro Bot';
+            assetSelect.value = 'ETH';
+        }
+        
+        let savedConfig = localStorage.getItem('botConfig_' + botName);
+        if (savedConfig) {
+            let config = JSON.parse(savedConfig);
+            assetSelect.value = config.asset;
+            document.getElementById('configAmount').value = config.amount;
+        } else {
+            document.getElementById('configAmount').value = 100;
+        }
+        
+        modal.style.display = 'block';
+    }
+
+    function closeConfigModal() {
+        document.getElementById('configModal').style.display = 'none';
+        currentConfigBot = null;
+    }
+
+    function saveConfig() {
+        let asset = document.getElementById('configAssetSelect').value;
+        let amount = document.getElementById('configAmount').value;
+        
+        if (amount < 10) {
+            alert('Minimum investment amount is $10');
+            return;
+        }
+        if (amount > 10000) {
+            alert('Maximum investment amount is $10,000');
+            return;
+        }
+        
+        let config = {
+            asset: asset,
+            amount: amount,
+            configured: true
+        };
+        localStorage.setItem('botConfig_' + currentConfigBot, JSON.stringify(config));
+        
+        updateBotCardUI(currentConfigBot, asset, amount);
+        
+        alert(`${currentConfigBot} configured successfully!\nAsset: ${asset}\nInvestment: $${amount} per trade`);
+        
+        closeConfigModal();
+    }
+
+    function updateBotCardUI(botName, asset, amount) {
+        let botCards = document.querySelectorAll('.bot-card');
+        for (let card of botCards) {
+            let title = card.querySelector('.bot-title');
+            if (title && title.innerText === botName) {
+                let statusSpan = card.querySelector('.bot-status');
+                if (statusSpan) {
+                    statusSpan.innerHTML = 'Configured';
+                    statusSpan.style.background = 'rgba(72,187,120,0.2)';
+                    statusSpan.style.color = '#48bb78';
+                }
+                
+                let performanceDiv = card.querySelector('.bot-performance');
+                if (performanceDiv) {
+                    performanceDiv.innerHTML = `Performance: $${amount} per trade (${asset})`;
+                    performanceDiv.style.color = '#48bb78';
+                }
+                break;
+            }
+        }
+    }
+
+    function loadSavedBotConfigs() {
+        let botCards = document.querySelectorAll('.bot-card');
+        for (let card of botCards) {
+            let title = card.querySelector('.bot-title');
+            if (title) {
+                let botName = title.innerText;
+                let savedConfig = localStorage.getItem('botConfig_' + botName);
+                if (savedConfig) {
+                    let config = JSON.parse(savedConfig);
+                    let statusSpan = card.querySelector('.bot-status');
+                    if (statusSpan) {
+                        statusSpan.innerHTML = 'Configured';
+                        statusSpan.style.background = 'rgba(72,187,120,0.2)';
+                        statusSpan.style.color = '#48bb78';
+                    }
+                    let performanceDiv = card.querySelector('.bot-performance');
+                    if (performanceDiv) {
+                        performanceDiv.innerHTML = `Performance: $${config.amount} per trade (${config.asset})`;
+                        performanceDiv.style.color = '#48bb78';
+                    }
+                }
+            }
         }
     }
     
