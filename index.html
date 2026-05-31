@@ -54,6 +54,12 @@
             cursor: pointer;
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
         .header-buttons {
             display: flex;
             gap: 20px;
@@ -74,6 +80,105 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
             padding: 8px 20px;
             border-radius: 20px;
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 1002;
+            position: relative;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background: white;
+            transition: 0.3s;
+            border-radius: 2px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100%;
+            background: #0d1129;
+            border-left: 1px solid rgba(255,255,255,0.08);
+            z-index: 2000;
+            transition: 0.3s ease;
+            padding: 80px 20px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.open {
+            right: 0;
+        }
+
+        .sidebar-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #a0a0c0;
+            background: rgba(255,255,255,0.05);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-close:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .sidebar-menu li {
+            padding: 15px 20px;
+            margin: 5px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: 0.3s;
+            color: #a0a0c0;
+        }
+
+        .sidebar-menu li:hover {
+            background: rgba(102,126,234,0.2);
+            color: white;
+        }
+
+        .sidebar-menu li.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
         }
 
         .hero {
@@ -1865,17 +1970,38 @@
             .portfolio-buttons { flex-direction: row; justify-content: space-between; }
             .history-table th, .history-table td { padding: 10px 5px; font-size: 11px; }
             .tx-modal-content { margin: 100px auto; width: 95%; }
+            .sidebar { width: 260px; }
         }
     </style>
 </head>
 <body>
 
+<!-- Sidebar Menu -->
+<div class="overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-close" onclick="closeSidebar()">×</div>
+    <ul class="sidebar-menu">
+        <li data-nav="home" onclick="navigateTo('home')">🏠 Home</li>
+        <li data-nav="markets" onclick="navigateTo('markets')">📊 Markets</li>
+        <li data-nav="trade" onclick="navigateTo('trade')">💰 Trade</li>
+        <li data-nav="bots" onclick="navigateTo('bots')">🤖 Bots</li>
+        <li data-nav="profile" onclick="navigateTo('profile')">👤 Profile</li>
+    </ul>
+</div>
+
 <div id="homepage">
     <div class="header">
         <div class="logo">BT-EARN</div>
-        <div class="header-buttons">
-            <a class="login-link" onclick="showAuthPage()">Log in</a>
-            <a class="signup-link" onclick="showAuthPage()">Sign up</a>
+        <div class="header-right">
+            <div class="header-buttons">
+                <a class="login-link" onclick="showAuthPage()">Log in</a>
+                <a class="signup-link" onclick="showAuthPage()">Sign up</a>
+            </div>
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
     </div>
 
@@ -1920,7 +2046,13 @@
 <div id="authPage" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
-        <div></div>
+        <div class="header-right">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </div>
     <div class="auth-container">
         <div class="auth-card">
@@ -1955,7 +2087,13 @@
 <div id="dashboard" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
-        <div></div>
+        <div class="header-right">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </div>
     <div class="dashboard-container">
         <div class="dashboard-header">
@@ -1990,7 +2128,13 @@
 <div id="profilePage" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
-        <div></div>
+        <div class="header-right">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </div>
     <div class="profile-container" id="profileContainer"></div>
     <div class="bottom-nav">
@@ -2005,7 +2149,13 @@
 <div id="marketsPage" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
-        <div></div>
+        <div class="header-right">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </div>
     <div class="markets-container">
         <div class="markets-header">
@@ -2031,7 +2181,13 @@
 <div id="tradePage" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
-        <div></div>
+        <div class="header-right">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </div>
     <div class="trade-container" id="tradeContainer">
         <div class="trade-header">
@@ -2087,7 +2243,13 @@
 <div id="botsPage" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
-        <div></div>
+        <div class="header-right">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </div>
     <div class="bots-container">
         <div class="bots-header">
@@ -2154,7 +2316,13 @@
 <div id="botDetailPage" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
-        <div></div>
+        <div class="header-right">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </div>
     <div class="bot-detail-container">
         <div class="bot-detail-header">
@@ -2209,7 +2377,13 @@
 <div id="withdrawalPage" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
-        <div></div>
+        <div class="header-right">
+            <div class="hamburger" onclick="toggleSidebar()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
     </div>
     <div class="withdrawal-container">
         <h1>Withdraw Funds</h1>
@@ -2455,6 +2629,30 @@
     
     currentPrices = { ...FALLBACK_PRICES };
 
+    // Sidebar functions
+    function toggleSidebar() {
+        let sidebar = document.getElementById('sidebar');
+        let overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+        let sidebar = document.getElementById('sidebar');
+        let overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+    }
+
+    function navigateTo(page) {
+        closeSidebar();
+        if (page === 'home') showDashboard();
+        else if (page === 'markets') showMarkets();
+        else if (page === 'trade') showTrade(currentTradeCoin);
+        else if (page === 'bots') showBots();
+        else if (page === 'profile') showProfile();
+    }
+
     // Load saved balance from localStorage
     function loadSavedBalance() {
         let savedBalance = localStorage.getItem('userBalance');
@@ -2576,7 +2774,7 @@
         if (!tbody) return;
         
         if (withdrawals.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td><tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>';
             return;
         }
         
@@ -2589,7 +2787,7 @@
                 <td>${w.asset}</td>
                 <td class="address-truncated">${truncatedAddress}</td>
                 <td class="${statusClass}">${w.status}</td>
-            </table>`;
+            </tr>`;
         }
         tbody.innerHTML = html;
     }
@@ -3640,14 +3838,14 @@
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             } else {
-                let html = '<table><thead><tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr></thead><tbody>';
+                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
                     <td>USDT/USDT</td>
                     <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
                     <td class="positive">0.00%</td>
                     <td>480.48M</td>
                 </tr>`;
-                html += '</tbody></tr>';
+                html += '</tbody></table>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             }
