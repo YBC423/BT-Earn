@@ -767,7 +767,7 @@
             <div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div>
             <button class="withdraw-submit-btn" onclick="submitWithdrawalWithLoading()">Withdraw</button>
         </div>
-        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody>}</div>
+        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody></table></div>
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
@@ -857,7 +857,13 @@
         document.getElementById('modalMessage').innerHTML = message;
         modal.classList.add('active');
     }
-    function closeCustomModal() { document.getElementById('customModal').classList.remove('active'); }
+    function closeCustomModal() { 
+        document.getElementById('customModal').classList.remove('active');
+        // After closing modal, if user is logged in, ensure dashboard is shown
+        if (currentUser) {
+            showDashboard();
+        }
+    }
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
     function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
     function navigateTo(page) { closeSidebar(); if(page === 'home') showDashboard(); else if(page === 'markets') showMarkets(); else if(page === 'trade') showTrade(currentTradeCoin); else if(page === 'bots') showBots(); else if(page === 'profile') showProfile(); }
@@ -875,7 +881,18 @@
         document.getElementById('withdrawalPage').style.display = 'none';
         populateCountries();
     }
-    function showDashboard() { document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; loadDashboard(); }
+    function showDashboard() { 
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'block'; 
+        document.getElementById('profilePage').style.display = 'none'; 
+        document.getElementById('marketsPage').style.display = 'none'; 
+        document.getElementById('tradePage').style.display = 'none'; 
+        document.getElementById('botsPage').style.display = 'none'; 
+        document.getElementById('botDetailPage').style.display = 'none'; 
+        document.getElementById('withdrawalPage').style.display = 'none'; 
+        loadDashboard(); 
+    }
     function showProfile() { document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'block'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; renderProfile(); }
     function showMarkets() { document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'block'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; loadMarketsPage(); }
     function showTrade(coin) { currentTradeCoin = coin || 'BTC'; document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'block'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; loadTradePage(); }
@@ -957,7 +974,6 @@
     async function saveUserData(uid) { if(!uid) return; try { await updateDoc(doc(db,"users",uid), { holdings:holdings, withdrawals:withdrawals, lastUpdated:new Date().toISOString() }); } catch(error) { console.error("Error saving user data:",error); } }
     async function saveBalance() { if(currentUser?.uid) await saveUserData(currentUser.uid); }
     
-    // FIXED: handleLogin function
     async function handleLogin() { 
         let email = document.getElementById('loginEmail').value; 
         let password = document.getElementById('loginPassword').value; 
@@ -979,7 +995,7 @@
         } 
     }
     
-    // FIXED: handleSignup function - properly reads email and creates account
+    // FIXED: handleSignup function - properly creates account and redirects to dashboard
     async function handleSignup() { 
         let name = document.getElementById('signupName').value; 
         let email = document.getElementById('signupEmail').value; 
@@ -1017,8 +1033,8 @@
                 withdrawals: [], 
                 createdAt: new Date().toISOString() 
             }); 
+            // Show success message - dashboard will load via onAuthStateChanged after modal closes
             showCustomModal('Success!', 'Account created successfully!', 'success');
-            // Dashboard will automatically show via onAuthStateChanged
         } catch(error) { 
             if(error.code === 'auth/email-already-in-use') { 
                 showCustomModal('Email Exists', 'Email already registered. Please login instead.', 'error'); 
@@ -1034,7 +1050,11 @@
         if(user) { 
             currentUser = user; 
             await loadUserData(user.uid); 
-            showDashboard(); 
+            // Only show dashboard if modal is not active (to avoid conflict)
+            const modal = document.getElementById('customModal');
+            if (!modal.classList.contains('active')) {
+                showDashboard(); 
+            }
         } else { 
             currentUser = null; 
             holdings = { usdt: 100 }; 
