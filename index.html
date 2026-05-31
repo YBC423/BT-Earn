@@ -632,6 +632,75 @@
             text-decoration: underline;
         }
 
+        /* BT-EARN Logo Spinner */
+        .btn-loading {
+            opacity: 0.8;
+            cursor: wait !important;
+            pointer-events: none;
+            position: relative;
+        }
+        
+        .logo-spinner {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .logo-spinner .spinner-letter {
+            font-size: 14px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: spinLetter 0.8s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        .logo-spinner .spinner-letter:nth-child(1) { animation-delay: 0s; }
+        .logo-spinner .spinner-letter:nth-child(2) { animation-delay: 0.1s; }
+        .logo-spinner .spinner-letter:nth-child(3) { animation-delay: 0.2s; }
+        .logo-spinner .spinner-letter:nth-child(4) { animation-delay: 0.3s; }
+        .logo-spinner .spinner-letter:nth-child(5) { animation-delay: 0.4s; }
+        .logo-spinner .spinner-letter:nth-child(6) { animation-delay: 0.5s; }
+        .logo-spinner .spinner-letter:nth-child(7) { animation-delay: 0.6s; }
+        
+        @keyframes spinLetter {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+        }
+        
+        .spinner-dots {
+            display: inline-flex;
+            gap: 3px;
+            margin-left: 6px;
+        }
+        
+        .spinner-dots span {
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            display: inline-block;
+            animation: dotPulse 1s ease-in-out infinite;
+        }
+        
+        .spinner-dots span:nth-child(1) { animation-delay: 0s; }
+        .spinner-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .spinner-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
         .dashboard-container {
             padding: 100px 20px 80px;
             max-width: 1200px;
@@ -2011,7 +2080,6 @@
                 <a class="login-link" onclick="showAuthPage()">Log in</a>
                 <a class="signup-link" onclick="showAuthPage()">Sign up</a>
             </div>
-            <!-- Hamburger menu removed from homepage -->
         </div>
     </div>
 
@@ -2034,7 +2102,6 @@
         </div>
     </div>
 
-    <!-- Watchlist Section - Replaced Markets -->
     <div class="watchlist-section">
         <div class="watchlist-header">
             <h2>Watchlist</h2>
@@ -2058,7 +2125,6 @@
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
         <div class="header-right">
-            <!-- Hamburger menu removed from authPage -->
         </div>
     </div>
     <div class="auth-container">
@@ -2293,7 +2359,7 @@
                 <div class="bot-performance" id="botPerfBitcoin">Performance: --</div>
                 <div class="bot-buttons">
                     <button class="bot-config-btn" onclick="openConfigModal('Bitcoin Accumulation')">Configure</button>
-                    <button class="bot-start-btn" onclick="startBotFromCard('Bitcoin Accumulation')">Start BA Bot</button>
+                    <button class="bot-start-btn" onclick="startBotWithLoading('Bitcoin Accumulation')">Start BA Bot</button>
                 </div>
             </div>
             <div class="bot-card">
@@ -2305,7 +2371,7 @@
                 <div class="bot-performance" id="botPerfETH">Performance: --</div>
                 <div class="bot-buttons">
                     <button class="bot-config-btn" onclick="openConfigModal('ETH DCA Pro')">Configure</button>
-                    <button class="bot-start-btn" onclick="startBotFromCard('ETH DCA Pro')">Start DCA Pro</button>
+                    <button class="bot-start-btn" onclick="startBotWithLoading('ETH DCA Pro')">Start DCA Pro</button>
                 </div>
             </div>
         </div>
@@ -2422,7 +2488,7 @@
                 <input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address">
             </div>
 
-            <button class="withdraw-submit-btn" onclick="submitWithdrawal()">Withdraw</button>
+            <button class="withdraw-submit-btn" onclick="submitWithdrawalWithLoading()">Withdraw</button>
         </div>
 
         <div class="history-section">
@@ -2636,6 +2702,225 @@
     
     currentPrices = { ...FALLBACK_PRICES };
 
+    // BT-EARN Logo Spinner Helper Functions
+    function getLogoSpinnerHTML() {
+        return `<span class="logo-spinner">
+            <span class="spinner-letter">B</span>
+            <span class="spinner-letter">T</span>
+            <span class="spinner-letter">-</span>
+            <span class="spinner-letter">E</span>
+            <span class="spinner-letter">A</span>
+            <span class="spinner-letter">R</span>
+            <span class="spinner-letter">N</span>
+            <span class="spinner-dots"><span>.</span><span>.</span><span>.</span></span>
+        </span>`;
+    }
+
+    function showButtonLoading(button, text) {
+        button.disabled = true;
+        button.classList.add('btn-loading');
+        const originalHTML = button.innerHTML;
+        button.setAttribute('data-original-text', originalHTML);
+        button.innerHTML = `${getLogoSpinnerHTML()} ${text}...`;
+        return originalHTML;
+    }
+
+    function hideButtonLoading(button, originalHTML) {
+        button.disabled = false;
+        button.classList.remove('btn-loading');
+        button.innerHTML = originalHTML;
+    }
+
+    // Updated handleLogin with 4-second spinner
+    function handleLogin() { 
+        let email = document.getElementById('loginEmail').value; 
+        let password = document.getElementById('loginPassword').value; 
+        if(!email.includes('@')) { alert('Please enter a valid email'); return; } 
+        if(password.length < 8) { alert('Password must be at least 8 characters'); return; } 
+        
+        let loginBtn = document.querySelector('#loginForm .auth-btn');
+        let originalText = showButtonLoading(loginBtn, 'Logging in');
+        
+        setTimeout(() => {
+            let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); 
+            let user = users.find(u => u.email === email && u.password === password); 
+            if(user) { 
+                currentUser = user; 
+                localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+                hideButtonLoading(loginBtn, originalText);
+                showDashboard(); 
+            } else { 
+                hideButtonLoading(loginBtn, originalText);
+                alert('Invalid credentials. Please sign up first.'); 
+            } 
+        }, 4000);
+    }
+
+    // Updated handleSignup with 4-second spinner
+    function handleSignup() { 
+        let name = document.getElementById('signupName').value; 
+        let email = document.getElementById('signupEmail').value; 
+        let phone = document.getElementById('signupPhone').value; 
+        let country = document.getElementById('signupCountry').value; 
+        let password = document.getElementById('signupPassword').value; 
+        let confirm = document.getElementById('signupConfirmPassword').value; 
+        
+        if(!name || !email || !phone || !country) { alert('Please fill all fields'); return; } 
+        if(!email.includes('@')) { alert('Email must contain @'); return; } 
+        if(password.length < 8) { alert('Password must be at least 8 characters'); return; } 
+        if(password !== confirm) { alert('Passwords do not match'); return; } 
+        
+        let signupBtn = document.querySelector('#signupForm .auth-btn');
+        let originalText = showButtonLoading(signupBtn, 'Creating account');
+        
+        setTimeout(() => {
+            let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); 
+            if(users.find(u => u.email === email)) { 
+                hideButtonLoading(signupBtn, originalText);
+                alert('Email already registered'); 
+                return; 
+            } 
+            let newUser = { name, email, phone, country, password }; 
+            users.push(newUser); 
+            localStorage.setItem('btUsers', JSON.stringify(users)); 
+            currentUser = newUser; 
+            localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+            hideButtonLoading(signupBtn, originalText);
+            showDashboard(); 
+        }, 4000);
+    }
+
+    // Updated logout with 4-second spinner
+    function logout() { 
+        let logoutBtn = document.querySelector('.profile-logout-btn');
+        if (!logoutBtn) {
+            localStorage.removeItem('currentUser'); 
+            currentUser = null; 
+            showHomepage();
+            return;
+        }
+        let originalText = showButtonLoading(logoutBtn, 'Logging out');
+        
+        setTimeout(() => {
+            localStorage.removeItem('currentUser'); 
+            currentUser = null; 
+            hideButtonLoading(logoutBtn, originalText);
+            showHomepage(); 
+        }, 4000);
+    }
+
+    // Updated submitWithdrawal with 4-second spinner
+    function submitWithdrawalWithLoading() {
+        let amount = parseFloat(document.getElementById('withdrawAmount').value);
+        let address = document.getElementById('walletAddress').value;
+        let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
+        
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
+        
+        if (amount < 10) {
+            alert('Minimum withdrawal amount is $10');
+            return;
+        }
+        
+        if (amount > holdings.usdt) {
+            alert(`Insufficient balance. You have $${holdings.usdt.toFixed(2)} available`);
+            return;
+        }
+        
+        if (!address || address.trim() === '') {
+            alert('Please enter a valid wallet address');
+            return;
+        }
+        
+        let withdrawBtn = document.querySelector('.withdraw-submit-btn');
+        let originalText = showButtonLoading(withdrawBtn, 'Processing withdrawal');
+        
+        setTimeout(() => {
+            // Deduct balance
+            holdings.usdt -= amount;
+            saveBalance();
+            updatePortfolioTotal();
+            renderCrypto();
+            renderMarketsCrypto();
+            renderHomepageWatchlist();
+            
+            // Update withdrawal page balance
+            let withdrawBalanceEl = document.getElementById('withdrawBalance');
+            if (withdrawBalanceEl) {
+                withdrawBalanceEl.innerHTML = `$${holdings.usdt.toFixed(2)}`;
+            }
+            
+            // Create withdrawal record
+            let networkFee = asset === 'BTC' ? 1.50 : 0.80;
+            let newWithdrawal = {
+                id: Date.now(),
+                dateTime: new Date().toLocaleString(),
+                amount: amount,
+                asset: asset,
+                network: asset === 'BTC' ? 'BTC Network' : 'TRC20',
+                address: address,
+                fee: networkFee,
+                txId: generateTxId(),
+                status: 'Pending',
+                pendingEndTime: Date.now() + 30000
+            };
+            
+            withdrawals.unshift(newWithdrawal);
+            saveWithdrawals();
+            renderWithdrawalHistory();
+            
+            setTimeout(() => approveWithdrawal(newWithdrawal.id), 30000);
+            
+            hideButtonLoading(withdrawBtn, originalText);
+            alert(`Withdrawal request submitted!\nAmount: $${amount}\nAsset: ${asset}\nAddress: ${address}\nStatus: Pending (will be approved in 30 seconds)`);
+            
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('walletAddress').value = '';
+        }, 4000);
+    }
+
+    // Bot start with 4-second spinner
+    function startBotWithLoading(botName) {
+        let savedConfig = localStorage.getItem('botConfig_' + botName);
+        if (!savedConfig) {
+            alert('Please configure the bot first before starting');
+            return;
+        }
+        
+        let botCards = document.querySelectorAll('.bot-card');
+        let startBtn = null;
+        
+        for (let card of botCards) {
+            if (card.querySelector('.bot-title')?.innerText === botName) {
+                startBtn = card.querySelector('.bot-start-btn');
+                break;
+            }
+        }
+        
+        if (startBtn) {
+            let originalText = showButtonLoading(startBtn, 'Starting bot');
+            
+            setTimeout(() => {
+                hideButtonLoading(startBtn, originalText);
+                showBotDetail(botName);
+            }, 4000);
+        } else {
+            showBotDetail(botName);
+        }
+    }
+
+    // Original submitWithdrawal function renamed - keep original logic without spinner for internal use
+    function submitWithdrawalOriginal() {
+        // This is kept for reference, but not used directly
+    }
+
+    function generateTxId() {
+        return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    }
+
     // Sidebar functions
     function toggleSidebar() {
         let sidebar = document.getElementById('sidebar');
@@ -2698,10 +2983,6 @@
         localStorage.setItem('withdrawals', JSON.stringify(withdrawals));
     }
     
-    function generateTxId() {
-        return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-    }
-    
     function approveWithdrawal(id) {
         let index = withdrawals.findIndex(w => w.id === id);
         if (index !== -1 && withdrawals[index].status === 'Pending') {
@@ -2709,72 +2990,6 @@
             saveWithdrawals();
             renderWithdrawalHistory();
         }
-    }
-    
-    function submitWithdrawal() {
-        let amount = parseFloat(document.getElementById('withdrawAmount').value);
-        let address = document.getElementById('walletAddress').value;
-        let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
-        
-        if (!amount || amount <= 0) {
-            alert('Please enter a valid amount');
-            return;
-        }
-        
-        if (amount < 10) {
-            alert('Minimum withdrawal amount is $10');
-            return;
-        }
-        
-        if (amount > holdings.usdt) {
-            alert(`Insufficient balance. You have $${holdings.usdt.toFixed(2)} available`);
-            return;
-        }
-        
-        if (!address || address.trim() === '') {
-            alert('Please enter a valid wallet address');
-            return;
-        }
-        
-        // Deduct balance
-        holdings.usdt -= amount;
-        saveBalance();
-        updatePortfolioTotal();
-        renderCrypto();
-        renderMarketsCrypto();
-        renderHomepageWatchlist();
-        
-        // Update withdrawal page balance
-        let withdrawBalanceEl = document.getElementById('withdrawBalance');
-        if (withdrawBalanceEl) {
-            withdrawBalanceEl.innerHTML = `$${holdings.usdt.toFixed(2)}`;
-        }
-        
-        // Create withdrawal record
-        let networkFee = asset === 'BTC' ? 1.50 : 0.80;
-        let newWithdrawal = {
-            id: Date.now(),
-            dateTime: new Date().toLocaleString(),
-            amount: amount,
-            asset: asset,
-            network: asset === 'BTC' ? 'BTC Network' : 'TRC20',
-            address: address,
-            fee: networkFee,
-            txId: generateTxId(),
-            status: 'Pending',
-            pendingEndTime: Date.now() + 30000
-        };
-        
-        withdrawals.unshift(newWithdrawal);
-        saveWithdrawals();
-        renderWithdrawalHistory();
-        
-        setTimeout(() => approveWithdrawal(newWithdrawal.id), 30000);
-        
-        alert(`Withdrawal request submitted!\nAmount: $${amount}\nAsset: ${asset}\nAddress: ${address}\nStatus: Pending (will be approved in 30 seconds)`);
-        
-        document.getElementById('withdrawAmount').value = '';
-        document.getElementById('walletAddress').value = '';
     }
     
     function renderWithdrawalHistory() {
@@ -2795,7 +3010,7 @@
                 <td>${w.asset}</td>
                 <td class="address-truncated">${truncatedAddress}</td>
                 <td class="${statusClass}">${w.status}</td>
-            </tr>`;
+             </tr>`;
         }
         tbody.innerHTML = html;
     }
@@ -3446,15 +3661,6 @@
         }
     }
     
-    function startBotFromCard(botName) {
-        let savedConfig = localStorage.getItem('botConfig_' + botName);
-        if (!savedConfig) {
-            alert('Please configure the bot first before starting');
-            return;
-        }
-        showBotDetail(botName);
-    }
-
     function loadMarketsPage() {
         renderMarketsCrypto();
         renderMarketsWatchlist();
@@ -3685,49 +3891,6 @@
 
     document.querySelectorAll('.auth-tab').forEach(tab => { tab.addEventListener('click', function() { document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); document.getElementById('loginForm').classList.toggle('active', this.dataset.tab === 'login'); document.getElementById('signupForm').classList.toggle('active', this.dataset.tab === 'signup'); }); });
 
-    function handleLogin() { 
-        let email = document.getElementById('loginEmail').value; 
-        let password = document.getElementById('loginPassword').value; 
-        if(!email.includes('@')) { alert('Please enter a valid email'); return; } 
-        if(password.length < 8) { alert('Password must be at least 8 characters'); return; } 
-        let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); 
-        let user = users.find(u => u.email === email && u.password === password); 
-        if(user) { 
-            currentUser = user; 
-            localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
-            showDashboard(); 
-        } else { 
-            alert('Invalid credentials. Please sign up first.'); 
-        } 
-    }
-
-    function handleSignup() { 
-        let name = document.getElementById('signupName').value; 
-        let email = document.getElementById('signupEmail').value; 
-        let phone = document.getElementById('signupPhone').value; 
-        let country = document.getElementById('signupCountry').value; 
-        let password = document.getElementById('signupPassword').value; 
-        let confirm = document.getElementById('signupConfirmPassword').value; 
-        if(!name || !email || !phone || !country) { alert('Please fill all fields'); return; } 
-        if(!email.includes('@')) { alert('Email must contain @'); return; } 
-        if(password.length < 8) { alert('Password must be at least 8 characters'); return; } 
-        if(password !== confirm) { alert('Passwords do not match'); return; } 
-        let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); 
-        if(users.find(u => u.email === email)) { alert('Email already registered'); return; } 
-        let newUser = { name, email, phone, country, password }; 
-        users.push(newUser); 
-        localStorage.setItem('btUsers', JSON.stringify(users)); 
-        currentUser = newUser; 
-        localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
-        showDashboard(); 
-    }
-
-    function logout() { 
-        localStorage.removeItem('currentUser'); 
-        currentUser = null; 
-        showHomepage(); 
-    }
-
     function updateDateTime() { 
         let now = new Date(); 
         let dateTimeElement = document.getElementById('dateTimeDisplay');
@@ -3863,7 +4026,7 @@
             
             let usdtData = data.tether;
             if(usdtData) {
-                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th><tr>\n                </thead><tbody>';
+                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 let price = usdtData.usd;
                 let change = usdtData.usd_24h_change || 0;
                 let changeClass = change >= 0 ? 'positive' : 'negative';
