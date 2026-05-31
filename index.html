@@ -486,7 +486,7 @@
     <div class="footer"><div class="footer-links"><a href="#">About</a><a href="#">Products</a><a href="#">Trade</a><a href="#">Support</a><a href="#">Contact support</a></div><div class="copyright">© 2026 BT-EARN. All rights reserved.</div></div>
 </div>
 
-<!-- AUTH PAGE - Phone Number REMOVED -->
+<!-- AUTH PAGE -->
 <div id="authPage" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
@@ -511,6 +511,7 @@
                 <p>Enter your details to create a new account</p>
                 <div class="input-group"><label>Full Name</label><input type="text" id="signupName" placeholder="John Doe"></div>
                 <div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div>
+                <div class="input-group"><label>Phone Number</label><input type="text" id="signupPhone" placeholder="123456789"></div>
                 <div class="input-group"><label>Country</label><select id="signupCountry"></select></div>
                 <div class="input-group"><label>Password</label><input type="password" id="signupPassword" placeholder="Enter your password"></div>
                 <div class="input-group"><label>Confirm Password</label><input type="password" id="signupConfirmPassword" placeholder="Confirm your password"></div>
@@ -829,29 +830,7 @@
 <div class="chat-widget" id="chatWidget" onclick="showCustomModal('Chat Support', 'Chat support coming soon! Email us at support@bt-earn.com', 'info')"><span>💬</span><span>Hi!</span></div>
 
 <script>
-    // ALL COUNTRIES OF THE WORLD - Complete list
-    const countriesList = [
-        "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
-        "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
-        "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia",
-        "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica",
-        "Côte d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
-        "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland",
-        "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau",
-        "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy",
-        "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kosovo", "Kuwait",
-        "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
-        "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico",
-        "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru",
-        "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan",
-        "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar",
-        "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa",
-        "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore",
-        "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan",
-        "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo",
-        "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates",
-        "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-    ];
+    const countriesList = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
 
     let currentUser = null;
     let holdings = { usdt: 100.00 };
@@ -869,20 +848,6 @@
     
     const FALLBACK_PRICES = { btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00, usdt: 1.00, trx: 0.12, usdc: 1.00, xrp: 0.52, doge: 0.12, btcChange: -0.48, ethChange: -0.84, bnbChange: 0.32, solChange: 1.24, usdtChange: 0.00 };
     currentPrices = { ...FALLBACK_PRICES };
-
-    // Populate country dropdown with all countries
-    function populateCountries() {
-        var countrySelect = document.getElementById('signupCountry');
-        if (countrySelect) {
-            countrySelect.innerHTML = '<option value="">-- Select Country --</option>';
-            for (var i = 0; i < countriesList.length; i++) {
-                var option = document.createElement('option');
-                option.value = countriesList[i];
-                option.textContent = countriesList[i];
-                countrySelect.appendChild(option);
-            }
-        }
-    }
 
     function showCustomModal(title, message, type) {
         const modal = document.getElementById('customModal');
@@ -938,6 +903,10 @@
     
     function renderProfile() { if(!currentUser) return; const memberSince = new Date().toLocaleString('en-US',{month:'long',year:'numeric'}); const profileHTML = `<div class="profile-header"><div class="profile-avatar">${currentUser.email ? currentUser.email.charAt(0).toUpperCase() : 'U'}</div><h2>${currentUser.email || 'User'}</h2><p>Member since ${memberSince}</p></div><div class="profile-section"><h3>Personal Information</h3><div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span></div><div class="info-row"><span class="info-label">Account Type</span><span class="info-value">Standard</span></div></div><div class="profile-section"><h3>Account Security</h3><div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span></div><div class="info-row"><span class="info-label">Last Login</span><span class="info-value">${new Date().toLocaleString()}</span></div></div><div class="profile-section"><h3>Preferences</h3><div class="preference-row"><span class="preference-label">Theme</span><span class="preference-value">Dark</span></div><div class="preference-row"><span class="preference-label">Language</span><span class="preference-value">English</span></div></div><button class="profile-logout-btn" onclick="logout()">Logout</button>`; document.getElementById('profileContainer').innerHTML = profileHTML; }
     
+    function populateCountries() { let countrySelect = document.getElementById('signupCountry'); if(countrySelect) { countrySelect.innerHTML = ''; for(let country of countriesList) { let option = document.createElement('option'); option.value = country; option.textContent = country; countrySelect.appendChild(option); } } }
+    
+    document.querySelectorAll('.auth-tab').forEach(tab => { tab.addEventListener('click', function() { document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); document.getElementById('loginForm').classList.toggle('active', this.dataset.tab === 'login'); document.getElementById('signupForm').classList.toggle('active', this.dataset.tab === 'signup'); }); });
+    
     function updateDateTime() { let now = new Date(); let dateTimeElement = document.getElementById('dateTimeDisplay'); if(dateTimeElement) { dateTimeElement.innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>`; } }
     setInterval(updateDateTime, 1000); updateDateTime();
     
@@ -966,74 +935,8 @@
     async function loadUserData(uid) { try { const userDoc = await getDoc(doc(db,"users",uid)); if(userDoc.exists()) { const data = userDoc.data(); holdings = data.holdings || { usdt:100 }; withdrawals = data.withdrawals || []; } else { holdings = { usdt:100 }; withdrawals = []; await setDoc(doc(db,"users",uid), { holdings:holdings, withdrawals:withdrawals, createdAt:new Date().toISOString() }); } updatePortfolioTotal(); renderCrypto(); renderMarketsCrypto(); renderHomepageWatchlist(); } catch(error) { console.error("Error loading user data:",error); } }
     async function saveUserData(uid) { if(!uid) return; try { await updateDoc(doc(db,"users",uid), { holdings:holdings, withdrawals:withdrawals, lastUpdated:new Date().toISOString() }); } catch(error) { console.error("Error saving user data:",error); } }
     async function saveBalance() { if(currentUser?.uid) await saveUserData(currentUser.uid); }
-    
-    async function handleLogin() { 
-        let email = document.getElementById('loginEmail').value; 
-        let password = document.getElementById('loginPassword').value; 
-        if(!email.includes('@')) { 
-            showCustomModal('Invalid Email','Please enter a valid email address.','error'); 
-            return; 
-        } 
-        if(password.length<8) { 
-            showCustomModal('Invalid Password','Password must be at least 8 characters.','error'); 
-            return; 
-        } 
-        try { 
-            await signInWithEmailAndPassword(auth,email,password); 
-            showCustomModal('Success', 'Logged in successfully!', 'success');
-        } catch(error) { 
-            if(error.code==='auth/user-not-found') showCustomModal('Login Failed','No account found with this email.','error'); 
-            else if(error.code==='auth/wrong-password') showCustomModal('Login Failed','Incorrect password.','error'); 
-            else showCustomModal('Login Failed',error.message,'error'); 
-        } 
-    }
-    
-    async function handleSignup() { 
-        let name = document.getElementById('signupName').value; 
-        let email = document.getElementById('signupEmail').value; 
-        let country = document.getElementById('signupCountry').value; 
-        let password = document.getElementById('signupPassword').value; 
-        let confirm = document.getElementById('signupConfirmPassword').value; 
-        
-        if(!name || !email || !country) { 
-            showCustomModal('Missing Fields','Please fill all fields (Name, Email, Country).','error'); 
-            return; 
-        } 
-        if(!email.includes('@')) { 
-            showCustomModal('Invalid Email','Email must contain @','error'); 
-            return; 
-        } 
-        if(password.length<8) { 
-            showCustomModal('Invalid Password','Password must be at least 8 characters','error'); 
-            return; 
-        } 
-        if(password !== confirm) { 
-            showCustomModal('Password Mismatch','Passwords do not match','error'); 
-            return; 
-        } 
-        if(country === "") {
-            showCustomModal('Select Country','Please select your country from the dropdown.','error');
-            return;
-        }
-        
-        try { 
-            const userCredential = await createUserWithEmailAndPassword(auth,email,password); 
-            const user = userCredential.user; 
-            await setDoc(doc(db,"users",user.uid), { 
-                name: name, 
-                email: email, 
-                country: country, 
-                holdings: { usdt: 100 }, 
-                withdrawals: [], 
-                createdAt: new Date().toISOString() 
-            }); 
-            showCustomModal('Success!','Account created successfully!','success'); 
-        } catch(error) { 
-            if(error.code==='auth/email-already-in-use') showCustomModal('Email Exists','Email already registered','error'); 
-            else showCustomModal('Signup Failed',error.message,'error'); 
-        } 
-    }
-    
+    async function handleLogin() { let email = document.getElementById('loginEmail').value; let password = document.getElementById('loginPassword').value; if(!email.includes('@')) { showCustomModal('Invalid Email','Please enter a valid email address.','error'); return; } if(password.length<8) { showCustomModal('Invalid Password','Password must be at least 8 characters.','error'); return; } try { await signInWithEmailAndPassword(auth,email,password); } catch(error) { if(error.code==='auth/user-not-found') showCustomModal('Login Failed','No account found with this email.','error'); else if(error.code==='auth/wrong-password') showCustomModal('Login Failed','Incorrect password.','error'); else showCustomModal('Login Failed',error.message,'error'); } }
+    async function handleSignup() { let name = document.getElementById('signupName').value; let email = document.getElementById('signupEmail').value; let phone = document.getElementById('signupPhone').value; let country = document.getElementById('signupCountry').value; let password = document.getElementById('signupPassword').value; let confirm = document.getElementById('signupConfirmPassword').value; if(!name||!email||!phone||!country) { showCustomModal('Missing Fields','Please fill all fields.','error'); return; } if(!email.includes('@')) { showCustomModal('Invalid Email','Email must contain @','error'); return; } if(password.length<8) { showCustomModal('Invalid Password','Password must be at least 8 characters','error'); return; } if(password!==confirm) { showCustomModal('Password Mismatch','Passwords do not match','error'); return; } try { const userCredential = await createUserWithEmailAndPassword(auth,email,password); const user = userCredential.user; await setDoc(doc(db,"users",user.uid), { name:name, email:email, phone:phone, country:country, holdings:{usdt:100}, withdrawals:[], createdAt:new Date().toISOString() }); showCustomModal('Success!','Account created successfully!','success'); } catch(error) { if(error.code==='auth/email-already-in-use') showCustomModal('Email Exists','Email already registered','error'); else showCustomModal('Signup Failed',error.message,'error'); } }
     async function logout() { await signOut(auth); showHomepage(); }
     
     onAuthStateChanged(auth, async (user) => { if(user) { currentUser = user; await loadUserData(user.uid); showDashboard(); } else { currentUser = null; holdings = { usdt:100 }; showHomepage(); } });
@@ -1057,10 +960,7 @@
     
     window.addEventListener('resize', function() { if(document.getElementById('chartModal').style.display === 'block') resizeCanvas(); });
     let chatWidget = document.getElementById('chatWidget'); if(chatWidget) makeDraggable(chatWidget);
-    
-    // Initialize country dropdown
     populateCountries();
-    
     updateMarqueePrices(); setInterval(updateMarqueePrices,30000);
     document.body.classList.add('loaded');
     
