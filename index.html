@@ -4,6 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BT-EARN - AI Trading Platform</title>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjv41yKM3ViDPbf9TQmiVKgXKkQn88uZE",
+            authDomain: "bt-earn-986f3.firebaseapp.com",
+            projectId: "bt-earn-986f3",
+            storageBucket: "bt-earn-986f3.firebasestorage.app",
+            messagingSenderId: "101980248199",
+            appId: "1:101980248199:web:772642b9ebe807f18f0022",
+            measurementId: "G-TXSM16GJQJ"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Make auth and db available globally
+        window.auth = auth;
+        window.db = db;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.signOut = signOut;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.updateDoc = updateDoc;
+        window.collection = collection;
+        window.getDocs = getDocs;
+    </script>
     <style>
         * {
             margin: 0;
@@ -82,7 +119,7 @@
             border-radius: 20px;
         }
 
-        /* Hamburger Menu - hidden on homepage and authPage */
+        /* Hamburger Menu */
         .hamburger {
             cursor: pointer;
             display: flex;
@@ -742,6 +779,75 @@
 
         .custom-modal-btn:hover {
             transform: scale(1.02);
+        }
+
+        /* BT-EARN Logo Spinner */
+        .btn-loading {
+            opacity: 0.8;
+            cursor: wait !important;
+            pointer-events: none;
+            position: relative;
+        }
+        
+        .logo-spinner {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .logo-spinner .spinner-letter {
+            font-size: 14px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: spinLetter 0.8s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        .logo-spinner .spinner-letter:nth-child(1) { animation-delay: 0s; }
+        .logo-spinner .spinner-letter:nth-child(2) { animation-delay: 0.1s; }
+        .logo-spinner .spinner-letter:nth-child(3) { animation-delay: 0.2s; }
+        .logo-spinner .spinner-letter:nth-child(4) { animation-delay: 0.3s; }
+        .logo-spinner .spinner-letter:nth-child(5) { animation-delay: 0.4s; }
+        .logo-spinner .spinner-letter:nth-child(6) { animation-delay: 0.5s; }
+        .logo-spinner .spinner-letter:nth-child(7) { animation-delay: 0.6s; }
+        
+        @keyframes spinLetter {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+        }
+        
+        .spinner-dots {
+            display: inline-flex;
+            gap: 3px;
+            margin-left: 6px;
+        }
+        
+        .spinner-dots span {
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            display: inline-block;
+            animation: dotPulse 1s ease-in-out infinite;
+        }
+        
+        .spinner-dots span:nth-child(1) { animation-delay: 0s; }
+        .spinner-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .spinner-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
         }
 
         .dashboard-container {
@@ -2691,33 +2797,18 @@
 
 <div class="chat-widget" id="chatWidget" onclick="showCustomModal('Chat Support', 'Chat support coming soon! Email us at support@bt-earn.com', 'info')"><span>💬</span><span>Hi!</span></div>
 
-<script>
-    const countriesList = [
-        "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria",
-        "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia",
-        "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia",
-        "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica",
-        "Côte d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
-        "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland",
-        "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau",
-        "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy",
-        "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea, North", "Korea, South", "Kosovo", "Kuwait",
-        "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg",
-        "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico",
-        "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru",
-        "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan",
-        "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar",
-        "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa",
-        "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore",
-        "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan",
-        "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo",
-        "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates",
-        "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen",
-        "Zambia", "Zimbabwe"
-    ];
-
+<script type="module">
+    // Import Firebase functions (already imported in module)
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    
+    // Get instances
+    const auth = getAuth();
+    const db = getFirestore();
+    
+    // Global variables
     let currentUser = null;
-    let holdings = { usdt: 1000.00 };
+    let holdings = { usdt: 0 };
     let currentPrices = {};
     let currentTradeCoin = 'BTC';
     let currentTradeMode = 'buy';
@@ -2754,7 +2845,14 @@
     };
     
     currentPrices = { ...FALLBACK_PRICES };
-
+    
+    // Country list
+    const countriesList = [
+        "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Australia", "Brazil", "Canada", "China",
+        "France", "Germany", "India", "Indonesia", "Italy", "Japan", "Mexico", "Netherlands", "Nigeria", "Spain",
+        "United Kingdom", "United States"
+    ];
+    
     // Custom Modal Function
     function showCustomModal(title, message, type = 'error') {
         const modal = document.getElementById('customModal');
@@ -2782,12 +2880,11 @@
         modal.classList.add('active');
     }
     
-    function closeCustomModal() {
-        const modal = document.getElementById('customModal');
-        modal.classList.remove('active');
-    }
-
-    // BT-EARN Logo Spinner Helper Functions
+    window.closeCustomModal = function() {
+        document.getElementById('customModal').classList.remove('active');
+    };
+    
+    // BT-EARN Logo Spinner
     function getLogoSpinnerHTML() {
         return `<span class="logo-spinner">
             <span class="spinner-letter">B</span>
@@ -2800,7 +2897,7 @@
             <span class="spinner-dots"><span>.</span><span>.</span><span>.</span></span>
         </span>`;
     }
-
+    
     function showButtonLoading(button, text) {
         button.disabled = true;
         button.classList.add('btn-loading');
@@ -2809,595 +2906,206 @@
         button.innerHTML = `${getLogoSpinnerHTML()} ${text}...`;
         return originalHTML;
     }
-
+    
     function hideButtonLoading(button, originalHTML) {
         button.disabled = false;
         button.classList.remove('btn-loading');
         button.innerHTML = originalHTML;
     }
-
-    // handleLogin with 4-second spinner
-    function handleLogin() { 
-        let email = document.getElementById('loginEmail').value; 
-        let password = document.getElementById('loginPassword').value; 
-        if(!email.includes('@')) { 
+    
+    // Load user data from Firestore
+    async function loadUserData(uid) {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            holdings = data.holdings || { usdt: 100 };
+            withdrawals = data.withdrawals || [];
+            return true;
+        } else {
+            // New user - create with $100 balance
+            holdings = { usdt: 100 };
+            withdrawals = [];
+            await setDoc(doc(db, "users", uid), {
+                holdings: holdings,
+                withdrawals: withdrawals,
+                createdAt: new Date().toISOString()
+            });
+            return true;
+        }
+    }
+    
+    // Save user data to Firestore
+    async function saveUserData(uid) {
+        if (!uid) return;
+        await updateDoc(doc(db, "users", uid), {
+            holdings: holdings,
+            withdrawals: withdrawals,
+            lastUpdated: new Date().toISOString()
+        }).catch(() => {
+            // If doc doesn't exist, create it
+            setDoc(doc(db, "users", uid), {
+                holdings: holdings,
+                withdrawals: withdrawals,
+                createdAt: new Date().toISOString()
+            });
+        });
+    }
+    
+    // Save balance to Firestore
+    async function saveBalance() {
+        if (currentUser?.uid) {
+            await saveUserData(currentUser.uid);
+        }
+    }
+    
+    // Handle Login with Firebase
+    window.handleLogin = async function() {
+        let email = document.getElementById('loginEmail').value;
+        let password = document.getElementById('loginPassword').value;
+        
+        if (!email.includes('@')) {
             showCustomModal('Invalid Email', 'Please enter a valid email address.', 'error');
-            return; 
-        } 
-        if(password.length < 8) { 
+            return;
+        }
+        if (password.length < 8) {
             showCustomModal('Invalid Password', 'Password must be at least 8 characters.', 'error');
-            return; 
-        } 
+            return;
+        }
         
         let loginBtn = document.querySelector('#loginForm .auth-btn');
         let originalText = showButtonLoading(loginBtn, 'Logging in');
         
-        setTimeout(() => {
-            let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); 
-            let user = users.find(u => u.email === email && u.password === password); 
-            if(user) { 
-                currentUser = user; 
-                localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
-                hideButtonLoading(loginBtn, originalText);
-                showDashboard(); 
-            } else { 
-                hideButtonLoading(loginBtn, originalText);
-                showCustomModal('Login Failed', 'Invalid credentials. Please sign up first.', 'error');
-            } 
-        }, 4000);
-    }
-
-    // handleSignup with 4-second spinner
-    function handleSignup() { 
-        let name = document.getElementById('signupName').value; 
-        let email = document.getElementById('signupEmail').value; 
-        let phone = document.getElementById('signupPhone').value; 
-        let country = document.getElementById('signupCountry').value; 
-        let password = document.getElementById('signupPassword').value; 
-        let confirm = document.getElementById('signupConfirmPassword').value; 
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            // Login successful - auth state will trigger showDashboard
+            hideButtonLoading(loginBtn, originalText);
+        } catch (error) {
+            hideButtonLoading(loginBtn, originalText);
+            if (error.code === 'auth/user-not-found') {
+                showCustomModal('Login Failed', 'No account found with this email.', 'error');
+            } else if (error.code === 'auth/wrong-password') {
+                showCustomModal('Login Failed', 'Incorrect password.', 'error');
+            } else {
+                showCustomModal('Login Failed', error.message, 'error');
+            }
+        }
+    };
+    
+    // Handle Signup with Firebase
+    window.handleSignup = async function() {
+        let name = document.getElementById('signupName').value;
+        let email = document.getElementById('signupEmail').value;
+        let phone = document.getElementById('signupPhone').value;
+        let country = document.getElementById('signupCountry').value;
+        let password = document.getElementById('signupPassword').value;
+        let confirm = document.getElementById('signupConfirmPassword').value;
         
-        if(!name || !email || !phone || !country) { 
+        if (!name || !email || !phone || !country) {
             showCustomModal('Missing Fields', 'Please fill all fields.', 'error');
-            return; 
-        } 
-        if(!email.includes('@')) { 
+            return;
+        }
+        if (!email.includes('@')) {
             showCustomModal('Invalid Email', 'Email must contain @', 'error');
-            return; 
-        } 
-        if(password.length < 8) { 
+            return;
+        }
+        if (password.length < 8) {
             showCustomModal('Invalid Password', 'Password must be at least 8 characters', 'error');
-            return; 
-        } 
-        if(password !== confirm) { 
+            return;
+        }
+        if (password !== confirm) {
             showCustomModal('Password Mismatch', 'Passwords do not match', 'error');
-            return; 
-        } 
+            return;
+        }
         
         let signupBtn = document.querySelector('#signupForm .auth-btn');
         let originalText = showButtonLoading(signupBtn, 'Creating account');
         
-        setTimeout(() => {
-            let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); 
-            if(users.find(u => u.email === email)) { 
-                hideButtonLoading(signupBtn, originalText);
-                showCustomModal('Email Exists', 'Email already registered', 'error');
-                return; 
-            } 
-            let newUser = { name, email, phone, country, password }; 
-            users.push(newUser); 
-            localStorage.setItem('btUsers', JSON.stringify(users)); 
-            currentUser = newUser; 
-            localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            
+            // Save user profile to Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                name: name,
+                email: email,
+                phone: phone,
+                country: country,
+                holdings: { usdt: 100 },
+                withdrawals: [],
+                createdAt: new Date().toISOString()
+            });
+            
             hideButtonLoading(signupBtn, originalText);
             showCustomModal('Success!', 'Account created successfully!', 'success');
-            setTimeout(() => showDashboard(), 1500);
-        }, 4000);
-    }
-
-    // logout with 4-second spinner
-    function logout() { 
+            // Auth state will trigger showDashboard
+        } catch (error) {
+            hideButtonLoading(signupBtn, originalText);
+            if (error.code === 'auth/email-already-in-use') {
+                showCustomModal('Email Exists', 'Email already registered', 'error');
+            } else {
+                showCustomModal('Signup Failed', error.message, 'error');
+            }
+        }
+    };
+    
+    // Logout
+    window.logout = async function() {
         let logoutBtn = document.querySelector('.profile-logout-btn');
-        if (!logoutBtn) {
-            localStorage.removeItem('currentUser'); 
-            currentUser = null; 
-            showHomepage();
-            return;
-        }
-        let originalText = showButtonLoading(logoutBtn, 'Logging out');
-        
-        setTimeout(() => {
-            localStorage.removeItem('currentUser'); 
-            currentUser = null; 
+        if (logoutBtn) {
+            let originalText = showButtonLoading(logoutBtn, 'Logging out');
+            await signOut(auth);
             hideButtonLoading(logoutBtn, originalText);
-            showHomepage(); 
-        }, 4000);
-    }
-
-    // submitWithdrawal with 4-second spinner
-    function submitWithdrawalWithLoading() {
-        let amount = parseFloat(document.getElementById('withdrawAmount').value);
-        let address = document.getElementById('walletAddress').value;
-        let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
-        
-        if (!amount || amount <= 0) {
-            showCustomModal('Invalid Amount', 'Please enter a valid amount', 'error');
-            return;
+        } else {
+            await signOut(auth);
         }
-        
-        if (amount < 10) {
-            showCustomModal('Amount Too Low', 'Minimum withdrawal amount is $10', 'error');
-            return;
-        }
-        
-        if (amount > holdings.usdt) {
-            showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)} available`, 'error');
-            return;
-        }
-        
-        if (!address || address.trim() === '') {
-            showCustomModal('Invalid Address', 'Please enter a valid wallet address', 'error');
-            return;
-        }
-        
-        let withdrawBtn = document.querySelector('.withdraw-submit-btn');
-        let originalText = showButtonLoading(withdrawBtn, 'Processing withdrawal');
-        
-        setTimeout(() => {
-            // Deduct balance
-            holdings.usdt -= amount;
-            saveBalance();
+        showHomepage();
+    };
+    
+    // Auth state listener
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            await loadUserData(user.uid);
             updatePortfolioTotal();
             renderCrypto();
             renderMarketsCrypto();
             renderHomepageWatchlist();
-            
-            // Update withdrawal page balance
-            let withdrawBalanceEl = document.getElementById('withdrawBalance');
-            if (withdrawBalanceEl) {
-                withdrawBalanceEl.innerHTML = `$${holdings.usdt.toFixed(2)}`;
-            }
-            
-            // Create withdrawal record
-            let networkFee = asset === 'BTC' ? 1.50 : 0.80;
-            let newWithdrawal = {
-                id: Date.now(),
-                dateTime: new Date().toLocaleString(),
-                amount: amount,
-                asset: asset,
-                network: asset === 'BTC' ? 'BTC Network' : 'TRC20',
-                address: address,
-                fee: networkFee,
-                txId: generateTxId(),
-                status: 'Pending',
-                pendingEndTime: Date.now() + 30000
-            };
-            
-            withdrawals.unshift(newWithdrawal);
-            saveWithdrawals();
-            renderWithdrawalHistory();
-            
-            setTimeout(() => approveWithdrawal(newWithdrawal.id), 30000);
-            
-            hideButtonLoading(withdrawBtn, originalText);
-            showCustomModal('Withdrawal Submitted', `Amount: $${amount}\nAsset: ${asset}\nAddress: ${address}\nStatus: Pending (will be approved in 30 seconds)`, 'success');
-            
-            document.getElementById('withdrawAmount').value = '';
-            document.getElementById('walletAddress').value = '';
-        }, 4000);
-    }
-
-    // Bot start with 4-second spinner
-    function startBotWithLoading(botName) {
-        let savedConfig = localStorage.getItem('botConfig_' + botName);
-        if (!savedConfig) {
-            showCustomModal('Bot Not Configured', 'Please configure the bot first before starting', 'error');
-            return;
-        }
-        
-        let botCards = document.querySelectorAll('.bot-card');
-        let startBtn = null;
-        
-        for (let card of botCards) {
-            if (card.querySelector('.bot-title')?.innerText === botName) {
-                startBtn = card.querySelector('.bot-start-btn');
-                break;
-            }
-        }
-        
-        if (startBtn) {
-            let originalText = showButtonLoading(startBtn, 'Starting bot');
-            
-            setTimeout(() => {
-                hideButtonLoading(startBtn, originalText);
-                showBotDetail(botName);
-            }, 4000);
+            showDashboard();
         } else {
-            showBotDetail(botName);
+            currentUser = null;
+            holdings = { usdt: 0 };
+            showHomepage();
         }
-    }
-
-    function generateTxId() {
-        return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-    }
-
+    });
+    
     // Sidebar functions
-    function toggleSidebar() {
+    window.toggleSidebar = function() {
         let sidebar = document.getElementById('sidebar');
         let overlay = document.getElementById('sidebarOverlay');
         sidebar.classList.toggle('open');
         overlay.classList.toggle('active');
-    }
-
-    function closeSidebar() {
+    };
+    
+    window.closeSidebar = function() {
         let sidebar = document.getElementById('sidebar');
         let overlay = document.getElementById('sidebarOverlay');
         sidebar.classList.remove('open');
         overlay.classList.remove('active');
-    }
-
-    function navigateTo(page) {
+    };
+    
+    window.navigateTo = function(page) {
         closeSidebar();
         if (page === 'home') showDashboard();
         else if (page === 'markets') showMarkets();
         else if (page === 'trade') showTrade(currentTradeCoin);
         else if (page === 'bots') showBots();
         else if (page === 'profile') showProfile();
-    }
-
-    // Load saved balance from localStorage
-    function loadSavedBalance() {
-        let savedBalance = localStorage.getItem('userBalance');
-        if (savedBalance && !isNaN(parseFloat(savedBalance))) {
-            holdings.usdt = parseFloat(savedBalance);
-        } else {
-            holdings.usdt = 1000.00;
-        }
-    }
+    };
     
-    function saveBalance() {
-        localStorage.setItem('userBalance', holdings.usdt.toFixed(8));
-    }
-    
-    // Load withdrawals from localStorage
-    function loadWithdrawals() {
-        let savedWithdrawals = localStorage.getItem('withdrawals');
-        if (savedWithdrawals) {
-            withdrawals = JSON.parse(savedWithdrawals);
-            withdrawals.forEach(w => {
-                if (w.status === 'Pending' && w.pendingEndTime) {
-                    let remaining = w.pendingEndTime - Date.now();
-                    if (remaining > 0) {
-                        setTimeout(() => approveWithdrawal(w.id), remaining);
-                    } else {
-                        approveWithdrawal(w.id);
-                    }
-                }
-            });
-        } else {
-            withdrawals = [];
-        }
-    }
-    
-    function saveWithdrawals() {
-        localStorage.setItem('withdrawals', JSON.stringify(withdrawals));
-    }
-    
-    function approveWithdrawal(id) {
-        let index = withdrawals.findIndex(w => w.id === id);
-        if (index !== -1 && withdrawals[index].status === 'Pending') {
-            withdrawals[index].status = 'Approved';
-            saveWithdrawals();
-            renderWithdrawalHistory();
-        }
-    }
-    
-    function renderWithdrawalHistory() {
-        let tbody = document.getElementById('withdrawalHistoryBody');
-        if (!tbody) return;
-        
-        if (withdrawals.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>';
-            return;
-        }
-        
-        let html = '';
-        for (let w of withdrawals) {
-            let truncatedAddress = w.address.length > 15 ? w.address.substring(0, 12) + '...' : w.address;
-            let statusClass = w.status === 'Pending' ? 'status-pending' : 'status-approved';
-            html += `<tr onclick="showTransactionDetails(${w.id})">
-                <td>$${w.amount.toFixed(2)}</td>
-                <td>${w.asset}</td>
-                <td class="address-truncated">${truncatedAddress}</td>
-                <td class="${statusClass}">${w.status}</td>
-              </tr>`;
-        }
-        tbody.innerHTML = html;
-    }
-    
-    function showTransactionDetails(id) {
-        let tx = withdrawals.find(w => w.id === id);
-        if (!tx) return;
-        
-        document.getElementById('txDateTime').innerHTML = tx.dateTime;
-        document.getElementById('txAmount').innerHTML = `$${tx.amount.toFixed(2)}`;
-        document.getElementById('txAsset').innerHTML = tx.asset;
-        document.getElementById('txNetwork').innerHTML = tx.network;
-        document.getElementById('txAddress').innerHTML = tx.address;
-        document.getElementById('txFee').innerHTML = `$${tx.fee.toFixed(2)}`;
-        document.getElementById('txId').innerHTML = tx.txId;
-        document.getElementById('txStatus').innerHTML = tx.status;
-        
-        document.getElementById('txDetailModal').style.display = 'block';
-    }
-    
-    function closeTxModal() {
-        document.getElementById('txDetailModal').style.display = 'none';
-    }
-    
-    // Asset selector for withdrawal
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('asset-option')) {
-            document.querySelectorAll('.asset-option').forEach(opt => opt.classList.remove('active'));
-            e.target.classList.add('active');
-            let asset = e.target.getAttribute('data-asset');
-            let networkName = document.getElementById('networkName');
-            let walletLabel = document.getElementById('walletAddressLabel');
-            let walletInput = document.getElementById('walletAddress');
-            
-            if (asset === 'BTC') {
-                networkName.innerHTML = 'BTC Network';
-                walletLabel.innerHTML = 'Bitcoin Wallet Address';
-                walletInput.placeholder = 'Enter your Bitcoin wallet address';
-            } else {
-                networkName.innerHTML = 'TRC20';
-                walletLabel.innerHTML = 'USDT (TRC20) Wallet Address';
-                walletInput.placeholder = 'Enter your USDT TRC20 wallet address';
-            }
-        }
-    });
-
-    function generateCandleData(basePrice, count = 30) {
-        let candles = [];
-        let currentPrice = basePrice;
-        for (let i = 0; i < count; i++) {
-            let open = currentPrice;
-            let change = (Math.random() - 0.5) * 0.02 * currentPrice;
-            let close = currentPrice + change;
-            let high = Math.max(open, close) + (Math.random() * 0.01 * currentPrice);
-            let low = Math.min(open, close) - (Math.random() * 0.01 * currentPrice);
-            let volume = Math.random() * 100 + 20;
-            candles.push({ open, high, low, close, volume });
-            currentPrice = close;
-        }
-        return candles;
-    }
-
-    function drawCandlestickChart() {
-        let canvas = document.getElementById('candleCanvas');
-        if (!canvas) return;
-        
-        let ctx = canvas.getContext('2d');
-        let width = canvas.width;
-        let height = canvas.height;
-        
-        ctx.clearRect(0, 0, width, height);
-        
-        if (candleData.length === 0) return;
-        
-        let candleWidth = (width - 80) / candleData.length;
-        let maxPrice = Math.max(...candleData.map(c => c.high));
-        let minPrice = Math.min(...candleData.map(c => c.low));
-        let priceRange = maxPrice - minPrice;
-        
-        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-        ctx.lineWidth = 0.5;
-        for (let i = 0; i <= 5; i++) {
-            let y = 40 + (i * (height - 80) / 5);
-            ctx.beginPath();
-            ctx.moveTo(60, y);
-            ctx.lineTo(width - 20, y);
-            ctx.stroke();
-            
-            let price = maxPrice - (i * priceRange / 5);
-            ctx.fillStyle = '#a0a0c0';
-            ctx.font = '10px Arial';
-            ctx.fillText(price.toFixed(2), 5, y + 3);
-        }
-        
-        for (let i = 0; i < candleData.length; i++) {
-            let candle = candleData[i];
-            let x = 60 + (i * candleWidth);
-            let isGreen = candle.close >= candle.open;
-            let color = isGreen ? '#48bb78' : '#e53e3e';
-            
-            let openY = 40 + ((maxPrice - candle.open) / priceRange) * (height - 80);
-            let closeY = 40 + ((maxPrice - candle.close) / priceRange) * (height - 80);
-            let highY = 40 + ((maxPrice - candle.high) / priceRange) * (height - 80);
-            let lowY = 40 + ((maxPrice - candle.low) / priceRange) * (height - 80);
-            
-            let bodyTop = Math.min(openY, closeY);
-            let bodyHeight = Math.abs(closeY - openY);
-            let bodyWidth = candleWidth * 0.6;
-            
-            ctx.beginPath();
-            ctx.moveTo(x + bodyWidth/2, highY);
-            ctx.lineTo(x + bodyWidth/2, lowY);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            
-            ctx.fillStyle = color;
-            ctx.fillRect(x + (candleWidth - bodyWidth)/2, bodyTop, bodyWidth, Math.max(1, bodyHeight));
-        }
-        
-        let coinId = currentTradeCoin.toLowerCase();
-        let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-        let currentY = 40 + ((maxPrice - currentPrice) / priceRange) * (height - 80);
-        ctx.beginPath();
-        ctx.moveTo(60, currentY);
-        ctx.lineTo(width - 20, currentY);
-        ctx.strokeStyle = '#667eea';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([5, 5]);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        
-        ctx.fillStyle = '#667eea';
-        ctx.font = '10px Arial';
-        ctx.fillText(`Current: $${currentPrice.toFixed(2)}`, width - 120, currentY - 3);
-    }
-
-    function updateChartWithCurrentPrice() {
-        let coinId = currentTradeCoin.toLowerCase();
-        let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-        
-        if (candleData.length > 0) {
-            let lastCandle = candleData[candleData.length - 1];
-            let newClose = currentPrice;
-            let newHigh = Math.max(lastCandle.high, currentPrice);
-            let newLow = Math.min(lastCandle.low, currentPrice);
-            lastCandle.close = newClose;
-            lastCandle.high = newHigh;
-            lastCandle.low = newLow;
-            lastCandle.volume += Math.random() * 10;
-        }
-        
-        drawCandlestickChart();
-        updateChartStats();
-    }
-
-    function updateChartStats() {
-        let coinId = currentTradeCoin.toLowerCase();
-        let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-        let change = currentPrices[coinId + 'Change'] || 0;
-        let high = currentPrice * (1 + Math.abs(change) / 100 + 0.005);
-        let low = currentPrice * (1 - Math.abs(change) / 100 - 0.005);
-        let volume = (Math.random() * 500 + 100).toFixed(2);
-        let ma7 = currentPrice * (1 + (Math.random() - 0.5) * 0.01);
-        let ma14 = currentPrice * (1 + (Math.random() - 0.5) * 0.008);
-        let ma28 = currentPrice * (1 + (Math.random() - 0.5) * 0.005);
-        
-        document.getElementById('statHigh').innerHTML = `$${high.toFixed(2)}`;
-        document.getElementById('statLow').innerHTML = `$${low.toFixed(2)}`;
-        document.getElementById('statVolume').innerHTML = `${volume}M`;
-        document.getElementById('statMA7').innerHTML = `$${ma7.toFixed(2)}`;
-        document.getElementById('statMA14').innerHTML = `$${ma14.toFixed(2)}`;
-        document.getElementById('statMA28').innerHTML = `$${ma28.toFixed(2)}`;
-        
-        let orderBookHtml = '';
-        for (let i = 0; i < 8; i++) {
-            let side = i < 4 ? 'sell' : 'buy';
-            let price = currentPrice * (1 + (Math.random() - 0.5) * 0.002);
-            let qty = (Math.random() * 2).toFixed(4);
-            let total = (price * qty).toFixed(2);
-            let priceColor = side === 'sell' ? '#e53e3e' : '#48bb78';
-            orderBookHtml += `<tr><td style="color:${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
-        }
-        document.getElementById('orderBookBody').innerHTML = orderBookHtml;
-        
-        let tradesHtml = '';
-        for (let i = 0; i < 10; i++) {
-            let type = Math.random() > 0.5 ? 'Buy' : 'Sell';
-            let typeColor = type === 'Buy' ? '#48bb78' : '#e53e3e';
-            let price = currentPrice * (1 + (Math.random() - 0.5) * 0.001);
-            let qty = (Math.random() * 1).toFixed(4);
-            let time = new Date(Date.now() - i * 60000).toLocaleTimeString();
-            tradesHtml += `<tr><td>${time}</td><td style="color:${typeColor}">$${price.toFixed(2)}</td><td>${qty}</td><td style="color:${typeColor}">${type}</td></tr>`;
-        }
-        document.getElementById('tradesBody').innerHTML = tradesHtml;
-    }
-
-    function openChartModal() {
-        let modal = document.getElementById('chartModal');
-        let coinId = currentTradeCoin.toLowerCase();
-        let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-        
-        candleData = generateCandleData(currentPrice, 30);
-        document.getElementById('chartCoinTitle').innerHTML = `${currentTradeCoin}/USDT Chart`;
-        
-        modal.style.display = 'block';
-        setTimeout(() => {
-            let canvas = document.getElementById('candleCanvas');
-            let container = canvas.parentElement;
-            canvas.width = Math.max(800, container.clientWidth - 20);
-            drawCandlestickChart();
-        }, 100);
-        updateChartStats();
-        
-        if (chartUpdateInterval) clearInterval(chartUpdateInterval);
-        chartUpdateInterval = setInterval(() => {
-            let coinId = currentTradeCoin.toLowerCase();
-            let newPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-            
-            if (candleData.length > 0) {
-                let lastCandle = candleData[candleData.length - 1];
-                lastCandle.close = newPrice;
-                lastCandle.high = Math.max(lastCandle.high, newPrice);
-                lastCandle.low = Math.min(lastCandle.low, newPrice);
-            }
-            
-            drawCandlestickChart();
-            updateChartStats();
-        }, 3000);
-    }
-
-    function closeChartModal() {
-        document.getElementById('chartModal').style.display = 'none';
-        if (chartUpdateInterval) {
-            clearInterval(chartUpdateInterval);
-            chartUpdateInterval = null;
-        }
-    }
-
-    function resizeCanvas() {
-        let canvas = document.getElementById('candleCanvas');
-        if (canvas && document.getElementById('chartModal').style.display === 'block') {
-            let container = canvas.parentElement;
-            canvas.width = Math.max(800, container.clientWidth - 20);
-            drawCandlestickChart();
-        }
-    }
-
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('time-btn')) {
-            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
-            let coinId = currentTradeCoin.toLowerCase();
-            let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-            candleData = generateCandleData(currentPrice, 30);
-            drawCandlestickChart();
-        }
-        if (e.target.classList.contains('indicator-btn')) {
-            document.querySelectorAll('.indicator-btn').forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
-        }
-        if (e.target.classList.contains('chart-tab')) {
-            document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
-            e.target.classList.add('active');
-            let tab = e.target.getAttribute('data-tab');
-            if (tab === 'orderbook') {
-                document.getElementById('orderBookPanel').style.display = 'block';
-                document.getElementById('tradesPanel').style.display = 'none';
-            } else {
-                document.getElementById('orderBookPanel').style.display = 'none';
-                document.getElementById('tradesPanel').style.display = 'block';
-            }
-        }
-        
-        const navItem = e.target.closest('.nav-item');
-        if(navItem) {
-            const navType = navItem.getAttribute('data-nav');
-            if(navType === 'home') { showDashboard(); }
-            else if(navType === 'profile') { showProfile(); }
-            else if(navType === 'markets') { showMarkets(); }
-            else if(navType === 'trade') { showTrade(currentTradeCoin); }
-            else if(navType === 'bots') { showBots(); }
-        }
-    });
-
-    function showHomepage() { 
-        document.getElementById('homepage').style.display = 'block'; 
-        document.getElementById('authPage').style.display = 'none'; 
+    // Page navigation functions
+    window.showHomepage = function() {
+        document.getElementById('homepage').style.display = 'block';
+        document.getElementById('authPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'none';
         document.getElementById('marketsPage').style.display = 'none';
@@ -3406,11 +3114,11 @@
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
         renderHomepageWatchlist();
-    }
+    };
     
-    function showAuthPage() { 
-        document.getElementById('homepage').style.display = 'none'; 
-        document.getElementById('authPage').style.display = 'block'; 
+    window.showAuthPage = function() {
+        document.getElementById('homepage').style.display = 'none';
+        document.getElementById('authPage').style.display = 'block';
         document.getElementById('dashboard').style.display = 'none';
         document.getElementById('profilePage').style.display = 'none';
         document.getElementById('marketsPage').style.display = 'none';
@@ -3418,11 +3126,11 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
-    }
+    };
     
-    function showDashboard() { 
-        document.getElementById('homepage').style.display = 'none'; 
-        document.getElementById('authPage').style.display = 'none'; 
+    window.showDashboard = function() {
+        document.getElementById('homepage').style.display = 'none';
+        document.getElementById('authPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'block';
         document.getElementById('profilePage').style.display = 'none';
         document.getElementById('marketsPage').style.display = 'none';
@@ -3430,10 +3138,10 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
-        loadDashboard(); 
-    }
+        loadDashboard();
+    };
     
-    function showProfile() {
+    window.showProfile = function() {
         document.getElementById('homepage').style.display = 'none';
         document.getElementById('authPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'none';
@@ -3444,9 +3152,9 @@
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
         renderProfile();
-    }
+    };
     
-    function showMarkets() {
+    window.showMarkets = function() {
         document.getElementById('homepage').style.display = 'none';
         document.getElementById('authPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'none';
@@ -3457,9 +3165,9 @@
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
         loadMarketsPage();
-    }
+    };
     
-    function showTrade(coin = 'BTC') {
+    window.showTrade = function(coin = 'BTC') {
         currentTradeCoin = coin;
         document.getElementById('homepage').style.display = 'none';
         document.getElementById('authPage').style.display = 'none';
@@ -3471,9 +3179,9 @@
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
         loadTradePage();
-    }
+    };
     
-    function showBots() {
+    window.showBots = function() {
         document.getElementById('homepage').style.display = 'none';
         document.getElementById('authPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'none';
@@ -3484,9 +3192,9 @@
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
         loadSavedBotConfigs();
-    }
+    };
     
-    function showWithdrawalPage() {
+    window.showWithdrawalPage = function() {
         document.getElementById('homepage').style.display = 'none';
         document.getElementById('authPage').style.display = 'none';
         document.getElementById('dashboard').style.display = 'none';
@@ -3502,362 +3210,186 @@
             balanceEl.innerHTML = `$${holdings.usdt.toFixed(2)}`;
         }
         renderWithdrawalHistory();
-    }
+    };
     
-    function showBotDetail(botName) {
-        let savedConfig = localStorage.getItem('botConfig_' + botName);
-        if (!savedConfig) {
-            showCustomModal('Bot Not Configured', 'Please configure the bot first before starting', 'error');
-            return;
-        }
-        
-        let config = JSON.parse(savedConfig);
-        
-        activeBot = botName;
-        lastTradeResult = null;
-        botStats = {
-            botName: botName,
-            asset: config.asset,
-            amountPerTrade: parseFloat(config.amount),
-            totalPL: 0,
-            totalRuns: 0,
-            totalTrades: 0,
-            wins: 0,
-            botBalance: holdings.usdt,
-            isRunning: false,
-            isPaused: false,
-            logs: []
-        };
-        
-        addBotLog(`High-Frequency Trading System loaded`, 'info');
-        addBotLog(`Account Balance: $${holdings.usdt.toFixed(2)}`, 'info');
-        addBotLog(`STANDARD Tier Active - Optimized for consistent small profits`, 'info');
-        addBotLog(`Base win rate: 65-72% | Target: $${(botStats.amountPerTrade * 0.01).toFixed(2)}-$${(botStats.amountPerTrade * 0.05).toFixed(2)} per trade`, 'info');
-        
-        document.getElementById('botDetailTitle').innerHTML = botName === 'Bitcoin Accumulation' ? 'Bitcoin Accumulation Bot' : 'ETH DCA Pro Bot';
-        document.getElementById('botBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
-        document.getElementById('botDetailStatus').className = 'bot-status-badge stopped';
-        document.getElementById('botDetailStatus').innerHTML = 'Stopped';
-        
-        document.getElementById('startBotBtn').disabled = false;
-        document.getElementById('pauseBotBtn').disabled = true;
-        document.getElementById('stopBotBtn').disabled = true;
-        
-        let plElement = document.getElementById('botPL');
-        if (plElement) {
-            plElement.className = 'stat-value';
-        }
-        
-        document.getElementById('botsPage').style.display = 'none';
-        document.getElementById('botDetailPage').style.display = 'block';
-        
-        updateBotStatsDisplay();
-    }
-    
-    function addBotLog(message, type = 'info') {
-        let time = new Date();
-        let timeStr = `${time.getHours().toString().padStart(2,'0')}:${time.getMinutes().toString().padStart(2,'0')}:${time.getSeconds().toString().padStart(2,'0')}.${time.getMilliseconds().toString().padStart(3,'0')}`;
-        let logEntry = { time: timeStr, message: message, type: type };
-        botStats.logs.unshift(logEntry);
-        
-        if (botStats.logs.length > 100) botStats.logs.pop();
-        
-        updateLogsDisplay();
-    }
-    
-    function updateLogsDisplay() {
-        let logsContainer = document.getElementById('botLogs');
-        let logCount = document.getElementById('logCount');
-        
-        if (logsContainer) {
-            logsContainer.innerHTML = '';
-            for (let log of botStats.logs) {
-                let logDiv = document.createElement('div');
-                logDiv.className = 'log-entry ' + log.type;
-                logDiv.innerHTML = `<span class="time">[${log.time}]</span> ${log.message}`;
-                logsContainer.appendChild(logDiv);
-            }
-            if (logCount) logCount.innerHTML = botStats.logs.length;
-        }
-    }
-    
-    function updateBotStatsDisplay() {
-        let plElement = document.getElementById('botPL');
-        if (plElement) {
-            let plValue = botStats.totalPL;
-            plElement.innerHTML = `${plValue >= 0 ? '+' : ''}$${Math.abs(plValue).toFixed(2)}`;
-            
-            if (lastTradeResult === 'win') {
-                plElement.className = 'stat-value positive';
-            } else if (lastTradeResult === 'loss') {
-                plElement.className = 'stat-value negative';
-            } else {
-                plElement.className = 'stat-value';
+    // Populate countries
+    function populateCountries() {
+        let countrySelect = document.getElementById('signupCountry');
+        if (countrySelect) {
+            countrySelect.innerHTML = '';
+            for (let country of countriesList) {
+                let option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                countrySelect.appendChild(option);
             }
         }
-        let runsElement = document.getElementById('botRuns');
-        if (runsElement) runsElement.innerHTML = botStats.totalRuns;
-        let tradesElement = document.getElementById('botTrades');
-        if (tradesElement) tradesElement.innerHTML = botStats.totalTrades;
-        let winRate = botStats.totalTrades > 0 ? (botStats.wins / botStats.totalTrades * 100) : 0;
-        let winRateElement = document.getElementById('botWinRate');
-        if (winRateElement) winRateElement.innerHTML = `${winRate.toFixed(1)}%`;
-        let balanceElement = document.getElementById('botBalance');
-        if (balanceElement) balanceElement.innerHTML = `$${botStats.botBalance.toFixed(2)}`;
     }
     
-    function calculateProfitLoss(amount) {
-        let isWin = Math.random() * 100 <= 65;
-        let profitPercent = 0;
-        
-        if (isWin) {
-            profitPercent = (Math.random() * 4 + 1) / 100;
-            let profit = amount * profitPercent;
-            if (profit < 0.05 && amount >= 10) profit = 0.05;
-            return { profit: profit, isWin: true, percent: profitPercent * 100 };
-        } else {
-            let lossPercent = (Math.random() * 2.5 + 0.5) / 100;
-            let loss = amount * lossPercent;
-            if (loss < 0.03 && amount >= 10) loss = 0.03;
-            return { profit: -loss, isWin: false, percent: lossPercent * 100 };
+    // Tab switching
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('loginForm').classList.toggle('active', this.dataset.tab === 'login');
+            document.getElementById('signupForm').classList.toggle('active', this.dataset.tab === 'signup');
+        });
+    });
+    
+    // Update date/time
+    function updateDateTime() {
+        let now = new Date();
+        let dateTimeElement = document.getElementById('dateTimeDisplay');
+        if (dateTimeElement) {
+            dateTimeElement.innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>`;
         }
     }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
     
-    function executeBotTrade() {
-        if (!botStats.isRunning || botStats.isPaused) return;
-        
-        let amount = botStats.amountPerTrade;
-        let result = calculateProfitLoss(amount);
-        let profit = result.profit;
-        let isWin = result.isWin;
-        
-        lastTradeResult = isWin ? 'win' : 'loss';
-        
-        addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${amount.toFixed(2)}`, 'buy');
-        
-        if (profit >= 0) {
-            addBotLog(`SELL ORDER: +$${profit.toFixed(2)} profit (${result.percent.toFixed(1)}%)`, 'sell-profit');
-        } else {
-            addBotLog(`SELL ORDER: -$${Math.abs(profit).toFixed(2)} loss (${result.percent.toFixed(1)}%)`, 'sell-loss');
-        }
-        
-        if (isWin) botStats.wins++;
-        botStats.totalPL += profit;
-        botStats.botBalance += profit;
-        botStats.totalTrades++;
-        botStats.totalRuns++;
-        
-        holdings.usdt += profit;
-        saveBalance();
-        updatePortfolioTotal();
+    // Fetch prices
+    async function fetchPrices() {
+        try {
+            let ids = ['bitcoin', 'ethereum', 'binancecoin', 'solana', 'tron', 'usd-coin', 'ripple', 'dogecoin', 'tether'];
+            let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`;
+            let res = await fetch(url);
+            if (!res.ok) return true;
+            let data = await res.json();
+            if (data.bitcoin?.usd !== undefined) {
+                currentPrices = {
+                    btc: data.bitcoin?.usd || FALLBACK_PRICES.btc,
+                    eth: data.ethereum?.usd || FALLBACK_PRICES.eth,
+                    bnb: data.binancecoin?.usd || FALLBACK_PRICES.bnb,
+                    sol: data.solana?.usd || FALLBACK_PRICES.sol,
+                    trx: data.tron?.usd || FALLBACK_PRICES.trx,
+                    usdc: data['usd-coin']?.usd || FALLBACK_PRICES.usdc,
+                    usdt: data.tether?.usd || FALLBACK_PRICES.usdt,
+                    xrp: data.ripple?.usd || FALLBACK_PRICES.xrp,
+                    doge: data.dogecoin?.usd || FALLBACK_PRICES.doge,
+                    btcChange: data.bitcoin?.usd_24h_change || FALLBACK_PRICES.btcChange,
+                    ethChange: data.ethereum?.usd_24h_change || FALLBACK_PRICES.ethChange,
+                    bnbChange: data.binancecoin?.usd_24h_change || FALLBACK_PRICES.bnbChange,
+                    solChange: data.solana?.usd_24h_change || FALLBACK_PRICES.solChange,
+                    usdtChange: data.tether?.usd_24h_change || FALLBACK_PRICES.usdtChange
+                };
+            }
+            return true;
+        } catch (e) { return true; }
+    }
+    
+    async function loadDashboard() {
+        await fetchPrices();
         renderCrypto();
-        renderMarketsCrypto();
+        renderWatchlist();
+        updatePortfolioTotal();
+        updateLastUpdatedText();
         renderHomepageWatchlist();
-        
-        addBotLog(`New Balance: $${holdings.usdt.toFixed(2)}`, 'info');
-        
-        updateBotStatsDisplay();
     }
     
-    function startBotTrading() {
-        if (botInterval) clearInterval(botInterval);
-        
-        botStats.isRunning = true;
-        botStats.isPaused = false;
-        
-        document.getElementById('botDetailStatus').className = 'bot-status-badge running';
-        document.getElementById('botDetailStatus').innerHTML = 'Running';
-        document.getElementById('startBotBtn').disabled = true;
-        document.getElementById('pauseBotBtn').disabled = false;
-        document.getElementById('stopBotBtn').disabled = false;
-        
-        addBotLog(`Bot started - Trading ${botStats.asset}/USDT`, 'info');
-        addBotLog(`Investment amount: $${botStats.amountPerTrade.toFixed(2)} per trade`, 'info');
-        addBotLog(`Trading interval: 4 seconds`, 'info');
-        
-        botInterval = setInterval(() => {
-            executeBotTrade();
-        }, 4000);
-    }
-    
-    function pauseBotTrading() {
-        if (botStats.isRunning && !botStats.isPaused) {
-            botStats.isPaused = true;
-            document.getElementById('botDetailStatus').className = 'bot-status-badge paused';
-            document.getElementById('botDetailStatus').innerHTML = 'Paused';
-            document.getElementById('startBotBtn').disabled = false;
-            document.getElementById('pauseBotBtn').disabled = true;
-            document.getElementById('stopBotBtn').disabled = false;
-            addBotLog(`Bot paused - Trading stopped temporarily`, 'info');
-        }
-    }
-    
-    function resumeBotTrading() {
-        if (botStats.isRunning && botStats.isPaused) {
-            botStats.isPaused = false;
-            document.getElementById('botDetailStatus').className = 'bot-status-badge running';
-            document.getElementById('botDetailStatus').innerHTML = 'Running';
-            document.getElementById('startBotBtn').disabled = true;
-            document.getElementById('pauseBotBtn').disabled = false;
-            document.getElementById('stopBotBtn').disabled = false;
-            addBotLog(`Bot resumed - Trading active`, 'info');
-        }
-    }
-    
-    function stopBotTrading() {
-        if (botInterval) {
-            clearInterval(botInterval);
-            botInterval = null;
-        }
-        
-        botStats.isRunning = false;
-        botStats.isPaused = false;
-        
-        document.getElementById('botDetailStatus').className = 'bot-status-badge stopped';
-        document.getElementById('botDetailStatus').innerHTML = 'Stopped';
-        document.getElementById('startBotBtn').disabled = false;
-        document.getElementById('pauseBotBtn').disabled = true;
-        document.getElementById('stopBotBtn').disabled = true;
-        
-        addBotLog(`Bot stopped - Final P/L: ${botStats.totalPL >= 0 ? '+' : ''}$${Math.abs(botStats.totalPL).toFixed(2)}`, 'info');
-        
-        let botKey = activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
-        let botStatusSpan = document.getElementById(`botStatus${botKey}`);
-        let botPerfSpan = document.getElementById(`botPerf${botKey}`);
-        
-        if (botStatusSpan) {
-            botStatusSpan.innerHTML = 'Not Configured';
-            botStatusSpan.style.background = 'rgba(229,62,62,0.2)';
-            botStatusSpan.style.color = '#e53e3e';
-        }
-        if (botPerfSpan) {
-            botPerfSpan.innerHTML = 'Performance: --';
-            botPerfSpan.style.color = '#a0a0c0';
-        }
-        
-        localStorage.removeItem('botConfig_' + activeBot);
-        saveBalance();
-        
-        activeBot = null;
-        lastTradeResult = null;
-        
-        setTimeout(() => {
-            showBots();
-        }, 2000);
-    }
-    
-    function controlBotAction(action) {
-        if (action === 'start') {
-            if (botStats.isPaused) {
-                resumeBotTrading();
-            } else {
-                startBotTrading();
-            }
-        } else if (action === 'pause') {
-            pauseBotTrading();
-        } else if (action === 'stop') {
-            stopBotTrading();
-        }
-    }
-    
-    function loadMarketsPage() {
-        renderMarketsCrypto();
-        renderMarketsWatchlist();
-        updateMarketsLastUpdatedText();
-    }
-
-    function renderMarketsWatchlist() { 
+    function renderWatchlist() {
         let watchCoins = [
-            {id:'btc', name:'BTC', full:'Bitcoin'},
-            {id:'eth', name:'ETH', full:'Ethereum'},
-            {id:'usdt', name:'USDT', full:'Tether'},
-            {id:'usdc', name:'USDC', full:'USD Coin'}
-        ]; 
-        let html = ''; 
-        for(let coin of watchCoins) { 
-            let price = currentPrices[coin.id] || 0; 
-            let change = currentPrices[coin.id+'Change'] || 0; 
-            let changeClass = change >= 0 ? 'positive' : 'negative'; 
+            { id: 'btc', name: 'BTC', full: 'Bitcoin' },
+            { id: 'eth', name: 'ETH', full: 'Ethereum' },
+            { id: 'usdt', name: 'USDT', full: 'Tether' },
+            { id: 'usdc', name: 'USDC', full: 'USD Coin' }
+        ];
+        let html = '';
+        for (let coin of watchCoins) {
+            let price = currentPrices[coin.id] || 0;
+            let change = currentPrices[coin.id + 'Change'] || 0;
+            let changeClass = change >= 0 ? 'positive' : 'negative';
             html += `<div class="watchlist-item clickable" onclick="showTrade('${coin.name}')">
                 <div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div>
-                <div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
-                <div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
-            </div>`; 
-        } 
-        let container = document.getElementById('marketsWatchlistContainer');
-        if(container) container.innerHTML = html; 
+                <div class="coin-price"><div class="price">$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
+                <div class="${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div></div>
+            </div>`;
+        }
+        let container = document.getElementById('watchlistContainer');
+        if (container) container.innerHTML = html;
     }
     
-    function renderMarketsCrypto() { 
+    function renderCrypto() {
         let usdtPrice = currentPrices.usdt || 1.00;
         let usdtValue = usdtPrice * holdings.usdt;
         let html = `<div class="crypto-item" onclick="showTrade('USDT')">
             <div><h4>USDT</h4><p>Tether</p><div class="positive">0.00%</div></div>
-            <div style="text-align:right;"><div class="price">$${usdtPrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
+            <div style="text-align:right;"><div class="price">$${usdtPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
             <div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt.toFixed(4)} USDT</div>
             <div>Value: $${usdtValue.toFixed(2)}</div>
             <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('USDT')">Trade</button></div>
-        </div>`; 
+        </div>`;
         
-        let container = document.getElementById('marketsCryptoContainer');
-        if(container) container.innerHTML = html; 
+        let container = document.getElementById('cryptoContainer');
+        if (container) container.innerHTML = html;
     }
-
-    function updateMarketsLastUpdatedText() {
-        let lastUpdatedText = document.getElementById('marketsLastUpdatedText');
-        if(lastUpdatedText) {
+    
+    function updatePortfolioTotal() {
+        let total = holdings.usdt * (currentPrices.usdt || 1.00);
+        let balanceElement = document.getElementById('portfolioBalance');
+        if (balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`;
+        saveBalance();
+    }
+    
+    function updateLastUpdatedText() {
+        let lastUpdatedText = document.getElementById('lastUpdatedText');
+        if (lastUpdatedText) {
             lastUpdatedText.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko`;
         }
     }
-
-    function refreshMarketsPrices() {
-        loadMarketsPage();
-    }
     
-    // Render homepage watchlist (non-clickable)
+    window.refreshDashboardPrices = async function() {
+        await fetchPrices();
+        renderCrypto();
+        renderWatchlist();
+        updatePortfolioTotal();
+        updateLastUpdatedText();
+        renderHomepageWatchlist();
+    };
+    
     function renderHomepageWatchlist() {
         let watchCoins = [
-            {id:'btc', name:'BTC', full:'Bitcoin'},
-            {id:'eth', name:'ETH', full:'Ethereum'},
-            {id:'usdt', name:'USDT', full:'Tether'},
-            {id:'usdc', name:'USDC', full:'USD Coin'}
-        ]; 
-        let html = ''; 
-        for(let coin of watchCoins) { 
-            let price = currentPrices[coin.id] || 0; 
-            let change = currentPrices[coin.id+'Change'] || 0; 
-            let changeClass = change >= 0 ? 'positive' : 'negative'; 
+            { id: 'btc', name: 'BTC', full: 'Bitcoin' },
+            { id: 'eth', name: 'ETH', full: 'Ethereum' },
+            { id: 'usdt', name: 'USDT', full: 'Tether' },
+            { id: 'usdc', name: 'USDC', full: 'USD Coin' }
+        ];
+        let html = '';
+        for (let coin of watchCoins) {
+            let price = currentPrices[coin.id] || 0;
+            let change = currentPrices[coin.id + 'Change'] || 0;
+            let changeClass = change >= 0 ? 'positive' : 'negative';
             html += `<div class="watchlist-item">
                 <div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div>
-                <div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
-                <div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
-            </div>`; 
-        } 
+                <div class="coin-price"><div class="price">$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
+                <div class="${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div></div>
+            </div>`;
+        }
         let container = document.getElementById('homepageWatchlist');
-        if(container) container.innerHTML = html;
+        if (container) container.innerHTML = html;
         
         let lastUpdated = document.getElementById('lastUpdatedWatchlist');
-        if(lastUpdated) lastUpdated.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+        if (lastUpdated) lastUpdated.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
     }
-
+    
+    // Trade functions
     function loadTradePage() {
         document.getElementById('tradeCoinSelect').value = currentTradeCoin;
         updateTradePriceDisplay();
         setTradeMode(currentTradeMode);
         calculateTotal();
     }
-
-    function changeTradeCoin() {
+    
+    window.changeTradeCoin = function() {
         currentTradeCoin = document.getElementById('tradeCoinSelect').value;
         updateTradePriceDisplay();
         calculateTotal();
-    }
-
+    };
+    
     function updateTradePriceDisplay() {
         let coinId = currentTradeCoin.toLowerCase();
         let price = currentPrices[coinId] || 0;
         let change = currentPrices[coinId + 'Change'] || 0;
-        document.getElementById('tradePrice').innerHTML = `$${price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})}`;
+        document.getElementById('tradePrice').innerHTML = `$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
         let changeClass = change >= 0 ? 'positive' : 'negative';
         document.getElementById('tradeChange').innerHTML = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
         document.getElementById('tradeChange').className = 'trade-change ' + changeClass;
@@ -3867,8 +3399,8 @@
         let availableBalance = holdings[coinId] || 0;
         document.getElementById('tradeBalanceInfo').innerHTML = `Available: ${availableBalance.toFixed(8)} ${currentTradeCoin}`;
     }
-
-    function setTradeMode(mode) {
+    
+    window.setTradeMode = function(mode) {
         currentTradeMode = mode;
         let buyTab = document.querySelector('.trade-tab.buy');
         let sellTab = document.querySelector('.trade-tab.sell');
@@ -3885,16 +3417,16 @@
             confirmBtn.className = 'confirm-btn sell';
             confirmBtn.innerHTML = `Sell ${currentTradeCoin}`;
         }
-    }
-
-    function calculateTotal() {
+    };
+    
+    window.calculateTotal = function() {
         let quantity = parseFloat(document.getElementById('tradeQuantityInput').value) || 0;
         let price = parseFloat(document.getElementById('tradePriceInput').value) || 0;
         let total = quantity * price;
         document.getElementById('tradeTotalValue').innerHTML = `$${total.toFixed(2)}`;
-    }
-
-    function executeTrade() {
+    };
+    
+    window.executeTrade = async function() {
         let coinId = currentTradeCoin.toLowerCase();
         let quantity = parseFloat(document.getElementById('tradeQuantityInput').value) || 0;
         let price = parseFloat(document.getElementById('tradePriceInput').value) || 0;
@@ -3924,7 +3456,7 @@
             holdings.usdt = holdings.usdt + total;
         }
         
-        saveBalance();
+        await saveBalance();
         document.getElementById('tradeQuantityInput').value = '';
         updateTradePriceDisplay();
         updatePortfolioTotal();
@@ -3937,276 +3469,249 @@
             botStats.botBalance = holdings.usdt;
             updateBotStatsDisplay();
         }
+    };
+    
+    // Markets page functions
+    function loadMarketsPage() {
+        renderMarketsCrypto();
+        renderMarketsWatchlist();
+        updateMarketsLastUpdatedText();
     }
-
+    
+    function renderMarketsWatchlist() {
+        let watchCoins = [
+            { id: 'btc', name: 'BTC', full: 'Bitcoin' },
+            { id: 'eth', name: 'ETH', full: 'Ethereum' },
+            { id: 'usdt', name: 'USDT', full: 'Tether' },
+            { id: 'usdc', name: 'USDC', full: 'USD Coin' }
+        ];
+        let html = '';
+        for (let coin of watchCoins) {
+            let price = currentPrices[coin.id] || 0;
+            let change = currentPrices[coin.id + 'Change'] || 0;
+            let changeClass = change >= 0 ? 'positive' : 'negative';
+            html += `<div class="watchlist-item clickable" onclick="showTrade('${coin.name}')">
+                <div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div>
+                <div class="coin-price"><div class="price">$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
+                <div class="${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div></div>
+            </div>`;
+        }
+        let container = document.getElementById('marketsWatchlistContainer');
+        if (container) container.innerHTML = html;
+    }
+    
+    function renderMarketsCrypto() {
+        let usdtPrice = currentPrices.usdt || 1.00;
+        let usdtValue = usdtPrice * holdings.usdt;
+        let html = `<div class="crypto-item" onclick="showTrade('USDT')">
+            <div><h4>USDT</h4><p>Tether</p><div class="positive">0.00%</div></div>
+            <div style="text-align:right;"><div class="price">$${usdtPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</div>
+            <div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt.toFixed(4)} USDT</div>
+            <div>Value: $${usdtValue.toFixed(2)}</div>
+            <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('USDT')">Trade</button></div>
+        </div>`;
+        
+        let container = document.getElementById('marketsCryptoContainer');
+        if (container) container.innerHTML = html;
+    }
+    
+    function updateMarketsLastUpdatedText() {
+        let lastUpdatedText = document.getElementById('marketsLastUpdatedText');
+        if (lastUpdatedText) {
+            lastUpdatedText.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko`;
+        }
+    }
+    
+    window.refreshMarketsPrices = function() {
+        loadMarketsPage();
+    };
+    
+    // Withdrawal functions
+    function generateTxId() {
+        return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    }
+    
+    function approveWithdrawal(id) {
+        let index = withdrawals.findIndex(w => w.id === id);
+        if (index !== -1 && withdrawals[index].status === 'Pending') {
+            withdrawals[index].status = 'Approved';
+            saveWithdrawals();
+            renderWithdrawalHistory();
+        }
+    }
+    
+    function saveWithdrawals() {
+        if (currentUser?.uid) {
+            saveUserData(currentUser.uid);
+        }
+    }
+    
+    function renderWithdrawalHistory() {
+        let tbody = document.getElementById('withdrawalHistoryBody');
+        if (!tbody) return;
+        
+        if (withdrawals.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        for (let w of withdrawals) {
+            let truncatedAddress = w.address.length > 15 ? w.address.substring(0, 12) + '...' : w.address;
+            let statusClass = w.status === 'Pending' ? 'status-pending' : 'status-approved';
+            html += `<tr onclick="showTransactionDetails(${w.id})">
+                <td>$${w.amount.toFixed(2)}</td>
+                <td>${w.asset}</td>
+                <td class="address-truncated">${truncatedAddress}</td>
+                <td class="${statusClass}">${w.status}</td>
+            </tr>`;
+        }
+        tbody.innerHTML = html;
+    }
+    
+    window.showTransactionDetails = function(id) {
+        let tx = withdrawals.find(w => w.id === id);
+        if (!tx) return;
+        
+        document.getElementById('txDateTime').innerHTML = tx.dateTime;
+        document.getElementById('txAmount').innerHTML = `$${tx.amount.toFixed(2)}`;
+        document.getElementById('txAsset').innerHTML = tx.asset;
+        document.getElementById('txNetwork').innerHTML = tx.network;
+        document.getElementById('txAddress').innerHTML = tx.address;
+        document.getElementById('txFee').innerHTML = `$${tx.fee.toFixed(2)}`;
+        document.getElementById('txId').innerHTML = tx.txId;
+        document.getElementById('txStatus').innerHTML = tx.status;
+        
+        document.getElementById('txDetailModal').style.display = 'block';
+    };
+    
+    window.closeTxModal = function() {
+        document.getElementById('txDetailModal').style.display = 'none';
+    };
+    
+    window.submitWithdrawalWithLoading = function() {
+        let amount = parseFloat(document.getElementById('withdrawAmount').value);
+        let address = document.getElementById('walletAddress').value;
+        let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
+        
+        if (!amount || amount <= 0) {
+            showCustomModal('Invalid Amount', 'Please enter a valid amount', 'error');
+            return;
+        }
+        
+        if (amount < 10) {
+            showCustomModal('Amount Too Low', 'Minimum withdrawal amount is $10', 'error');
+            return;
+        }
+        
+        if (amount > holdings.usdt) {
+            showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)} available`, 'error');
+            return;
+        }
+        
+        if (!address || address.trim() === '') {
+            showCustomModal('Invalid Address', 'Please enter a valid wallet address', 'error');
+            return;
+        }
+        
+        let withdrawBtn = document.querySelector('.withdraw-submit-btn');
+        let originalText = showButtonLoading(withdrawBtn, 'Processing withdrawal');
+        
+        setTimeout(async () => {
+            holdings.usdt -= amount;
+            await saveBalance();
+            updatePortfolioTotal();
+            renderCrypto();
+            renderMarketsCrypto();
+            renderHomepageWatchlist();
+            
+            let withdrawBalanceEl = document.getElementById('withdrawBalance');
+            if (withdrawBalanceEl) {
+                withdrawBalanceEl.innerHTML = `$${holdings.usdt.toFixed(2)}`;
+            }
+            
+            let networkFee = asset === 'BTC' ? 1.50 : 0.80;
+            let newWithdrawal = {
+                id: Date.now(),
+                dateTime: new Date().toLocaleString(),
+                amount: amount,
+                asset: asset,
+                network: asset === 'BTC' ? 'BTC Network' : 'TRC20',
+                address: address,
+                fee: networkFee,
+                txId: generateTxId(),
+                status: 'Pending',
+                pendingEndTime: Date.now() + 30000
+            };
+            
+            withdrawals.unshift(newWithdrawal);
+            await saveWithdrawals();
+            renderWithdrawalHistory();
+            
+            setTimeout(() => approveWithdrawal(newWithdrawal.id), 30000);
+            
+            hideButtonLoading(withdrawBtn, originalText);
+            showCustomModal('Withdrawal Submitted', `Amount: $${amount}\nAsset: ${asset}\nAddress: ${address}\nStatus: Pending (will be approved in 30 seconds)`, 'success');
+            
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('walletAddress').value = '';
+        }, 4000);
+    };
+    
+    // Asset selector
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('asset-option')) {
+            document.querySelectorAll('.asset-option').forEach(opt => opt.classList.remove('active'));
+            e.target.classList.add('active');
+            let asset = e.target.getAttribute('data-asset');
+            let networkName = document.getElementById('networkName');
+            let walletLabel = document.getElementById('walletAddressLabel');
+            let walletInput = document.getElementById('walletAddress');
+            
+            if (asset === 'BTC') {
+                networkName.innerHTML = 'BTC Network';
+                walletLabel.innerHTML = 'Bitcoin Wallet Address';
+                walletInput.placeholder = 'Enter your Bitcoin wallet address';
+            } else {
+                networkName.innerHTML = 'TRC20';
+                walletLabel.innerHTML = 'USDT (TRC20) Wallet Address';
+                walletInput.placeholder = 'Enter your USDT TRC20 wallet address';
+            }
+        }
+    });
+    
+    // Profile render
     function renderProfile() {
         if (!currentUser) return;
         const memberSince = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
-        const phoneNumber = currentUser.phone || 'Not provided';
         const profileHTML = `
             <div class="profile-header">
-                <div class="profile-avatar">${currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}</div>
-                <h2>${currentUser.name || 'User'}</h2>
+                <div class="profile-avatar">${currentUser.email ? currentUser.email.charAt(0).toUpperCase() : 'U'}</div>
+                <h2>${currentUser.email || 'User'}</h2>
                 <p>Member since ${memberSince}</p>
             </div>
             <div class="profile-section">
                 <h3>Personal Information</h3>
-                <div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${currentUser.name || 'Not set'}</span><button class="edit-btn" onclick="showCustomModal('Edit Name', 'Edit name feature coming soon', 'info')">Edit</button></div>
-                <div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span><button class="edit-btn" onclick="showCustomModal('Edit Email', 'Edit email feature coming soon', 'info')">Edit</button></div>
-                <div class="info-row"><span class="info-label">Phone Number</span><span class="info-value">${phoneNumber}</span><button class="edit-btn" onclick="showCustomModal('Edit Phone', 'Edit phone feature coming soon', 'info')">Edit</button></div>
+                <div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span></div>
                 <div class="info-row"><span class="info-label">Account Type</span><span class="info-value">Standard</span></div>
             </div>
             <div class="profile-section">
                 <h3>Account Security</h3>
-                <div class="info-row"><span class="info-label">Last password change</span><span class="info-value">Never</span><button class="edit-btn" onclick="showCustomModal('Change Password', 'Change password feature coming soon', 'info')">Change</button></div>
-                <div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span><button class="edit-btn" onclick="showCustomModal('Enable 2FA', 'Enable 2FA feature coming soon', 'info')">Enable</button></div>
+                <div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span></div>
                 <div class="info-row"><span class="info-label">Last Login</span><span class="info-value">${new Date().toLocaleString()}</span></div>
             </div>
             <div class="profile-section">
                 <h3>Preferences</h3>
                 <div class="preference-row"><span class="preference-label">Theme</span><span class="preference-value">Dark</span></div>
                 <div class="preference-row"><span class="preference-label">Language</span><span class="preference-value">English</span></div>
-                <div class="preference-row"><span class="preference-label">Notification</span><span class="preference-value">Email Only</span></div>
-                <div class="preference-row"><span class="preference-label">Timezone</span><span class="preference-value">UTC</span></div>
-                <button class="edit-btn" style="margin-top: 15px; width: 100%;" onclick="showCustomModal('Edit Preferences', 'Edit preferences feature coming soon', 'info')">Edit Preferences</button>
             </div>
             <button class="profile-logout-btn" onclick="logout()">Logout</button>
         `;
         document.getElementById('profileContainer').innerHTML = profileHTML;
     }
-
-    function populateCountries() {
-        let countrySelect = document.getElementById('signupCountry');
-        if(countrySelect) {
-            countrySelect.innerHTML = '';
-            for(let country of countriesList) {
-                let option = document.createElement('option');
-                option.value = country;
-                option.textContent = country;
-                countrySelect.appendChild(option);
-            }
-        }
-    }
-
-    document.querySelectorAll('.auth-tab').forEach(tab => { tab.addEventListener('click', function() { document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); document.getElementById('loginForm').classList.toggle('active', this.dataset.tab === 'login'); document.getElementById('signupForm').classList.toggle('active', this.dataset.tab === 'signup'); }); });
-
-    function updateDateTime() { 
-        let now = new Date(); 
-        let dateTimeElement = document.getElementById('dateTimeDisplay');
-        if(dateTimeElement) {
-            dateTimeElement.innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>`; 
-        }
-    }
-    setInterval(updateDateTime, 1000); 
-    updateDateTime();
-
-    async function fetchPrices() {
-        try {
-            let ids = ['bitcoin','ethereum','binancecoin','solana','tron','usd-coin','ripple','dogecoin','tether'];
-            let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`;
-            let res = await fetch(url);
-            if (!res.ok) return true;
-            let data = await res.json();
-            if (data.bitcoin?.usd !== undefined) {
-                currentPrices = {
-                    btc: data.bitcoin?.usd || FALLBACK_PRICES.btc,
-                    eth: data.ethereum?.usd || FALLBACK_PRICES.eth,
-                    bnb: data.binancecoin?.usd || FALLBACK_PRICES.bnb,
-                    sol: data.solana?.usd || FALLBACK_PRICES.sol,
-                    trx: data.tron?.usd || FALLBACK_PRICES.trx,
-                    usdc: data['usd-coin']?.usd || FALLBACK_PRICES.usdc,
-                    usdt: data.tether?.usd || FALLBACK_PRICES.usdt,
-                    xrp: data.ripple?.usd || FALLBACK_PRICES.xrp,
-                    doge: data.dogecoin?.usd || FALLBACK_PRICES.doge,
-                    btcChange: data.bitcoin?.usd_24h_change || FALLBACK_PRICES.btcChange,
-                    ethChange: data.ethereum?.usd_24h_change || FALLBACK_PRICES.ethChange,
-                    bnbChange: data.binancecoin?.usd_24h_change || FALLBACK_PRICES.bnbChange,
-                    solChange: data.solana?.usd_24h_change || FALLBACK_PRICES.solChange,
-                    usdtChange: data.tether?.usd_24h_change || FALLBACK_PRICES.usdtChange
-                };
-            }
-            return true;
-        } catch(e) { return true; }
-    }
-
-    async function loadDashboard() { 
-        await fetchPrices(); 
-        renderCrypto();
-        renderWatchlist(); 
-        updatePortfolioTotal();
-        updateLastUpdatedText();
-        renderHomepageWatchlist();
-    }
     
-    function renderWatchlist() { 
-        let watchCoins = [
-            {id:'btc', name:'BTC', full:'Bitcoin'},
-            {id:'eth', name:'ETH', full:'Ethereum'},
-            {id:'usdt', name:'USDT', full:'Tether'},
-            {id:'usdc', name:'USDC', full:'USD Coin'}
-        ]; 
-        let html = ''; 
-        for(let coin of watchCoins) { 
-            let price = currentPrices[coin.id] || 0; 
-            let change = currentPrices[coin.id+'Change'] || 0; 
-            let changeClass = change >= 0 ? 'positive' : 'negative'; 
-            html += `<div class="watchlist-item clickable" onclick="showTrade('${coin.name}')">
-                <div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div>
-                <div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
-                <div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div>
-            </div>`; 
-        } 
-        let container = document.getElementById('watchlistContainer');
-        if(container) container.innerHTML = html; 
-    }
-    
-    function renderCrypto() { 
-        let usdtPrice = currentPrices.usdt || 1.00;
-        let usdtValue = usdtPrice * holdings.usdt;
-        let html = `<div class="crypto-item" onclick="showTrade('USDT')">
-            <div><h4>USDT</h4><p>Tether</p><div class="positive">0.00%</div></div>
-            <div style="text-align:right;"><div class="price">$${usdtPrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div>
-            <div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt.toFixed(4)} USDT</div>
-            <div>Value: $${usdtValue.toFixed(2)}</div>
-            <button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('USDT')">Trade</button></div>
-        </div>`; 
-        
-        let container = document.getElementById('cryptoContainer');
-        if(container) container.innerHTML = html; 
-    }
-    
-    function updatePortfolioTotal() { 
-        let total = holdings.usdt * (currentPrices.usdt || 1.00);
-        let balanceElement = document.getElementById('portfolioBalance');
-        if(balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`; 
-        saveBalance();
-    }
-
-    function updateLastUpdatedText() {
-        let lastUpdatedText = document.getElementById('lastUpdatedText');
-        if(lastUpdatedText) {
-            lastUpdatedText.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko`;
-        }
-    }
-    
-    async function refreshDashboardPrices() { 
-        await fetchPrices(); 
-        renderCrypto();
-        renderWatchlist(); 
-        updatePortfolioTotal();
-        updateLastUpdatedText();
-        renderHomepageWatchlist();
-    }
-
-    const marqueeCoins = [{ id: 'bitcoin', name: 'BTC' },{ id: 'ethereum', name: 'ETH' },{ id: 'tron', name: 'TRX' },{ id: 'tether', name: 'USDT' },{ id: 'binancecoin', name: 'BNB' },{ id: 'solana', name: 'SOL' }];
-    
-    async function updateMarqueePrices() { 
-        try { 
-            let ids = marqueeCoins.map(c=>c.id).join(','); 
-            let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`); 
-            let data = await res.json(); 
-            let html = ''; 
-            for(let coin of marqueeCoins) { 
-                let price = data[coin.id]?.usd; 
-                html += `<span>${coin.name}: ${price ? '$'+price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4}) : '$' + (coin.id === 'bitcoin' ? '73786' : coin.id === 'ethereum' ? '2022' : '--')}</span>`; 
-            } 
-            let marquee = document.getElementById('statsMarquee'); 
-            if(marquee) marquee.innerHTML = html+html; 
-        } catch(e) { console.error(e); } 
-    }
-    
-    const coins = [{ id: 'bitcoin', name: 'BTC' },{ id: 'ethereum', name: 'ETH' },{ id: 'tron', name: 'TRX' },{ id: 'tether', name: 'USDT' },{ id: 'ripple', name: 'XRP' },{ id: 'solana', name: 'SOL' },{ id: 'dogecoin', name: 'DOGE' },{ id: 'toncoin', name: 'TON' },{ id: 'binancecoin', name: 'BNB' },{ id: 'litecoin', name: 'LTC' }];
-    
-    async function fetchMarketData() { 
-        try { 
-            let ids = coins.map(c=>c.id).join(','); 
-            let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`); 
-            let data = await res.json(); 
-            
-            let usdtData = data.tether;
-            if(usdtData) {
-                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th><tr>\n                </thead><tbody>';
-                let price = usdtData.usd;
-                let change = usdtData.usd_24h_change || 0;
-                let changeClass = change >= 0 ? 'positive' : 'negative';
-                html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
-                    <td>USDT/USDT</td>
-                    <td>$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</td>
-                    <td class="${changeClass}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</td>
-                    <td>480.48M</td>
-                </tr>`;
-                html += '</tbody></table>';
-                let marketTable = document.getElementById('marketTable');
-                if(marketTable) marketTable.innerHTML = html;
-            } else {
-                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
-                html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
-                    <td>USDT/USDT</td>
-                    <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
-                    <td class="positive">0.00%</td>
-                    <td>480.48M</td>
-                </tr>`;
-                html += '</tbody></tr>';
-                let marketTable = document.getElementById('marketTable');
-                if(marketTable) marketTable.innerHTML = html;
-            }
-            
-            let lastUpdated = document.getElementById('lastUpdated');
-            if(lastUpdated) lastUpdated.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`; 
-            updateMarqueePrices(); 
-            renderHomepageWatchlist();
-        } catch(e) { 
-            let marketTable = document.getElementById('marketTable');
-            if(marketTable) marketTable.innerHTML = '<div class="loading">Unable to load prices</div>'; 
-        } 
-    }
-    
-    function toggleFAQ(el) { 
-        let ans = el.nextElementSibling; 
-        let plus = el.querySelector('.plus'); 
-        if(ans.style.display==='block') { 
-            ans.style.display='none'; 
-            plus.textContent='+'; 
-        } else { 
-            ans.style.display='block'; 
-            plus.textContent='−'; 
-        } 
-    }
-    
-    function makeDraggable(element) {
-        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        element.onmousedown = dragMouseDown;
-        function dragMouseDown(e) {
-            e.preventDefault();
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            document.onmouseup = closeDragElement;
-            document.onmousemove = elementDrag;
-        }
-        function elementDrag(e) {
-            e.preventDefault();
-            pos1 = pos3 - e.clientX;
-            pos2 = pos4 - e.clientY;
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            let top = element.offsetTop - pos2;
-            let left = element.offsetLeft - pos1;
-            let maxX = window.innerWidth - element.offsetWidth;
-            let maxY = window.innerHeight - element.offsetHeight;
-            left = Math.min(Math.max(0, left), maxX);
-            top = Math.min(Math.max(0, top), maxY);
-            element.style.top = top + 'px';
-            element.style.left = left + 'px';
-            element.style.bottom = 'auto';
-            element.style.right = 'auto';
-        }
-        function closeDragElement() {
-            document.onmouseup = null;
-            document.onmousemove = null;
-        }
-    }
-    
-    function openConfigModal(botName) {
+    // Bot functions (simplified for demo)
+    window.openConfigModal = function(botName) {
         currentConfigBot = botName;
         let modal = document.getElementById('configModal');
         let title = document.getElementById('configModalTitle');
@@ -4230,14 +3735,14 @@
         }
         
         modal.style.display = 'block';
-    }
-
-    function closeConfigModal() {
+    };
+    
+    window.closeConfigModal = function() {
         document.getElementById('configModal').style.display = 'none';
         currentConfigBot = null;
-    }
-
-    function saveConfig() {
+    };
+    
+    window.saveConfig = function() {
         let asset = document.getElementById('configAssetSelect').value;
         let amount = document.getElementById('configAmount').value;
         
@@ -4262,8 +3767,8 @@
         showCustomModal('Success', `${currentConfigBot} configured successfully!\nAsset: ${asset}\nInvestment: $${amount} per trade`, 'success');
         
         closeConfigModal();
-    }
-
+    };
+    
     function updateBotCardUI(botName, asset, amount) {
         let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
         let botStatusSpan = document.getElementById(`botStatus${botKey}`);
@@ -4280,7 +3785,7 @@
             botPerfSpan.style.color = '#48bb78';
         }
     }
-
+    
     function loadSavedBotConfigs() {
         let botNames = ['Bitcoin Accumulation', 'ETH DCA Pro'];
         for (let botName of botNames) {
@@ -4300,31 +3805,136 @@
         }
     }
     
-    window.addEventListener('resize', function() {
-        if (document.getElementById('chartModal').style.display === 'block') {
-            resizeCanvas();
+    window.startBotWithLoading = function(botName) {
+        let savedConfig = localStorage.getItem('botConfig_' + botName);
+        if (!savedConfig) {
+            showCustomModal('Bot Not Configured', 'Please configure the bot first before starting', 'error');
+            return;
         }
-    });
+        
+        let botCards = document.querySelectorAll('.bot-card');
+        let startBtn = null;
+        
+        for (let card of botCards) {
+            if (card.querySelector('.bot-title')?.innerText === botName) {
+                startBtn = card.querySelector('.bot-start-btn');
+                break;
+            }
+        }
+        
+        if (startBtn) {
+            let originalText = showButtonLoading(startBtn, 'Starting bot');
+            
+            setTimeout(() => {
+                hideButtonLoading(startBtn, originalText);
+                showCustomModal('Bot Started', `${botName} has been started successfully!`, 'success');
+            }, 4000);
+        } else {
+            showCustomModal('Bot Started', `${botName} has been started successfully!`, 'success');
+        }
+    };
     
-    let chatWidget = document.getElementById('chatWidget');
-    if(chatWidget) makeDraggable(chatWidget);
-    
-    populateCountries();
-    loadSavedBalance();
-    loadWithdrawals();
-    
-    if(localStorage.getItem('currentUser')) { 
-        currentUser = JSON.parse(localStorage.getItem('currentUser')); 
-        showDashboard(); 
-    } else { 
-        showHomepage(); 
+    function showBotDetail(botName) {
+        showCustomModal('Bot Detail', `${botName} details would appear here.`, 'info');
     }
-    fetchMarketData(); 
-    setInterval(fetchMarketData, 30000); 
-    updateMarqueePrices(); 
-    setInterval(updateMarqueePrices, 30000); 
+    
+    // FAQ toggle
+    window.toggleFAQ = function(el) {
+        let ans = el.nextElementSibling;
+        let plus = el.querySelector('.plus');
+        if (ans.style.display === 'block') {
+            ans.style.display = 'none';
+            plus.textContent = '+';
+        } else {
+            ans.style.display = 'block';
+            plus.textContent = '−';
+        }
+    };
+    
+    // Marquee prices
+    const marqueeCoins = [{ id: 'bitcoin', name: 'BTC' }, { id: 'ethereum', name: 'ETH' }, { id: 'tron', name: 'TRX' }, { id: 'tether', name: 'USDT' }, { id: 'binancecoin', name: 'BNB' }, { id: 'solana', name: 'SOL' }];
+    
+    async function updateMarqueePrices() {
+        try {
+            let ids = marqueeCoins.map(c => c.id).join(',');
+            let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+            let data = await res.json();
+            let html = '';
+            for (let coin of marqueeCoins) {
+                let price = data[coin.id]?.usd;
+                html += `<span>${coin.name}: ${price ? '$' + price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) : '$' + (coin.id === 'bitcoin' ? '73786' : coin.id === 'ethereum' ? '2022' : '--')}</span>`;
+            }
+            let marquee = document.getElementById('statsMarquee');
+            if (marquee) marquee.innerHTML = html + html;
+        } catch (e) { console.error(e); }
+    }
+    
+    async function fetchMarketData() {
+        try {
+            let ids = ['bitcoin', 'ethereum', 'tether'];
+            let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
+            let data = await res.json();
+            
+            let lastUpdated = document.getElementById('lastUpdated');
+            if (lastUpdated) lastUpdated.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+            updateMarqueePrices();
+            renderHomepageWatchlist();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    
+    // Chart functions (simplified)
+    window.openChartModal = function() {
+        showCustomModal('Chart', 'Chart feature coming soon!', 'info');
+    };
+    
+    window.closeChartModal = function() {
+        document.getElementById('chartModal').style.display = 'none';
+    };
+    
+    // Initialize
+    populateCountries();
+    
+    // Start price updates
+    fetchMarketData();
+    setInterval(fetchMarketData, 30000);
+    updateMarqueePrices();
+    setInterval(updateMarqueePrices, 30000);
     
     document.body.classList.add('loaded');
+    
+    // Make draggable chat
+    let chatWidget = document.getElementById('chatWidget');
+    if (chatWidget) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        chatWidget.onmousedown = function(e) {
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = function() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            };
+            document.onmousemove = function(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                let top = chatWidget.offsetTop - pos2;
+                let left = chatWidget.offsetLeft - pos1;
+                let maxX = window.innerWidth - chatWidget.offsetWidth;
+                let maxY = window.innerHeight - chatWidget.offsetHeight;
+                left = Math.min(Math.max(0, left), maxX);
+                top = Math.min(Math.max(0, top), maxY);
+                chatWidget.style.top = top + 'px';
+                chatWidget.style.left = left + 'px';
+                chatWidget.style.bottom = 'auto';
+                chatWidget.style.right = 'auto';
+            };
+        };
+    }
 </script>
 </body>
 </html>
