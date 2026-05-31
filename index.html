@@ -60,6 +60,28 @@
             gap: 20px;
         }
 
+        .header-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .header-buttons a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .login-link {
+            color: #a0a0c0;
+        }
+
+        .signup-link {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
         /* Hamburger Menu */
         .hamburger {
             cursor: pointer;
@@ -142,40 +164,6 @@
         .sidebar-menu li.active {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-        }
-
-        /* Sidebar auth buttons (homepage only) */
-        .sidebar-auth-buttons {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .sidebar-login-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 30px;
-            color: white;
-            text-align: center;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .sidebar-signup-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            padding: 12px;
-            border-radius: 30px;
-            color: white;
-            text-align: center;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
         }
 
         .overlay {
@@ -1992,13 +1980,7 @@
 <div class="overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="sidebar" id="sidebar">
     <div class="sidebar-close" onclick="closeSidebar()">×</div>
-    <!-- Login and Sign up buttons inside sidebar (homepage only - shown via JS) -->
-    <div class="sidebar-auth-buttons" id="sidebarAuthButtons">
-        <div class="sidebar-login-btn" onclick="showAuthPage()">Log in</div>
-        <div class="sidebar-signup-btn" onclick="showAuthPage()">Sign up</div>
-    </div>
-    <!-- Regular sidebar menu items - will be hidden on homepage -->
-    <ul class="sidebar-menu" id="sidebarMenu">
+    <ul class="sidebar-menu">
         <li data-nav="home" onclick="navigateTo('home')">🏠 Home</li>
         <li data-nav="markets" onclick="navigateTo('markets')">📊 Markets</li>
         <li data-nav="trade" onclick="navigateTo('trade')">💰 Trade</li>
@@ -2011,7 +1993,10 @@
     <div class="header">
         <div class="logo">BT-EARN</div>
         <div class="header-right">
-            <!-- Login/Signup buttons removed from header on homepage -->
+            <div class="header-buttons">
+                <a class="login-link" onclick="showAuthPage()">Log in</a>
+                <a class="signup-link" onclick="showAuthPage()">Sign up</a>
+            </div>
             <div class="hamburger" onclick="toggleSidebar()">
                 <span></span>
                 <span></span>
@@ -2644,23 +2629,6 @@
     
     currentPrices = { ...FALLBACK_PRICES };
 
-    // Function to update sidebar based on current page
-    function updateSidebarForPage() {
-        const isHomepage = document.getElementById('homepage').style.display !== 'none';
-        const sidebarAuthButtons = document.getElementById('sidebarAuthButtons');
-        const sidebarMenu = document.getElementById('sidebarMenu');
-        
-        if (isHomepage) {
-            // On homepage: show only auth buttons, hide menu items
-            if (sidebarAuthButtons) sidebarAuthButtons.style.display = 'flex';
-            if (sidebarMenu) sidebarMenu.style.display = 'none';
-        } else {
-            // On other pages: hide auth buttons, show menu items
-            if (sidebarAuthButtons) sidebarAuthButtons.style.display = 'none';
-            if (sidebarMenu) sidebarMenu.style.display = 'block';
-        }
-    }
-
     // Sidebar functions
     function toggleSidebar() {
         let sidebar = document.getElementById('sidebar');
@@ -2819,7 +2787,7 @@
                 <td>${w.asset}</td>
                 <td class="address-truncated">${truncatedAddress}</td>
                 <td class="${statusClass}">${w.status}</td>
-             </tr>`;
+            </tr>`;
         }
         tbody.innerHTML = html;
     }
@@ -3115,7 +3083,6 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
-        updateSidebarForPage();
     }
     
     function showAuthPage() { 
@@ -3128,7 +3095,6 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
-        updateSidebarForPage();
     }
     
     function showDashboard() { 
@@ -3141,7 +3107,6 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
-        updateSidebarForPage();
         loadDashboard(); 
     }
     
@@ -3155,7 +3120,6 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
-        updateSidebarForPage();
         renderProfile();
     }
     
@@ -3169,7 +3133,6 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
-        updateSidebarForPage();
         loadMarketsPage();
     }
     
@@ -3184,7 +3147,6 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
-        updateSidebarForPage();
         loadTradePage();
     }
     
@@ -3198,7 +3160,6 @@
         document.getElementById('botsPage').style.display = 'block';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'none';
-        updateSidebarForPage();
         loadSavedBotConfigs();
     }
     
@@ -3212,7 +3173,6 @@
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'block';
-        updateSidebarForPage();
         
         let balanceEl = document.getElementById('withdrawBalance');
         if (balanceEl) {
@@ -3267,7 +3227,7 @@
         
         document.getElementById('botsPage').style.display = 'none';
         document.getElementById('botDetailPage').style.display = 'block';
-        updateSidebarForPage();
+        
         updateBotStatsDisplay();
     }
     
@@ -3864,7 +3824,7 @@
             
             let usdtData = data.tether;
             if(usdtData) {
-                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th><tr>\n                </thead><tbody>';
+                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 let price = usdtData.usd;
                 let change = usdtData.usd_24h_change || 0;
                 let changeClass = change >= 0 ? 'positive' : 'negative';
@@ -3878,7 +3838,7 @@
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             } else {
-                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<tr><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
                     <td>USDT/USDT</td>
                     <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
