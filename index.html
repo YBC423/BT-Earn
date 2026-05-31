@@ -2233,6 +2233,7 @@
             <div class="input-field">
                 <label>Amount (USD)</label>
                 <input type="number" id="withdrawAmount" placeholder="0.00" min="10">
+                <div class="helper-text" style="font-size: 11px; color: #a0a0c0; margin-top: 5px;">Minimum withdrawal: $10</div>
             </div>
 
             <div class="input-field">
@@ -2473,7 +2474,6 @@
         let savedWithdrawals = localStorage.getItem('withdrawals');
         if (savedWithdrawals) {
             withdrawals = JSON.parse(savedWithdrawals);
-            // Re-start timers for pending withdrawals
             withdrawals.forEach(w => {
                 if (w.status === 'Pending' && w.pendingEndTime) {
                     let remaining = w.pendingEndTime - Date.now();
@@ -2556,19 +2556,17 @@
             fee: networkFee,
             txId: generateTxId(),
             status: 'Pending',
-            pendingEndTime: Date.now() + 30000 // 30 seconds
+            pendingEndTime: Date.now() + 30000
         };
         
         withdrawals.unshift(newWithdrawal);
         saveWithdrawals();
         renderWithdrawalHistory();
         
-        // Set timeout to approve after 30 seconds
         setTimeout(() => approveWithdrawal(newWithdrawal.id), 30000);
         
         alert(`Withdrawal request submitted!\nAmount: $${amount}\nAsset: ${asset}\nAddress: ${address}\nStatus: Pending (will be approved in 30 seconds)`);
         
-        // Clear form
         document.getElementById('withdrawAmount').value = '';
         document.getElementById('walletAddress').value = '';
     }
@@ -2578,7 +2576,7 @@
         if (!tbody) return;
         
         if (withdrawals.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td><tr>';
             return;
         }
         
@@ -2591,7 +2589,7 @@
                 <td>${w.asset}</td>
                 <td class="address-truncated">${truncatedAddress}</td>
                 <td class="${statusClass}">${w.status}</td>
-            </tr>`;
+            </table>`;
         }
         tbody.innerHTML = html;
     }
@@ -2978,7 +2976,6 @@
         document.getElementById('botDetailPage').style.display = 'none';
         document.getElementById('withdrawalPage').style.display = 'block';
         
-        // Update balance on withdrawal page
         let balanceEl = document.getElementById('withdrawBalance');
         if (balanceEl) {
             balanceEl.innerHTML = `$${holdings.usdt.toFixed(2)}`;
@@ -3650,7 +3647,7 @@
                     <td class="positive">0.00%</td>
                     <td>480.48M</td>
                 </tr>`;
-                html += '</tbody><table>';
+                html += '</tbody></tr>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             }
