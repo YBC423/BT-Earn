@@ -514,122 +514,98 @@
             cursor: grabbing;
         }
 
-        .auth-container {
-            min-height: 100vh;
+        /* Custom Modal Styles */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-modal.active {
+            display: flex;
+        }
+
+        .custom-modal-content {
+            background: #0d1129;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .custom-modal-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 100px 20px 60px;
-            background: #0a0e27;
+            font-size: 30px;
         }
-        .auth-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-            position: relative;
+
+        .custom-modal-icon.error {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
         }
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 6px 15px;
-            border-radius: 20px;
-            color: #a0a0c0;
-            cursor: pointer;
-            font-size: 14px;
+
+        .custom-modal-icon.success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
         }
-        .back-btn:hover {
-            background: rgba(255,255,255,0.1);
+
+        .custom-modal-icon.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
-        .auth-tabs {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            margin-top: 30px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding-bottom: 15px;
-            justify-content: center;
-        }
-        .auth-tab {
-            font-size: 24px;
+
+        .custom-modal-title {
+            font-size: 22px;
             font-weight: bold;
-            cursor: pointer;
-            color: #a0a0c0;
-            transition: 0.3s;
-        }
-        .auth-tab.active {
+            margin-bottom: 15px;
             color: white;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
         }
-        .auth-form {
-            display: none;
-        }
-        .auth-form.active {
-            display: block;
-        }
-        .auth-form h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        .auth-form p {
-            color: #a0a0c0;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
+
+        .custom-modal-message {
             font-size: 14px;
             color: #a0a0c0;
+            margin-bottom: 25px;
+            line-height: 1.5;
         }
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 14px;
-        }
-        .input-group input:focus, .input-group select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        .auth-btn {
-            width: 100%;
+
+        .custom-modal-btn {
             background: linear-gradient(135deg, #667eea, #764ba2);
             border: none;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
+            padding: 12px 30px;
             border-radius: 30px;
             color: white;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .forgot-btn {
-            background: none;
-            border: none;
-            color: #667eea;
-            cursor: pointer;
             font-size: 14px;
-            margin-top: 15px;
-            text-align: center;
-            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
         }
-        .forgot-btn:hover {
-            text-decoration: underline;
+
+        .custom-modal-btn:hover {
+            transform: scale(1.02);
         }
 
         /* BT-EARN Logo Spinner */
@@ -2059,6 +2035,16 @@
 </head>
 <body>
 
+<!-- Custom Modal -->
+<div id="customModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <div class="custom-modal-icon" id="modalIcon">⚠️</div>
+        <div class="custom-modal-title" id="modalTitle">Notice</div>
+        <div class="custom-modal-message" id="modalMessage">Message here</div>
+        <button class="custom-modal-btn" onclick="closeCustomModal()">OK</button>
+    </div>
+</div>
+
 <!-- Sidebar Menu -->
 <div class="overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="sidebar" id="sidebar">
@@ -2140,7 +2126,7 @@
                 <div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
                 <div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div>
                 <button class="auth-btn" onclick="handleLogin()">Login</button>
-                <button class="forgot-btn" onclick="alert('Password reset link sent to your email (demo).')">Forgot Password?</button>
+                <button class="forgot-btn" onclick="showCustomModal('Password Reset', 'Password reset link has been sent to your email address.', 'info')">Forgot Password?</button>
             </div>
             <div id="signupForm" class="auth-form">
                 <h2>Create an account</h2>
@@ -2178,7 +2164,7 @@
             <div class="portfolio-balance" id="portfolioBalance">$0.00</div>
             <div class="portfolio-change" id="portfolioChange">+0.00%</div>
             <div class="portfolio-buttons">
-                <button class="deposit-btn" onclick="alert('Deposit feature coming soon!')">Deposit</button>
+                <button class="deposit-btn" onclick="showCustomModal('Deposit', 'Deposit feature is coming soon!', 'info')">Deposit</button>
                 <button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button>
             </div>
         </div>
@@ -2344,10 +2330,10 @@
                 <div class="stat-sub">↑ +2.1%</div>
             </div>
         </div>
-        <button class="create-bot-btn" onclick="alert('Create new bot feature coming soon')">+ Create New Bot</button>
+        <button class="create-bot-btn" onclick="showCustomModal('Create Bot', 'Create new bot feature coming soon!', 'info')">+ Create New Bot</button>
         <div class="dca-section">
             <h3>Dollar-Cost Averaging Bots</h3>
-            <button class="create-dca-btn" onclick="alert('Create DCA bot feature coming soon')">+ Create DCA Bot</button>
+            <button class="create-dca-btn" onclick="showCustomModal('Create DCA Bot', 'Create DCA bot feature coming soon!', 'info')">+ Create DCA Bot</button>
         </div>
         <div class="bots-grid">
             <div class="bot-card">
@@ -2636,7 +2622,7 @@
     </div>
 </div>
 
-<div class="chat-widget" id="chatWidget" onclick="alert('Chat support coming soon! Email us at support@bt-earn.com')"><span>💬</span><span>Hi!</span></div>
+<div class="chat-widget" id="chatWidget" onclick="showCustomModal('Chat Support', 'Chat support coming soon! Email us at support@bt-earn.com', 'info')"><span>💬</span><span>Hi!</span></div>
 
 <script>
     const countriesList = [
@@ -2702,6 +2688,38 @@
     
     currentPrices = { ...FALLBACK_PRICES };
 
+    // Custom Modal Function
+    function showCustomModal(title, message, type = 'error') {
+        const modal = document.getElementById('customModal');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        
+        modalTitle.innerHTML = title;
+        modalMessage.innerHTML = message;
+        
+        if (type === 'error') {
+            modalIcon.innerHTML = '❌';
+            modalIcon.className = 'custom-modal-icon error';
+        } else if (type === 'success') {
+            modalIcon.innerHTML = '✓';
+            modalIcon.className = 'custom-modal-icon success';
+        } else if (type === 'warning') {
+            modalIcon.innerHTML = '⚠️';
+            modalIcon.className = 'custom-modal-icon warning';
+        } else {
+            modalIcon.innerHTML = 'ℹ️';
+            modalIcon.className = 'custom-modal-icon';
+        }
+        
+        modal.classList.add('active');
+    }
+    
+    function closeCustomModal() {
+        const modal = document.getElementById('customModal');
+        modal.classList.remove('active');
+    }
+
     // BT-EARN Logo Spinner Helper Functions
     function getLogoSpinnerHTML() {
         return `<span class="logo-spinner">
@@ -2731,12 +2749,18 @@
         button.innerHTML = originalHTML;
     }
 
-    // Updated handleLogin with 4-second spinner
+    // Updated handleLogin with 4-second spinner and custom modal
     function handleLogin() { 
         let email = document.getElementById('loginEmail').value; 
         let password = document.getElementById('loginPassword').value; 
-        if(!email.includes('@')) { alert('Please enter a valid email'); return; } 
-        if(password.length < 8) { alert('Password must be at least 8 characters'); return; } 
+        if(!email.includes('@')) { 
+            showCustomModal('Invalid Email', 'Please enter a valid email address.', 'error');
+            return; 
+        } 
+        if(password.length < 8) { 
+            showCustomModal('Invalid Password', 'Password must be at least 8 characters.', 'error');
+            return; 
+        } 
         
         let loginBtn = document.querySelector('#loginForm .auth-btn');
         let originalText = showButtonLoading(loginBtn, 'Logging in');
@@ -2751,12 +2775,12 @@
                 showDashboard(); 
             } else { 
                 hideButtonLoading(loginBtn, originalText);
-                alert('Invalid credentials. Please sign up first.'); 
+                showCustomModal('Login Failed', 'Invalid credentials. Please sign up first.', 'error');
             } 
         }, 4000);
     }
 
-    // Updated handleSignup with 4-second spinner
+    // Updated handleSignup with 4-second spinner and custom modal
     function handleSignup() { 
         let name = document.getElementById('signupName').value; 
         let email = document.getElementById('signupEmail').value; 
@@ -2765,10 +2789,22 @@
         let password = document.getElementById('signupPassword').value; 
         let confirm = document.getElementById('signupConfirmPassword').value; 
         
-        if(!name || !email || !phone || !country) { alert('Please fill all fields'); return; } 
-        if(!email.includes('@')) { alert('Email must contain @'); return; } 
-        if(password.length < 8) { alert('Password must be at least 8 characters'); return; } 
-        if(password !== confirm) { alert('Passwords do not match'); return; } 
+        if(!name || !email || !phone || !country) { 
+            showCustomModal('Missing Fields', 'Please fill all fields.', 'error');
+            return; 
+        } 
+        if(!email.includes('@')) { 
+            showCustomModal('Invalid Email', 'Email must contain @', 'error');
+            return; 
+        } 
+        if(password.length < 8) { 
+            showCustomModal('Invalid Password', 'Password must be at least 8 characters', 'error');
+            return; 
+        } 
+        if(password !== confirm) { 
+            showCustomModal('Password Mismatch', 'Passwords do not match', 'error');
+            return; 
+        } 
         
         let signupBtn = document.querySelector('#signupForm .auth-btn');
         let originalText = showButtonLoading(signupBtn, 'Creating account');
@@ -2777,7 +2813,7 @@
             let users = JSON.parse(localStorage.getItem('btUsers') || '[]'); 
             if(users.find(u => u.email === email)) { 
                 hideButtonLoading(signupBtn, originalText);
-                alert('Email already registered'); 
+                showCustomModal('Email Exists', 'Email already registered', 'error');
                 return; 
             } 
             let newUser = { name, email, phone, country, password }; 
@@ -2786,7 +2822,8 @@
             currentUser = newUser; 
             localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
             hideButtonLoading(signupBtn, originalText);
-            showDashboard(); 
+            showCustomModal('Success!', 'Account created successfully!', 'success');
+            setTimeout(() => showDashboard(), 1500);
         }, 4000);
     }
 
@@ -2809,29 +2846,29 @@
         }, 4000);
     }
 
-    // Updated submitWithdrawal with 4-second spinner
+    // Updated submitWithdrawal with 4-second spinner and custom modal
     function submitWithdrawalWithLoading() {
         let amount = parseFloat(document.getElementById('withdrawAmount').value);
         let address = document.getElementById('walletAddress').value;
         let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
         
         if (!amount || amount <= 0) {
-            alert('Please enter a valid amount');
+            showCustomModal('Invalid Amount', 'Please enter a valid amount', 'error');
             return;
         }
         
         if (amount < 10) {
-            alert('Minimum withdrawal amount is $10');
+            showCustomModal('Amount Too Low', 'Minimum withdrawal amount is $10', 'error');
             return;
         }
         
         if (amount > holdings.usdt) {
-            alert(`Insufficient balance. You have $${holdings.usdt.toFixed(2)} available`);
+            showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)} available`, 'error');
             return;
         }
         
         if (!address || address.trim() === '') {
-            alert('Please enter a valid wallet address');
+            showCustomModal('Invalid Address', 'Please enter a valid wallet address', 'error');
             return;
         }
         
@@ -2875,7 +2912,7 @@
             setTimeout(() => approveWithdrawal(newWithdrawal.id), 30000);
             
             hideButtonLoading(withdrawBtn, originalText);
-            alert(`Withdrawal request submitted!\nAmount: $${amount}\nAsset: ${asset}\nAddress: ${address}\nStatus: Pending (will be approved in 30 seconds)`);
+            showCustomModal('Withdrawal Submitted', `Amount: $${amount}\nAsset: ${asset}\nAddress: ${address}\nStatus: Pending (will be approved in 30 seconds)`, 'success');
             
             document.getElementById('withdrawAmount').value = '';
             document.getElementById('walletAddress').value = '';
@@ -2886,7 +2923,7 @@
     function startBotWithLoading(botName) {
         let savedConfig = localStorage.getItem('botConfig_' + botName);
         if (!savedConfig) {
-            alert('Please configure the bot first before starting');
+            showCustomModal('Bot Not Configured', 'Please configure the bot first before starting', 'error');
             return;
         }
         
@@ -2910,11 +2947,6 @@
         } else {
             showBotDetail(botName);
         }
-    }
-
-    // Original submitWithdrawal function renamed - keep original logic without spinner for internal use
-    function submitWithdrawalOriginal() {
-        // This is kept for reference, but not used directly
     }
 
     function generateTxId() {
@@ -3408,7 +3440,7 @@
     function showBotDetail(botName) {
         let savedConfig = localStorage.getItem('botConfig_' + botName);
         if (!savedConfig) {
-            alert('Please configure the bot first before starting');
+            showCustomModal('Bot Not Configured', 'Please configure the bot first before starting', 'error');
             return;
         }
         
@@ -3802,25 +3834,25 @@
         let total = quantity * price;
         
         if (quantity <= 0) {
-            alert('Please enter a valid quantity');
+            showCustomModal('Invalid Quantity', 'Please enter a valid quantity', 'error');
             return;
         }
         
         if (currentTradeMode === 'buy') {
             let costInUSDT = total;
             if (holdings.usdt < costInUSDT) {
-                alert(`Insufficient USDT balance. You have $${holdings.usdt.toFixed(2)} USDT`);
+                showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)} USDT available`, 'error');
                 return;
             }
-            alert(`Buy order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`);
+            showCustomModal('Order Placed', `Buy order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`, 'success');
             holdings.usdt = holdings.usdt - costInUSDT;
             holdings[coinId] = (holdings[coinId] || 0) + quantity;
         } else {
             if (holdings[coinId] < quantity) {
-                alert(`Insufficient ${currentTradeCoin} balance. You have ${(holdings[coinId] || 0).toFixed(8)} ${currentTradeCoin}`);
+                showCustomModal('Insufficient Balance', `You have ${(holdings[coinId] || 0).toFixed(8)} ${currentTradeCoin} available`, 'error');
                 return;
             }
-            alert(`Sell order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`);
+            showCustomModal('Order Placed', `Sell order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`, 'success');
             holdings[coinId] = holdings[coinId] - quantity;
             holdings.usdt = holdings.usdt + total;
         }
@@ -3852,15 +3884,15 @@
             </div>
             <div class="profile-section">
                 <h3>Personal Information</h3>
-                <div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${currentUser.name || 'Not set'}</span><button class="edit-btn" onclick="alert('Edit name feature coming soon')">Edit</button></div>
-                <div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span><button class="edit-btn" onclick="alert('Edit email feature coming soon')">Edit</button></div>
-                <div class="info-row"><span class="info-label">Phone Number</span><span class="info-value">${phoneNumber}</span><button class="edit-btn" onclick="alert('Edit phone feature coming soon')">Edit</button></div>
+                <div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${currentUser.name || 'Not set'}</span><button class="edit-btn" onclick="showCustomModal('Edit Name', 'Edit name feature coming soon', 'info')">Edit</button></div>
+                <div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span><button class="edit-btn" onclick="showCustomModal('Edit Email', 'Edit email feature coming soon', 'info')">Edit</button></div>
+                <div class="info-row"><span class="info-label">Phone Number</span><span class="info-value">${phoneNumber}</span><button class="edit-btn" onclick="showCustomModal('Edit Phone', 'Edit phone feature coming soon', 'info')">Edit</button></div>
                 <div class="info-row"><span class="info-label">Account Type</span><span class="info-value">Standard</span></div>
             </div>
             <div class="profile-section">
                 <h3>Account Security</h3>
-                <div class="info-row"><span class="info-label">Last password change</span><span class="info-value">Never</span><button class="edit-btn" onclick="alert('Change password feature coming soon')">Change</button></div>
-                <div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span><button class="edit-btn" onclick="alert('Enable 2FA feature coming soon')">Enable</button></div>
+                <div class="info-row"><span class="info-label">Last password change</span><span class="info-value">Never</span><button class="edit-btn" onclick="showCustomModal('Change Password', 'Change password feature coming soon', 'info')">Change</button></div>
+                <div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span><button class="edit-btn" onclick="showCustomModal('Enable 2FA', 'Enable 2FA feature coming soon', 'info')">Enable</button></div>
                 <div class="info-row"><span class="info-label">Last Login</span><span class="info-value">${new Date().toLocaleString()}</span></div>
             </div>
             <div class="profile-section">
@@ -3869,7 +3901,7 @@
                 <div class="preference-row"><span class="preference-label">Language</span><span class="preference-value">English</span></div>
                 <div class="preference-row"><span class="preference-label">Notification</span><span class="preference-value">Email Only</span></div>
                 <div class="preference-row"><span class="preference-label">Timezone</span><span class="preference-value">UTC</span></div>
-                <button class="edit-btn" style="margin-top: 15px; width: 100%;" onclick="alert('Edit preferences coming soon')">Edit Preferences</button>
+                <button class="edit-btn" style="margin-top: 15px; width: 100%;" onclick="showCustomModal('Edit Preferences', 'Edit preferences feature coming soon', 'info')">Edit Preferences</button>
             </div>
             <button class="profile-logout-btn" onclick="logout()">Logout</button>
         `;
@@ -4143,11 +4175,11 @@
         let amount = document.getElementById('configAmount').value;
         
         if (amount < 10) {
-            alert('Minimum investment amount is $10');
+            showCustomModal('Invalid Amount', 'Minimum investment amount is $10', 'error');
             return;
         }
         if (amount > 10000) {
-            alert('Maximum investment amount is $10,000');
+            showCustomModal('Invalid Amount', 'Maximum investment amount is $10,000', 'error');
             return;
         }
         
@@ -4160,7 +4192,7 @@
         
         updateBotCardUI(currentConfigBot, asset, amount);
         
-        alert(`${currentConfigBot} configured successfully!\nAsset: ${asset}\nInvestment: $${amount} per trade`);
+        showCustomModal('Success', `${currentConfigBot} configured successfully!\nAsset: ${asset}\nInvestment: $${amount} per trade`, 'success');
         
         closeConfigModal();
     }
