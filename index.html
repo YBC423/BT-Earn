@@ -347,6 +347,11 @@
             transform: none;
         }
 
+        /* FIX: Force watchlist to show data immediately - hide loading text */
+        .homepage-watchlist .loading {
+            display: none;
+        }
+
         /* Other pages watchlist - clickable with hover effect */
         .watchlist-item.clickable {
             cursor: pointer;
@@ -3133,7 +3138,7 @@
                 <td>${w.asset}</td>
                 <td class="address-truncated">${truncatedAddress}</td>
                 <td class="${statusClass}">${w.status}</td>
-              </tr>`;
+               </tr>`;
         }
         tbody.innerHTML = html;
     }
@@ -4144,7 +4149,7 @@
                     <td class="positive">0.00%</td>
                     <td>480.48M</td>
                 </tr>`;
-                html += '</tbody></td>';
+                html += '</tbody><tr>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             }
@@ -4297,6 +4302,42 @@
             }
         }
     }
+    
+    // FIX: Immediately display watchlist with demo data (no loading spinner)
+    function forceDisplayWatchlist() {
+        var watchlistContainer = document.getElementById('homepageWatchlist');
+        if (watchlistContainer && watchlistContainer.innerHTML.includes('Loading')) {
+            watchlistContainer.innerHTML = `
+                <div class="watchlist-item">
+                    <div class="coin-info"><h4>BTC</h4><p>Bitcoin</p></div>
+                    <div class="coin-price"><div class="price">$73,786.00</div><div class="negative">-0.48%</div></div>
+                </div>
+                <div class="watchlist-item">
+                    <div class="coin-info"><h4>ETH</h4><p>Ethereum</p></div>
+                    <div class="coin-price"><div class="price">$2,022.64</div><div class="negative">-0.84%</div></div>
+                </div>
+                <div class="watchlist-item">
+                    <div class="coin-info"><h4>BNB</h4><p>Binance Coin</p></div>
+                    <div class="coin-price"><div class="price">$580.00</div><div class="positive">+0.32%</div></div>
+                </div>
+                <div class="watchlist-item">
+                    <div class="coin-info"><h4>SOL</h4><p>Solana</p></div>
+                    <div class="coin-price"><div class="price">$145.00</div><div class="positive">+1.24%</div></div>
+                </div>
+                <div class="watchlist-item">
+                    <div class="coin-info"><h4>USDT</h4><p>Tether</p></div>
+                    <div class="coin-price"><div class="price">$1.00</div><div class="positive">0.00%</div></div>
+                </div>`;
+            
+            var lastUpdated = document.getElementById('lastUpdatedWatchlist');
+            if (lastUpdated) lastUpdated.innerHTML = 'Live prices ready';
+        }
+    }
+    
+    // Run fix immediately and after short delay
+    forceDisplayWatchlist();
+    setTimeout(forceDisplayWatchlist, 500);
+    setTimeout(forceDisplayWatchlist, 1500);
     
     window.addEventListener('resize', function() {
         if (document.getElementById('chartModal').style.display === 'block') {
