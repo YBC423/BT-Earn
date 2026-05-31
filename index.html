@@ -2263,8 +2263,6 @@
     <div class="faq-section"><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">What products does BT-EARN offer? <span class="plus">+</span></div><div class="faq-answer">BT-EARN offers Spot trading, Futures trading (up to 125x leverage), Grid trading, Copy trading, and Staking services.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How Secure is BT-EARN? <span class="plus">+</span></div><div class="faq-answer">98% of assets are stored in cold wallets. We use multi-level security system, KYC and two-factor authentication (2FA).</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to Buy Bitcoin and Other Cryptocurrencies on BT-EARN? <span class="plus">+</span></div><div class="faq-answer">You can buy crypto via SEPA Transfer, Card Payment, or P2P trading. Go to "Buy Crypto" section to get started.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to Trade Cryptocurrency on BT-EARN? <span class="plus">+</span></div><div class="faq-answer">Deposit funds, go to Spot/Futures market, choose your trading pair, and place your order.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to trade using AI Trading? <span class="plus">+</span></div><div class="faq-answer">Enable AI Trading in settings, set your risk level, and let the bot trade automatically for you.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">Registration and Security <span class="plus">+</span></div><div class="faq-answer">Sign up with email, verify identity, enable 2FA for maximum security.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">Trading and Fees <span class="plus">+</span></div><div class="faq-answer">0% deposit fees, low trading commissions. Active traders get extra discounts.</div></div></div>
 
     <div class="footer"><div class="footer-links"><a href="#">About</a><a href="#">Products</a><a href="#">Trade</a><a href="#">Support</a><a href="#">Contact support</a></div><div class="copyright">© 2026 BT-EARN. All rights reserved.</div></div>
-    
-    <div class="chat-widget" id="chatWidget" onclick="showCustomModal('Chat Support', 'Chat support coming soon! Email us at support@bt-earn.com', 'info')"><span>💬</span><span>Hi!</span></div>
 </div>
 
 <div id="authPage" style="display:none;">
@@ -2781,6 +2779,8 @@
         </div>
     </div>
 </div>
+
+<div class="chat-widget" id="chatWidget" onclick="showCustomModal('Chat Support', 'Chat support coming soon! Email us at support@bt-earn.com', 'info')"><span>💬</span><span>Hi!</span></div>
 
 <script>
     const countriesList = [
@@ -3765,27 +3765,6 @@
         }
     }
     
-    function startBotWithLoading(botName) {
-        let savedConfig = localStorage.getItem('botConfig_' + botName);
-        if (!savedConfig) {
-            showCustomModal('Bot Not Configured', 'Please configure the bot first before starting', 'error');
-            return;
-        }
-        
-        let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
-        let startBtn = document.querySelector(`#botStatus${botKey}`)?.parentElement?.querySelector('.bot-start-btn');
-        
-        if (startBtn) {
-            let originalText = showButtonLoading(startBtn, 'Starting');
-            setTimeout(() => {
-                hideButtonLoading(startBtn, originalText);
-                showBotDetail(botName);
-            }, 1000);
-        } else {
-            showBotDetail(botName);
-        }
-    }
-    
     function loadMarketsPage() {
         renderMarketsCrypto();
         renderMarketsWatchlist();
@@ -4007,71 +3986,6 @@
         }
     }
 
-    function submitWithdrawalWithLoading() {
-        let withdrawBtn = document.querySelector('.withdraw-submit-btn');
-        let originalText = showButtonLoading(withdrawBtn, 'Processing');
-        
-        setTimeout(() => {
-            let amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
-            let address = document.getElementById('walletAddress').value;
-            let activeAsset = document.querySelector('.asset-option.active').getAttribute('data-asset');
-            
-            if (amount < 10) {
-                hideButtonLoading(withdrawBtn, originalText);
-                showCustomModal('Invalid Amount', 'Minimum withdrawal amount is $10', 'error');
-                return;
-            }
-            
-            if (!address) {
-                hideButtonLoading(withdrawBtn, originalText);
-                showCustomModal('Missing Address', 'Please enter a valid wallet address', 'error');
-                return;
-            }
-            
-            if (holdings.usdt < amount) {
-                hideButtonLoading(withdrawBtn, originalText);
-                showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)} available`, 'error');
-                return;
-            }
-            
-            holdings.usdt -= amount;
-            saveBalance();
-            
-            let network = activeAsset === 'BTC' ? 'BTC Network' : 'TRC20';
-            let withdrawal = {
-                id: Date.now(),
-                dateTime: new Date().toLocaleString(),
-                amount: amount,
-                asset: activeAsset,
-                network: network,
-                address: address,
-                fee: activeAsset === 'BTC' ? 0.0005 : 1.00,
-                txId: generateTxId(),
-                status: 'Pending'
-            };
-            
-            withdrawals.push(withdrawal);
-            saveWithdrawals();
-            renderWithdrawalHistory();
-            
-            let balanceEl = document.getElementById('withdrawBalance');
-            if (balanceEl) {
-                balanceEl.innerHTML = `$${holdings.usdt.toFixed(2)}`;
-            }
-            
-            document.getElementById('withdrawAmount').value = '';
-            document.getElementById('walletAddress').value = '';
-            
-            hideButtonLoading(withdrawBtn, originalText);
-            showCustomModal('Withdrawal Requested', `Your withdrawal request for $${amount.toFixed(2)} ${activeAsset} has been submitted for approval.`, 'success');
-            
-            updatePortfolioTotal();
-            renderCrypto();
-            renderMarketsCrypto();
-            renderHomepageWatchlist();
-        }, 1500);
-    }
-
     document.querySelectorAll('.auth-tab').forEach(tab => { tab.addEventListener('click', function() { document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); document.getElementById('loginForm').classList.toggle('active', this.dataset.tab === 'login'); document.getElementById('signupForm').classList.toggle('active', this.dataset.tab === 'signup'); }); });
 
     function updateDateTime() { 
@@ -4209,7 +4123,7 @@
             
             let usdtData = data.tether;
             if(usdtData) {
-                let html = '</table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 let price = usdtData.usd;
                 let change = usdtData.usd_24h_change || 0;
                 let changeClass = change >= 0 ? 'positive' : 'negative';
@@ -4223,14 +4137,14 @@
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             } else {
-                let html = '<table class="market-table"><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
+                let html = '<table><thead>\n                    <tr><th>Contract</th><th>Last Price</th><th>24H Change</th><th>Volume (24H)</th></tr>\n                </thead><tbody>';
                 html += `<tr onclick="showTrade('USDT')" style="cursor:pointer;">
                     <td>USDT/USDT</td>
                     <td>$${FALLBACK_PRICES.usdt.toFixed(2)}</td>
                     <td class="positive">0.00%</td>
                     <td>480.48M</td>
                 </tr>`;
-                html += '</tbody></table>';
+                html += '</tbody></td>';
                 let marketTable = document.getElementById('marketTable');
                 if(marketTable) marketTable.innerHTML = html;
             }
