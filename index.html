@@ -655,7 +655,8 @@ document.getElementById('withdrawAmount').value = '';
 document.getElementById('walletAddress').value = '';
 if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
 hideButtonSpinner(buttonId);
-showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted. Will auto-approve in 30s.`, 'success');
+// Removed "Will auto-approve in 30s" text from message
+showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted.`, 'success');
 setTimeout(() => {
 let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
 if(idx !== -1 && withdrawals[idx].status === 'Pending') {
@@ -663,7 +664,7 @@ withdrawals[idx].status = 'Approved';
 saveUserData();
 renderWithdrawalHistory();
 if(document.getElementById('txDetailModal').style.display === 'block' && currentTxId === withdrawal.id) { updateTxModal(withdrawals[idx]); }
-showCustomModal('Withdrawal Approved', `Your $${amount} ${asset} withdrawal has been approved.`, 'success');
+// NO POPUP - silent approval only
 }
 }, 30000);
 }
