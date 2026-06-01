@@ -318,6 +318,10 @@
             color: #e53e3e;
             font-weight: 600;
         }
+        .order-book-table td, .order-book-table td {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+            font-weight: 500;
+        }
         .trades-container {
             max-height: 300px;
             overflow-y: auto;
@@ -395,6 +399,8 @@
         .bot-stat-card .stat-value { font-size: 28px; font-weight: bold; }
         .bot-stat-card .stat-value.positive { color: #48bb78; }
         .bot-stat-card .stat-value.negative { color: #e53e3e; }
+        .win-rate-positive { color: #48bb78; }
+        .win-rate-negative { color: #e53e3e; }
         .bot-logs-section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; }
         .bot-logs-section h3 { font-size: 18px; margin-bottom: 15px; color: #667eea; }
         .logs-container { background: #0a0e27; border-radius: 12px; padding: 15px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; }
@@ -1277,6 +1283,7 @@
     let currentTradeMode = 'buy';
     let chartUpdateInterval = null;
     let chartRealTimeInterval = null;
+    let chartIntervalDuration = null;
     let candleData = [];
     let currentConfigBot = null;
     let withdrawals = [];
@@ -1488,7 +1495,7 @@
         let tbody = document.getElementById('withdrawalHistoryBody'); 
         if(!tbody) return; 
         if(withdrawals.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>'; 
+            tbody.innerHTML = '<table><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>'; 
             return; 
         } 
         let html = ''; 
@@ -1533,7 +1540,109 @@
         } 
     });
     
-    // Chart Functions - Real-time moving chart
+    // ============ REAL-TIME CHART FUNCTIONS ============
+    let currentInterval = '1h';
+    let lastCandleTime = null;
+    let priceUpdateInterval = null;
+    
+    function getIntervalMilliseconds(interval) {
+        switch(interval) {
+            case '1m': return 60000;
+            case '5m': return 300000;
+            case '15m': return 900000;
+            case '1h': return 3600000;
+            case '4h': return 14400000;
+            case '1D': return 86400000;
+            default: return 3600000;
+        }
+    }
+    
+    function generateInitialCandleData(basePrice, count, interval) {
+        let candles = [];
+        let currentPrice = basePrice;
+        let intervalMs = getIntervalMilliseconds(interval);
+        let now = Date.now();
+        
+        for(let i = count; i > 0; i--) {
+            let open = currentPrice;
+            let change = (Math.random() - 0.5) * 0.002 * currentPrice;
+            let close = currentPrice + change;
+            let high = Math.max(open, close) + (Math.random() * 0.0015 * currentPrice);
+            let low = Math.min(open, close) - (Math.random() * 0.0015 * currentPrice);
+            let volume = Math.random() * 100 + 20;
+            let time = now - (i * intervalMs);
+            candles.push({ open, high, low, close, volume, time });
+            currentPrice = close;
+        }
+        return candles;
+    }
+    
+    function addNewCandle() {
+        let coinId = currentTradeCoin.toLowerCase();
+        let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+        let lastCandle = candleData[candleData.length - 1];
+        
+        let newCandle = {
+            open: currentPrice,
+            high: currentPrice,
+            low: currentPrice,
+            close: currentPrice,
+            volume: Math.random() * 100 + 20,
+            time: Date.now()
+        };
+        
+        candleData.push(newCandle);
+        if(candleData.length > 50) candleData.shift();
+        lastCandleTime = Date.now();
+        drawCandlestickChart();
+    }
+    
+    function updateCurrentCandlePrice(newPrice) {
+        if(candleData.length === 0) return;
+        let currentCandle = candleData[candleData.length - 1];
+        currentCandle.close = newPrice;
+        currentCandle.high = Math.max(currentCandle.high, newPrice);
+        currentCandle.low = Math.min(currentCandle.low, newPrice);
+        drawCandlestickChart();
+    }
+    
+    function startRealTimeChart() {
+        if(priceUpdateInterval) clearInterval(priceUpdateInterval);
+        
+        // Update price every 2-3 seconds (real-time movement)
+        priceUpdateInterval = setInterval(function() {
+            let coinId = currentTradeCoin.toLowerCase();
+            let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+            let randomMove = (Math.random() - 0.5) * 0.0008 * currentPrice;
+            let newPrice = currentPrice + randomMove;
+            
+            // Update current price
+            if(currentPrices[coinId]) {
+                currentPrices[coinId] = Math.max(newPrice, currentPrice * 0.99);
+            }
+            
+            // Update the current candle with new price
+            updateCurrentCandlePrice(currentPrices[coinId]);
+            
+            // Update trade price display if trade page is open
+            if(document.getElementById('tradePage').style.display === 'block') {
+                updateTradePriceDisplay();
+            }
+            
+            // Update chart stats
+            updateChartStats();
+            
+            // Check if it's time to close current candle and create a new one
+            let now = Date.now();
+            let intervalMs = getIntervalMilliseconds(currentInterval);
+            if(!lastCandleTime) {
+                lastCandleTime = now;
+            } else if(now - lastCandleTime >= intervalMs) {
+                addNewCandle();
+            }
+        }, 2500);
+    }
+    
     function generateCandleData(basePrice, count) { 
         let candles = []; 
         let currentPrice = basePrice; 
@@ -1544,7 +1653,7 @@
             let high = Math.max(open, close) + (Math.random() * 0.003 * currentPrice); 
             let low = Math.min(open, close) - (Math.random() * 0.003 * currentPrice); 
             let volume = Math.random() * 100 + 20; 
-            candles.push({ open, high, low, close, volume }); 
+            candles.push({ open, high, low, close, volume, time: Date.now() - (candles.length * 60000) }); 
             currentPrice = close; 
         } 
         return candles; 
@@ -1562,6 +1671,7 @@
         let maxPrice = Math.max(...candleData.map(c => c.high)); 
         let minPrice = Math.min(...candleData.map(c => c.low)); 
         let priceRange = maxPrice - minPrice; 
+        if(priceRange === 0) priceRange = 1;
         ctx.strokeStyle = 'rgba(255,255,255,0.05)'; 
         ctx.lineWidth = 0.5; 
         for(let i=0; i<=5; i++) { 
@@ -1610,36 +1720,6 @@
         ctx.fillStyle = '#667eea'; 
         ctx.font = '10px Arial'; 
         ctx.fillText(`Current: $${currentPrice.toFixed(2)}`, width - 120, currentY - 3); 
-    }
-    
-    // Real-time chart update - adds a new candle every 5 seconds
-    function startRealTimeChart() {
-        if(chartRealTimeInterval) clearInterval(chartRealTimeInterval);
-        chartRealTimeInterval = setInterval(function() {
-            let coinId = currentTradeCoin.toLowerCase();
-            let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-            
-            if(candleData.length > 0) {
-                // Update the last candle's close price
-                let lastCandle = candleData[candleData.length-1];
-                lastCandle.close = currentPrice;
-                lastCandle.high = Math.max(lastCandle.high, currentPrice);
-                lastCandle.low = Math.min(lastCandle.low, currentPrice);
-                
-                // Add a new candle every 5 seconds (real-time movement)
-                let newCandle = {
-                    open: currentPrice,
-                    high: currentPrice,
-                    low: currentPrice,
-                    close: currentPrice,
-                    volume: Math.random() * 100 + 20
-                };
-                candleData.push(newCandle);
-                if(candleData.length > 50) candleData.shift();
-            }
-            drawCandlestickChart();
-            updateChartStats();
-        }, 5000);
     }
     
     function updateChartStats() { 
@@ -1691,7 +1771,8 @@
         
         let coinId = currentTradeCoin.toLowerCase(); 
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; 
-        candleData = generateCandleData(currentPrice, 30); 
+        candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
+        lastCandleTime = Date.now();
         
         let titleElement = document.getElementById('chartCoinTitle');
         if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`; 
@@ -1709,53 +1790,28 @@
             updateChartStats(); 
         });
         
-        if(chartUpdateInterval) clearInterval(chartUpdateInterval); 
-        chartUpdateInterval = setInterval(function() { 
-            let coinId = currentTradeCoin.toLowerCase(); 
-            let newPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; 
-            if(candleData.length > 0) { 
-                let lastCandle = candleData[candleData.length-1]; 
-                lastCandle.close = newPrice; 
-                lastCandle.high = Math.max(lastCandle.high, newPrice); 
-                lastCandle.low = Math.min(lastCandle.low, newPrice); 
-            } 
-            drawCandlestickChart(); 
-            updateChartStats(); 
-        }, 3000);
-        
         startRealTimeChart();
     }
     
     function closeChartModal() { 
         let modal = document.getElementById('chartModal');
         if(modal) modal.style.display = 'none'; 
-        if(chartUpdateInterval) { 
-            clearInterval(chartUpdateInterval); 
-            chartUpdateInterval = null; 
+        if(priceUpdateInterval) { 
+            clearInterval(priceUpdateInterval); 
+            priceUpdateInterval = null; 
         }
-        if(chartRealTimeInterval) {
-            clearInterval(chartRealTimeInterval);
-            chartRealTimeInterval = null;
-        }
-    }
-    
-    function resizeCanvas() { 
-        let canvas = document.getElementById('candleCanvas'); 
-        let modal = document.getElementById('chartModal');
-        if(canvas && modal && modal.style.display === 'block') { 
-            let container = canvas.parentElement; 
-            canvas.width = Math.max(800, container.clientWidth - 20); 
-            drawCandlestickChart(); 
-        } 
+        lastCandleTime = null;
     }
     
     document.addEventListener('click', function(e) { 
         if(e.target.classList && e.target.classList.contains('time-btn')) { 
             document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active')); 
             e.target.classList.add('active'); 
+            currentInterval = e.target.getAttribute('data-interval');
             let coinId = currentTradeCoin.toLowerCase(); 
             let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; 
-            candleData = generateCandleData(currentPrice, 30); 
+            candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
+            lastCandleTime = Date.now();
             drawCandlestickChart(); 
         } 
         if(e.target.classList && e.target.classList.contains('indicator-btn')) { 
@@ -1927,6 +1983,15 @@
         currentTradeCoin = document.getElementById('tradeCoinSelect').value; 
         updateTradePriceDisplay(); 
         calculateTotal(); 
+        if(document.getElementById('chartModal').style.display === 'block') {
+            let coinId = currentTradeCoin.toLowerCase();
+            let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+            candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
+            lastCandleTime = Date.now();
+            drawCandlestickChart();
+            let titleElement = document.getElementById('chartCoinTitle');
+            if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`;
+        }
     }
     
     function updateTradePriceDisplay() { 
@@ -2207,7 +2272,17 @@
         if(tradesElement) tradesElement.innerHTML = botStats.totalTrades; 
         let winRate = botStats.totalTrades>0 ? (botStats.wins/botStats.totalTrades*100) : 0; 
         let winRateElement = document.getElementById('botWinRate'); 
-        if(winRateElement) winRateElement.innerHTML = `${winRate.toFixed(1)}%`; 
+        if(winRateElement) { 
+            winRateElement.innerHTML = `${winRate.toFixed(1)}%`;
+            // Win rate color follows last trade result (green on win, red on loss)
+            if(lastTradeResult === 'win') {
+                winRateElement.className = 'stat-value win-rate-positive';
+            } else if(lastTradeResult === 'loss') {
+                winRateElement.className = 'stat-value win-rate-negative';
+            } else {
+                winRateElement.className = 'stat-value';
+            }
+        }
         let balanceElement = document.getElementById('botBalance'); 
         if(balanceElement) balanceElement.innerHTML = `$${botStats.botBalance.toFixed(2)}`; 
     }
@@ -2342,6 +2417,16 @@
     window.addEventListener('resize', function() { 
         if(document.getElementById('chartModal').style.display === 'block') resizeCanvas(); 
     });
+    
+    function resizeCanvas() { 
+        let canvas = document.getElementById('candleCanvas'); 
+        let modal = document.getElementById('chartModal');
+        if(canvas && modal && modal.style.display === 'block') { 
+            let container = canvas.parentElement; 
+            canvas.width = Math.max(800, container.clientWidth - 20); 
+            drawCandlestickChart(); 
+        } 
+    }
     
     let chatWidget = document.getElementById('chatWidget'); 
     if(chatWidget) makeDraggable(chatWidget);
