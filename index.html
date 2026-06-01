@@ -435,30 +435,30 @@
         .history-section { margin-top: 30px; }
         .history-section h3 { font-size: 20px; margin-bottom: 20px; color: #667eea; }
         
-        /* ============ WITHDRAWAL HISTORY TABLE - WATCHLIST STYLE ============ */
+        /* ============ WITHDRAWAL HISTORY TABLE - SAME SIZE AS TRANSACTION DETAILS MODAL ============ */
         .withdrawal-history-table {
             width: 100%;
             border-collapse: collapse;
-            background: rgba(255,255,255,0.03);
+            background: #0d1129;
             border: 1px solid rgba(255,255,255,0.08);
             border-radius: 16px;
             overflow: hidden;
         }
         .withdrawal-history-table th {
             text-align: left;
-            padding: 16px 16px;
+            padding: 18px 20px;
+            background: rgba(0,0,0,0.3);
             color: #a0a0c0;
             font-weight: 600;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            background: rgba(0,0,0,0.2);
+            font-size: 14px;
+            letter-spacing: 0.3px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
         }
         .withdrawal-history-table td {
-            padding: 16px 16px;
+            padding: 16px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 15px;
+            font-weight: 600;
             color: white;
             cursor: pointer;
             transition: 0.2s;
@@ -471,24 +471,29 @@
         }
         .withdrawal-history-table .address-cell {
             font-family: monospace;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
             letter-spacing: 0.3px;
+            color: #a0a0c0;
         }
         .withdrawal-history-table .amount-cell {
             font-weight: 700;
             color: #48bb78;
+            font-size: 16px;
         }
         .withdrawal-history-table .asset-cell {
             font-weight: 700;
+            font-size: 16px;
         }
         .withdrawal-history-table .status-pending {
             color: #f59e0b;
             font-weight: 700;
+            font-size: 14px;
         }
         .withdrawal-history-table .status-approved {
             color: #48bb78;
             font-weight: 700;
+            font-size: 14px;
         }
         
         /* ============ TRANSACTION DETAILS MODAL - WATCHLIST STYLE ============ */
@@ -602,7 +607,7 @@
             .config-modal-content { margin: 80px auto; width: 95%; padding: 20px; }
             .bot-stats-grid { grid-template-columns: repeat(2, 1fr); }
             .portfolio-buttons { flex-direction: row; justify-content: space-between; }
-            .withdrawal-history-table th, .withdrawal-history-table td { padding: 12px 10px; font-size: 12px; }
+            .withdrawal-history-table th, .withdrawal-history-table td { padding: 12px 12px; font-size: 13px; }
             .sidebar { width: 260px; }
             .loading-logo { font-size: 40px; }
             .tx-modal-content { margin: 60px auto; width: 95%; padding: 20px; }
@@ -1692,19 +1697,19 @@
         let tbody = document.getElementById('withdrawalHistoryBody'); 
         if(!tbody) return; 
         if(withdrawals.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>'; 
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0; padding: 30px;">No withdrawals yet</td></tr>'; 
             return; 
         } 
         let html = ''; 
         for(let w of withdrawals) { 
-            let truncatedAddress = w.address.length > 20 ? w.address.substring(0, 18) + '...' : w.address; 
+            let truncatedAddress = w.address.length > 24 ? w.address.substring(0, 22) + '...' : w.address; 
             let statusClass = w.status === 'Pending' ? 'status-pending' : 'status-approved'; 
             html += `<tr onclick="showTransactionDetails(${w.id})">
                         <td class="amount-cell">$${w.amount.toFixed(2)}</td>
                         <td class="asset-cell">${w.asset}</td>
                         <td class="address-cell">${truncatedAddress}</td>
                         <td class="${statusClass}">${w.status}</td>
-                     </tr>`; 
+                      </tr>`; 
         } 
         tbody.innerHTML = html; 
     }
