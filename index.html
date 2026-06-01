@@ -434,15 +434,64 @@
         .withdraw-submit-btn:hover { transform: scale(1.02); }
         .history-section { margin-top: 30px; }
         .history-section h3 { font-size: 20px; margin-bottom: 20px; color: #667eea; }
-        .history-table { width: 100%; border-collapse: collapse; }
-        .history-table th { text-align: left; padding: 12px 10px; color: #a0a0c0; font-weight: normal; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .history-table td { padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; cursor: pointer; }
-        .history-table tr:hover { background: rgba(255,255,255,0.03); }
-        .status-pending { color: #f59e0b; }
-        .status-approved { color: #48bb78; }
-        .address-truncated { font-family: monospace; font-size: 12px; }
         
-        /* ============ WATCHLIST STYLED TRANSACTION DETAILS MODAL ============ */
+        /* ============ WITHDRAWAL HISTORY TABLE - WATCHLIST STYLE ============ */
+        .withdrawal-history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .withdrawal-history-table th {
+            text-align: left;
+            padding: 16px 16px;
+            color: #a0a0c0;
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .withdrawal-history-table td {
+            padding: 16px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .withdrawal-history-table tr:last-child td {
+            border-bottom: none;
+        }
+        .withdrawal-history-table tr:hover td {
+            background: rgba(255,255,255,0.05);
+        }
+        .withdrawal-history-table .address-cell {
+            font-family: monospace;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        .withdrawal-history-table .amount-cell {
+            font-weight: 700;
+            color: #48bb78;
+        }
+        .withdrawal-history-table .asset-cell {
+            font-weight: 700;
+        }
+        .withdrawal-history-table .status-pending {
+            color: #f59e0b;
+            font-weight: 700;
+        }
+        .withdrawal-history-table .status-approved {
+            color: #48bb78;
+            font-weight: 700;
+        }
+        
+        /* ============ TRANSACTION DETAILS MODAL - WATCHLIST STYLE ============ */
         .tx-modal {
             display: none;
             position: fixed;
@@ -515,7 +564,6 @@
             word-break: break-all;
             max-width: 60%;
         }
-        /* Highlight Amount, Asset, Address, Status */
         .tx-detail-row.highlight .tx-detail-label {
             color: #667eea;
             font-weight: 700;
@@ -533,12 +581,6 @@
         .tx-detail-value.status-approved {
             color: #48bb78;
             font-weight: 800;
-        }
-        @media (max-width: 768px) {
-            .tx-modal-content { margin: 60px auto; width: 95%; padding: 20px; }
-            .tx-detail-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .tx-detail-value { max-width: 100%; text-align: left; }
-            .tx-detail-row.highlight .tx-detail-value { font-size: 15px; }
         }
         
         @media (max-width: 768px) {
@@ -560,9 +602,12 @@
             .config-modal-content { margin: 80px auto; width: 95%; padding: 20px; }
             .bot-stats-grid { grid-template-columns: repeat(2, 1fr); }
             .portfolio-buttons { flex-direction: row; justify-content: space-between; }
-            .history-table th, .history-table td { padding: 10px 5px; font-size: 11px; }
+            .withdrawal-history-table th, .withdrawal-history-table td { padding: 12px 10px; font-size: 12px; }
             .sidebar { width: 260px; }
             .loading-logo { font-size: 40px; }
+            .tx-modal-content { margin: 60px auto; width: 95%; padding: 20px; }
+            .tx-detail-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .tx-detail-value { max-width: 100%; text-align: left; }
         }
     </style>
 </head>
@@ -953,7 +998,20 @@
             <div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div>
             <button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">Withdraw</button>
         </div>
-        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead> <th>Amount</th><th>Asset</th><th>Address</th><th>Status</th> </thead><tbody id="withdrawalHistoryBody"></tbody> </table></div>
+        <div class="history-section">
+            <h3>Withdrawal History</h3>
+            <table class="withdrawal-history-table" id="withdrawalHistoryTable">
+                <thead>
+                    <tr>
+                        <th>Amount</th>
+                        <th>Asset</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="withdrawalHistoryBody"></tbody>
+            </table>
+        </div>
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
@@ -965,7 +1023,7 @@
     </div>
 </div>
 
-<!-- TRANSACTION DETAILS MODAL - REDESIGNED LIKE WATCHLIST -->
+<!-- TRANSACTION DETAILS MODAL - WATCHLIST STYLE -->
 <div id="txDetailModal" class="tx-modal">
     <div class="tx-modal-content">
         <div class="close-tx" onclick="closeTxModal()">×</div>
@@ -1289,7 +1347,7 @@
             email: email,
             country: country,
             password: password,
-            holdings: { usdt: 10.00 },  // CHANGED: New user starts with $10 USDT
+            holdings: { usdt: 10.00 },  // New user starts with $10 USDT
             withdrawals: [],
             createdAt: new Date().toISOString()
         };
@@ -1639,9 +1697,14 @@
         } 
         let html = ''; 
         for(let w of withdrawals) { 
-            let truncatedAddress = w.address.length > 15 ? w.address.substring(0,12)+'...' : w.address; 
+            let truncatedAddress = w.address.length > 20 ? w.address.substring(0, 18) + '...' : w.address; 
             let statusClass = w.status === 'Pending' ? 'status-pending' : 'status-approved'; 
-            html += `<tr onclick="showTransactionDetails(${w.id})"><td>$${w.amount.toFixed(2)}</td><td>${w.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${w.status}</td></tr>`; 
+            html += `<tr onclick="showTransactionDetails(${w.id})">
+                        <td class="amount-cell">$${w.amount.toFixed(2)}</td>
+                        <td class="asset-cell">${w.asset}</td>
+                        <td class="address-cell">${truncatedAddress}</td>
+                        <td class="${statusClass}">${w.status}</td>
+                     </tr>`; 
         } 
         tbody.innerHTML = html; 
     }
