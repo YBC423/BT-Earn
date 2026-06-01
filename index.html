@@ -801,7 +801,7 @@
             <div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div>
             <button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">Withdraw</button>
         </div>
-        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody>}</div>
+        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody></table></div>
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
@@ -1466,7 +1466,7 @@
         } 
     });
     
-    // Chart Functions
+    // Chart Functions - FIXED to properly open modal
     function generateCandleData(basePrice, count) { 
         let candles = []; 
         let currentPrice = basePrice; 
@@ -1582,16 +1582,26 @@
         document.getElementById('tradesBody').innerHTML = tradesHtml; 
     }
     
+    // FIXED: openChartModal function - properly opens the chart modal
     function openChartModal() { 
         let modal = document.getElementById('chartModal'); 
-        if(!modal) return;
+        if(!modal) {
+            console.error("Chart modal element not found!");
+            showCustomModal('Error', 'Chart modal not available', 'error');
+            return;
+        }
+        
         let coinId = currentTradeCoin.toLowerCase(); 
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; 
         candleData = generateCandleData(currentPrice, 30); 
+        
         let titleElement = document.getElementById('chartCoinTitle');
         if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`; 
+        
         modal.style.display = 'block'; 
-        setTimeout(() => { 
+        
+        // Use requestAnimationFrame to ensure modal is visible before drawing
+        requestAnimationFrame(function() { 
             let canvas = document.getElementById('candleCanvas'); 
             if(canvas) {
                 let container = canvas.parentElement; 
@@ -1599,10 +1609,11 @@
                 else canvas.width = 900;
                 drawCandlestickChart(); 
             }
-        }, 100); 
-        updateChartStats(); 
+            updateChartStats(); 
+        });
+        
         if(chartUpdateInterval) clearInterval(chartUpdateInterval); 
-        chartUpdateInterval = setInterval(() => { 
+        chartUpdateInterval = setInterval(function() { 
             let coinId = currentTradeCoin.toLowerCase(); 
             let newPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; 
             if(candleData.length > 0) { 
@@ -1617,7 +1628,8 @@
     }
     
     function closeChartModal() { 
-        document.getElementById('chartModal').style.display = 'none'; 
+        let modal = document.getElementById('chartModal');
+        if(modal) modal.style.display = 'none'; 
         if(chartUpdateInterval) { 
             clearInterval(chartUpdateInterval); 
             chartUpdateInterval = null; 
@@ -1626,7 +1638,8 @@
     
     function resizeCanvas() { 
         let canvas = document.getElementById('candleCanvas'); 
-        if(canvas && document.getElementById('chartModal').style.display === 'block') { 
+        let modal = document.getElementById('chartModal');
+        if(canvas && modal && modal.style.display === 'block') { 
             let container = canvas.parentElement; 
             canvas.width = Math.max(800, container.clientWidth - 20); 
             drawCandlestickChart(); 
