@@ -414,89 +414,98 @@
         .bot-status-badge.running { background: rgba(72,187,120,0.2); color: #48bb78; }
         .bot-status-badge.paused { background: rgba(245,158,11,0.2); color: #f59e0b; }
         .bot-status-badge.stopped { background: rgba(229,62,62,0.2); color: #e53e3e; }
-        .withdrawal-container { padding: 100px 20px 80px; max-width: 800px; margin: 0 auto; }
-        .withdrawal-container h1 { font-size: 28px; margin-bottom: 10px; }
-        .withdrawal-container .subtitle { color: #a0a0c0; font-size: 14px; margin-bottom: 30px; }
-        .balance-card { background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 25px; text-align: center; margin-bottom: 30px; }
-        .balance-card .label { font-size: 14px; color: #a0a0c0; margin-bottom: 10px; }
-        .balance-card .amount { font-size: 42px; font-weight: bold; color: #48bb78; }
-        .withdraw-form { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 25px; margin-bottom: 30px; }
-        .asset-selector { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(255,255,255,0.05); border-radius: 40px; padding: 5px; }
-        .asset-option { flex: 1; text-align: center; padding: 12px; border-radius: 35px; cursor: pointer; font-weight: bold; transition: 0.3s; color: #a0a0c0; }
-        .asset-option.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
-        .network-info { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px 15px; margin-bottom: 20px; font-size: 14px; }
-        .network-info span { color: #667eea; }
-        .input-field { margin-bottom: 20px; }
-        .input-field label { display: block; font-size: 14px; color: #a0a0c0; margin-bottom: 8px; }
-        .input-field input { width: 100%; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 16px; }
-        .input-field input:focus { outline: none; border-color: #667eea; }
-        .withdraw-submit-btn { width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 14px; border-radius: 30px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .withdraw-submit-btn:hover { transform: scale(1.02); }
-        .history-section { margin-top: 30px; }
-        .history-section h3 { font-size: 20px; margin-bottom: 20px; color: #667eea; }
         
-        /* ============ WITHDRAWAL HISTORY TABLE - SAME SIZE AS TRANSACTION DETAILS MODAL ============ */
-        .withdrawal-history-table {
+        /* ============ WITHDRAWAL PAGE - REDESIGNED TO MATCH OTHER PAGES ============ */
+        .withdrawal-container { padding: 100px 20px 80px; max-width: 800px; margin: 0 auto; }
+        .withdrawal-container h1 { font-size: 32px; margin-bottom: 10px; font-weight: bold; background: linear-gradient(135deg, #fff, #667eea); -webkit-background-clip: text; background-clip: text; color: transparent; display: inline-block; }
+        .withdrawal-container .subtitle { color: #a0a0c0; font-size: 14px; margin-bottom: 30px; }
+        .withdrawal-balance-card { background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.15)); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 25px; text-align: center; margin-bottom: 30px; backdrop-filter: blur(10px); }
+        .withdrawal-balance-card .label { font-size: 14px; color: #a0a0c0; margin-bottom: 10px; letter-spacing: 1px; }
+        .withdrawal-balance-card .amount { font-size: 48px; font-weight: bold; color: #48bb78; }
+        .withdrawal-form-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 25px; margin-bottom: 30px; transition: 0.3s; }
+        .withdrawal-form-card:hover { background: rgba(255,255,255,0.05); }
+        .asset-selector { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(255,255,255,0.05); border-radius: 50px; padding: 5px; }
+        .asset-option { flex: 1; text-align: center; padding: 12px; border-radius: 45px; cursor: pointer; font-weight: 600; transition: 0.3s; color: #a0a0c0; font-size: 16px; }
+        .asset-option.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
+        .network-info { background: rgba(102,126,234,0.1); border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; font-size: 14px; border-left: 3px solid #667eea; }
+        .network-info span { color: #667eea; font-weight: 600; }
+        .input-field { margin-bottom: 20px; }
+        .input-field label { display: block; font-size: 14px; color: #a0a0c0; margin-bottom: 8px; font-weight: 500; }
+        .input-field input { width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 16px; transition: 0.3s; }
+        .input-field input:focus { outline: none; border-color: #667eea; background: rgba(255,255,255,0.08); }
+        .input-field .helper-text { font-size: 11px; color: #a0a0c0; margin-top: 6px; }
+        .withdraw-submit-btn { width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 14px; border-radius: 40px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .withdraw-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102,126,234,0.3); }
+        .history-section { margin-top: 40px; }
+        .history-section h3 { font-size: 22px; margin-bottom: 20px; color: white; font-weight: bold; border-left: 4px solid #667eea; padding-left: 15px; }
+        
+        /* Withdrawal History Table - Matching Markets/Trade Tables */
+        .withdrawal-table {
             width: 100%;
             border-collapse: collapse;
-            background: #0d1129;
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
             border-radius: 16px;
             overflow: hidden;
         }
-        .withdrawal-history-table th {
+        .withdrawal-table th {
             text-align: left;
-            padding: 18px 20px;
+            padding: 16px 20px;
             background: rgba(0,0,0,0.3);
             color: #a0a0c0;
             font-weight: 600;
-            font-size: 14px;
-            letter-spacing: 0.3px;
+            font-size: 13px;
+            letter-spacing: 0.5px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
         }
-        .withdrawal-history-table td {
-            padding: 16px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 15px;
-            font-weight: 600;
+        .withdrawal-table td {
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 14px;
+            font-weight: 500;
             color: white;
             cursor: pointer;
             transition: 0.2s;
         }
-        .withdrawal-history-table tr:last-child td {
+        .withdrawal-table tr:last-child td {
             border-bottom: none;
         }
-        .withdrawal-history-table tr:hover td {
-            background: rgba(255,255,255,0.05);
+        .withdrawal-table tr:hover td {
+            background: rgba(255,255,255,0.04);
         }
-        .withdrawal-history-table .address-cell {
-            font-family: monospace;
-            font-size: 14px;
+        .withdrawal-table .address-cell {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 13px;
             font-weight: 500;
-            letter-spacing: 0.3px;
             color: #a0a0c0;
         }
-        .withdrawal-history-table .amount-cell {
+        .withdrawal-table .amount-cell {
             font-weight: 700;
             color: #48bb78;
-            font-size: 16px;
+            font-size: 15px;
         }
-        .withdrawal-history-table .asset-cell {
+        .withdrawal-table .asset-cell {
             font-weight: 700;
-            font-size: 16px;
         }
-        .withdrawal-history-table .status-pending {
+        .withdrawal-table .status-pending {
             color: #f59e0b;
             font-weight: 700;
-            font-size: 14px;
+            background: rgba(245,158,11,0.1);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
         }
-        .withdrawal-history-table .status-approved {
+        .withdrawal-table .status-approved {
             color: #48bb78;
             font-weight: 700;
-            font-size: 14px;
+            background: rgba(72,187,120,0.1);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
         }
         
-        /* ============ TRANSACTION DETAILS MODAL - WATCHLIST STYLE ============ */
+        /* Transaction Details Modal */
         .tx-modal {
             display: none;
             position: fixed;
@@ -607,12 +616,13 @@
             .config-modal-content { margin: 80px auto; width: 95%; padding: 20px; }
             .bot-stats-grid { grid-template-columns: repeat(2, 1fr); }
             .portfolio-buttons { flex-direction: row; justify-content: space-between; }
-            .withdrawal-history-table th, .withdrawal-history-table td { padding: 12px 12px; font-size: 13px; }
+            .withdrawal-table th, .withdrawal-table td { padding: 10px 12px; font-size: 12px; }
             .sidebar { width: 260px; }
             .loading-logo { font-size: 40px; }
             .tx-modal-content { margin: 60px auto; width: 95%; padding: 20px; }
             .tx-detail-row { flex-direction: column; align-items: flex-start; gap: 8px; }
             .tx-detail-value { max-width: 100%; text-align: left; }
+            .withdrawal-balance-card .amount { font-size: 32px; }
         }
     </style>
 </head>
@@ -981,7 +991,7 @@
     </div>
 </div>
 
-<!-- WITHDRAWAL PAGE -->
+<!-- ============ WITHDRAWAL PAGE - REDESIGNED ============ -->
 <div id="withdrawalPage" style="display:none;">
     <div class="header">
         <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
@@ -991,21 +1001,39 @@
     </div>
     <div class="withdrawal-container">
         <h1>Withdraw Funds</h1>
-        <p class="subtitle">Choose your preferred withdrawal method below</p>
-        <div class="balance-card"><div class="label">Available Balance</div><div class="amount" id="withdrawBalance">$0.00</div></div>
-        <div class="withdraw-form">
-            <div class="asset-selector" id="assetSelector">
-                <div class="asset-option active" data-asset="BTC">Bitcoin</div>
-                <div class="asset-option" data-asset="USDT">USDT</div>
-            </div>
-            <div class="network-info" id="networkInfo">Network: <span id="networkName">BTC Network</span></div>
-            <div class="input-field"><label>Amount (USD)</label><input type="number" id="withdrawAmount" placeholder="0.00" min="10"><div class="helper-text" style="font-size:11px; color:#a0a0c0; margin-top:5px;">Minimum withdrawal: $10</div></div>
-            <div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div>
-            <button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">Withdraw</button>
+        <p class="subtitle">Withdraw your funds securely to your external wallet</p>
+        
+        <div class="withdrawal-balance-card">
+            <div class="label">Available Balance</div>
+            <div class="amount" id="withdrawBalance">$0.00</div>
         </div>
+        
+        <div class="withdrawal-form-card">
+            <div class="asset-selector" id="assetSelector">
+                <div class="asset-option active" data-asset="BTC">Bitcoin (BTC)</div>
+                <div class="asset-option" data-asset="USDT">Tether (USDT)</div>
+            </div>
+            <div class="network-info" id="networkInfo">
+                <span>Network:</span> <span id="networkName">BTC Network</span>
+            </div>
+            <div class="input-field">
+                <label>Amount (USD)</label>
+                <input type="number" id="withdrawAmount" placeholder="0.00" min="10" step="1">
+                <div class="helper-text">Minimum withdrawal: $10 USD</div>
+            </div>
+            <div class="input-field">
+                <label id="walletAddressLabel">Bitcoin Wallet Address</label>
+                <input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address">
+                <div class="helper-text">Enter a valid wallet address for your selected asset</div>
+            </div>
+            <button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">
+                Withdraw Funds
+            </button>
+        </div>
+        
         <div class="history-section">
             <h3>Withdrawal History</h3>
-            <table class="withdrawal-history-table" id="withdrawalHistoryTable">
+            <table class="withdrawal-table" id="withdrawalHistoryTable">
                 <thead>
                     <tr>
                         <th>Amount</th>
@@ -1014,7 +1042,11 @@
                         <th>Status</th>
                     </tr>
                 </thead>
-                <tbody id="withdrawalHistoryBody"></tbody>
+                <tbody id="withdrawalHistoryBody">
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #a0a0c0; padding: 40px;">No withdrawals yet</td>
+                    </tr>
+                </tbody>
             </table>
         </div>
         <div style="height:80px;"></div>
@@ -1028,7 +1060,7 @@
     </div>
 </div>
 
-<!-- TRANSACTION DETAILS MODAL - WATCHLIST STYLE -->
+<!-- TRANSACTION DETAILS MODAL -->
 <div id="txDetailModal" class="tx-modal">
     <div class="tx-modal-content">
         <div class="close-tx" onclick="closeTxModal()">×</div>
@@ -1154,7 +1186,7 @@
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     
-    // ============ SAVE CONFIGURATION WITH SPINNER (4 seconds) ============
+    // ============ SAVE CONFIGURATION WITH SPINNER ============
     async function saveConfigWithSpinner() {
         const buttonId = 'configSaveBtn';
         const originalText = 'Save Configuration';
@@ -1191,7 +1223,6 @@
         
         localStorage.setItem('botConfig_' + currentConfigBot, JSON.stringify(config));
         
-        // Update bot card UI
         let botKey = currentConfigBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
         let botStatusSpan = document.getElementById(`botStatus${botKey}`);
         let botPerfSpan = document.getElementById(`botPerf${botKey}`);
@@ -1217,15 +1248,12 @@
     function openConfigModal(botName) {
         console.log("Opening config modal for: " + botName);
         
-        // Store current bot name
         currentConfigBot = botName;
         
-        // Get modal element
         let modal = document.getElementById('configModal');
         let title = document.getElementById('configModalTitle');
         let assetSelect = document.getElementById('configAssetSelect');
         
-        // Set title based on bot name
         if(botName === 'Bitcoin Accumulation') {
             title.innerHTML = 'Configure Bitcoin Accumulation Bot';
             if(assetSelect) assetSelect.value = 'BTC';
@@ -1236,7 +1264,6 @@
             title.innerHTML = 'Configure Bot';
         }
         
-        // Load saved configuration if exists
         let savedConfig = localStorage.getItem('botConfig_' + botName);
         if(savedConfig) {
             let config = JSON.parse(savedConfig);
@@ -1248,7 +1275,6 @@
             if(amountInput) amountInput.value = 100;
         }
         
-        // Show modal
         if(modal) {
             modal.style.display = 'block';
         } else {
@@ -1352,7 +1378,7 @@
             email: email,
             country: country,
             password: password,
-            holdings: { usdt: 10.00 },  // New user starts with $10 USDT
+            holdings: { usdt: 10.00 },
             withdrawals: [],
             createdAt: new Date().toISOString()
         };
@@ -1392,7 +1418,6 @@
                 withdrawals[index].status = 'Approved';
                 saveUserData();
                 renderWithdrawalHistory();
-                // Also update the modal if it's open for this transaction
                 let modal = document.getElementById('txDetailModal');
                 if(modal && modal.style.display === 'block') {
                     let currentTxId = modal.getAttribute('data-current-tx-id');
@@ -1402,12 +1427,12 @@
                     }
                 }
             }
-        }, 30000); // 30 seconds
+        }, 30000);
     }
     
     async function submitWithdrawalWithSpinner() {
         const buttonId = 'withdrawBtn';
-        const originalText = 'Withdraw';
+        const originalText = 'Withdraw Funds';
         showButtonSpinner(buttonId, originalText);
         
         await delay(4000);
@@ -1453,7 +1478,6 @@
         document.getElementById('walletAddress').value = '';
         if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
         
-        // Schedule auto-approval after 30 seconds
         scheduleWithdrawalApproval(withdrawal.id);
         
         hideButtonSpinner(buttonId);
@@ -1697,7 +1721,7 @@
         let tbody = document.getElementById('withdrawalHistoryBody'); 
         if(!tbody) return; 
         if(withdrawals.length === 0) { 
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0; padding: 30px;">No withdrawals yet</td></tr>'; 
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0; padding: 40px;">No withdrawals yet</td></tr>'; 
             return; 
         } 
         let html = ''; 
@@ -1708,8 +1732,8 @@
                         <td class="amount-cell">$${w.amount.toFixed(2)}</td>
                         <td class="asset-cell">${w.asset}</td>
                         <td class="address-cell">${truncatedAddress}</td>
-                        <td class="${statusClass}">${w.status}</td>
-                      </tr>`; 
+                        <td><span class="${statusClass}">${w.status}</span></td>
+                       </tr>`; 
         } 
         tbody.innerHTML = html; 
     }
@@ -1795,7 +1819,6 @@
     function addNewCandle() {
         let coinId = currentTradeCoin.toLowerCase();
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-        let lastCandle = candleData[candleData.length - 1];
         
         let newCandle = {
             open: currentPrice,
