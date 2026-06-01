@@ -434,63 +434,13 @@
         .withdraw-submit-btn:hover { transform: scale(1.02); }
         .history-section { margin-top: 30px; }
         .history-section h3 { font-size: 20px; margin-bottom: 20px; color: #667eea; }
-        
-        /* Withdrawal History - Card Style (matching watchlist) */
-        .withdrawal-scroll {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .withdrawal-box {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        .withdrawal-box:hover {
-            background: rgba(255,255,255,0.08);
-            transform: translateX(5px);
-        }
-        .withdrawal-info h4 {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .withdrawal-info p {
-            color: #a0a0c0;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        .withdrawal-details {
-            text-align: right;
-        }
-        .withdrawal-details .amount {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .withdrawal-status {
-            font-size: 14px;
-            font-weight: 600;
-            margin-top: 5px;
-        }
-        .withdrawal-status.pending {
-            color: #f59e0b;
-        }
-        .withdrawal-status.approved {
-            color: #48bb78;
-        }
-        .address-truncated {
-            font-family: monospace;
-            font-size: 13px;
-            font-weight: 500;
-        }
-        
+        .history-table { width: 100%; border-collapse: collapse; }
+        .history-table th { text-align: left; padding: 12px 10px; color: #a0a0c0; font-weight: normal; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .history-table td { padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; cursor: pointer; }
+        .history-table tr:hover { background: rgba(255,255,255,0.03); }
+        .status-pending { color: #f59e0b; }
+        .status-approved { color: #48bb78; }
+        .address-truncated { font-family: monospace; font-size: 12px; }
         .tx-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2002; overflow-y: auto; }
         .tx-modal-content { background: #0a0e27; margin: 80px auto; width: 95%; max-width: 500px; border-radius: 20px; padding: 25px; position: relative; border: 1px solid rgba(255,255,255,0.1); }
         .close-tx { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: white; background: rgba(255,255,255,0.1); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -518,8 +468,7 @@
             .config-modal-content { margin: 80px auto; width: 95%; padding: 20px; }
             .bot-stats-grid { grid-template-columns: repeat(2, 1fr); }
             .portfolio-buttons { flex-direction: row; justify-content: space-between; }
-            .withdrawal-box { flex-direction: column; align-items: flex-start; gap: 12px; text-align: left; }
-            .withdrawal-details { text-align: left; width: 100%; }
+            .history-table th, .history-table td { padding: 10px 5px; font-size: 11px; }
             .tx-modal-content { margin: 100px auto; width: 95%; }
             .sidebar { width: 260px; }
             .loading-logo { font-size: 40px; }
@@ -913,12 +862,7 @@
             <div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div>
             <button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">Withdraw</button>
         </div>
-        <div class="history-section">
-            <h3>Withdrawal History</h3>
-            <div class="withdrawal-scroll" id="withdrawalHistoryContainer">
-                <div style="text-align:center; color:#a0a0c0; padding:20px;">No withdrawals yet</div>
-            </div>
-        </div>
+        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead> <th>Amount</th><th>Asset</th><th>Address</th><th>Status</th> </thead><tbody id="withdrawalHistoryBody"> <tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td> </tbody> </table></div>
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
@@ -1224,14 +1168,13 @@
             return;
         }
         
-        // CHANGE #2: New user starting balance reduced from $100 to $10
         const newUser = {
             uid: 'user_' + Date.now(),
             name: name,
             email: email,
             country: country,
             password: password,
-            holdings: { usdt: 10.00 },
+            holdings: { usdt: 100.00 },
             withdrawals: [],
             createdAt: new Date().toISOString()
         };
@@ -1258,13 +1201,10 @@
         await delay(4000);
         
         setCurrentUser(null);
-        holdings = { usdt: 10.00 };
+        holdings = { usdt: 100.00 };
         withdrawals = [];
         showHomepage();
     }
-    
-    // Withdrawal timer storage
-    let withdrawalTimers = [];
     
     async function submitWithdrawalWithSpinner() {
         const buttonId = 'withdrawBtn';
@@ -1314,72 +1254,262 @@
         document.getElementById('walletAddress').value = '';
         if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
         
-        // CHANGE #3: Set timer to change status from Pending to Approved after 30 seconds
-        let timer = setTimeout(function() {
-            if(withdrawal.status === 'Pending') {
-                withdrawal.status = 'Approved';
-                saveUserData();
-                renderWithdrawalHistory();
-                // Also update modal if open
-                if(currentOpenTxId === withdrawal.id) {
-                    updateTxModalStatus(withdrawal);
-                }
-            }
-        }, 30000);
-        
-        withdrawal.timerId = timer;
-        withdrawalTimers.push(timer);
-        
         hideButtonSpinner(buttonId);
-        showCustomModal('Withdrawal Requested', `Your withdrawal request for $${amount} ${asset} has been submitted. Status will change from Pending to Approved after 30 seconds. Transaction ID: ${txId}`, 'success');
+        showCustomModal('Withdrawal Requested', `Your withdrawal request for $${amount} ${asset} has been submitted. Transaction ID: ${txId}`, 'success');
     }
     
-    let currentOpenTxId = null;
+    async function startBotWithSpinner(botName) {
+        let buttonId = botName === 'Bitcoin Accumulation' ? 'startBotBitcoinBtn' : 'startBotETHBtn';
+        const button = document.getElementById(buttonId);
+        if(!button) return;
+        
+        const originalText = button.innerHTML;
+        button.innerHTML = getLogoSpinner();
+        button.disabled = true;
+        
+        await delay(4000);
+        
+        button.innerHTML = originalText;
+        button.disabled = false;
+        
+        showBotDetail(botName);
+    }
     
-    function updateTxModalStatus(withdrawal) {
-        const statusElement = document.getElementById('txStatus');
-        if(statusElement && currentOpenTxId === withdrawal.id) {
-            statusElement.innerHTML = withdrawal.status;
-            if(withdrawal.status === 'Approved') {
-                statusElement.style.color = '#48bb78';
-            } else {
-                statusElement.style.color = '#f59e0b';
-            }
+    // ============ LOCALSTORAGE AUTH SYSTEM ============
+    let currentUser = null;
+    let holdings = { usdt: 100.00 };
+    let currentPrices = {};
+    let currentTradeCoin = 'BTC';
+    let currentTradeMode = 'buy';
+    let chartUpdateInterval = null;
+    let chartRealTimeInterval = null;
+    let chartIntervalDuration = null;
+    let candleData = [];
+    let currentConfigBot = null;
+    let withdrawals = [];
+    let activeBot = null;
+    let botInterval = null;
+    let lastTradeResult = null;
+    let botStats = { botName: '', asset: '', amountPerTrade: 100, totalPL: 0, totalRuns: 0, totalTrades: 0, wins: 0, botBalance: 0, isRunning: false, isPaused: false, logs: [] };
+    
+    const countriesList = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Korea, North","Korea, South","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+    
+    const FALLBACK_PRICES = { btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00, usdt: 1.00, trx: 0.12, usdc: 1.00, xrp: 0.52, doge: 0.12, btcChange: -0.48, ethChange: -0.84, bnbChange: 0.32, solChange: 1.24, usdtChange: 0.00 };
+    currentPrices = { ...FALLBACK_PRICES };
+    
+    function showCustomModal(title, message, type) {
+        const modal = document.getElementById('customModal');
+        document.getElementById('modalIcon').innerHTML = type === 'error' ? '❌' : (type === 'success' ? '✓' : 'ℹ️');
+        document.getElementById('modalIcon').className = 'custom-modal-icon ' + (type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info'));
+        document.getElementById('modalTitle').innerHTML = title;
+        document.getElementById('modalMessage').innerHTML = message;
+        modal.classList.add('active');
+    }
+    function closeCustomModal() { document.getElementById('customModal').classList.remove('active'); }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
+    function navigateTo(page) { closeSidebar(); if(page === 'home') showDashboard(); else if(page === 'markets') showMarkets(); else if(page === 'trade') showTrade(currentTradeCoin); else if(page === 'bots') showBots(); else if(page === 'profile') showProfile(); }
+    
+    function getUsers() {
+        const users = localStorage.getItem('bt_earn_users');
+        return users ? JSON.parse(users) : [];
+    }
+    
+    function saveUsers(users) {
+        localStorage.setItem('bt_earn_users', JSON.stringify(users));
+    }
+    
+    function getCurrentUser() {
+        const userJson = localStorage.getItem('bt_earn_current_user');
+        return userJson ? JSON.parse(userJson) : null;
+    }
+    
+    function setCurrentUser(user) {
+        if (user) {
+            localStorage.setItem('bt_earn_current_user', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('bt_earn_current_user');
         }
+        currentUser = user;
+    }
+    
+    function logout() {
+        logoutWithSpinner();
+    }
+    
+    function saveUserData() {
+        if(!currentUser) return;
+        let users = getUsers();
+        let index = users.findIndex(u => u.uid === currentUser.uid);
+        if(index !== -1) {
+            users[index].holdings = holdings;
+            users[index].withdrawals = withdrawals;
+            saveUsers(users);
+        }
+    }
+    
+    function saveBalance() {
+        saveUserData();
+    }
+    
+    // Page navigation functions
+    function showHomepage() { 
+        document.getElementById('homepage').style.display = 'block'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'none'; 
+        document.getElementById('profilePage').style.display = 'none'; 
+        document.getElementById('marketsPage').style.display = 'none'; 
+        document.getElementById('tradePage').style.display = 'none'; 
+        document.getElementById('botsPage').style.display = 'none'; 
+        document.getElementById('botDetailPage').style.display = 'none'; 
+        document.getElementById('withdrawalPage').style.display = 'none'; 
+        renderHomepageWatchlist(); 
+    }
+    
+    function showAuthPage() { 
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'block'; 
+        document.getElementById('dashboard').style.display = 'none'; 
+        document.getElementById('profilePage').style.display = 'none'; 
+        document.getElementById('marketsPage').style.display = 'none'; 
+        document.getElementById('tradePage').style.display = 'none'; 
+        document.getElementById('botsPage').style.display = 'none'; 
+        document.getElementById('botDetailPage').style.display = 'none'; 
+        document.getElementById('withdrawalPage').style.display = 'none';
+        populateCountries();
+        document.getElementById('signupName').value = '';
+        document.getElementById('signupEmail').value = '';
+        document.getElementById('signupPassword').value = '';
+        document.getElementById('signupConfirmPassword').value = '';
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+    }
+    
+    function showDashboard() { 
+        if(!currentUser) {
+            showAuthPage();
+            return;
+        }
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'block'; 
+        document.getElementById('profilePage').style.display = 'none'; 
+        document.getElementById('marketsPage').style.display = 'none'; 
+        document.getElementById('tradePage').style.display = 'none'; 
+        document.getElementById('botsPage').style.display = 'none'; 
+        document.getElementById('botDetailPage').style.display = 'none'; 
+        document.getElementById('withdrawalPage').style.display = 'none'; 
+        loadDashboard(); 
+    }
+    
+    function showProfile() { 
+        if(!currentUser) {
+            showAuthPage();
+            return;
+        }
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'none'; 
+        document.getElementById('profilePage').style.display = 'block'; 
+        document.getElementById('marketsPage').style.display = 'none'; 
+        document.getElementById('tradePage').style.display = 'none'; 
+        document.getElementById('botsPage').style.display = 'none'; 
+        document.getElementById('botDetailPage').style.display = 'none'; 
+        document.getElementById('withdrawalPage').style.display = 'none'; 
+        renderProfile(); 
+    }
+    
+    function showMarkets() { 
+        if(!currentUser) {
+            showAuthPage();
+            return;
+        }
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'none'; 
+        document.getElementById('profilePage').style.display = 'none'; 
+        document.getElementById('marketsPage').style.display = 'block'; 
+        document.getElementById('tradePage').style.display = 'none'; 
+        document.getElementById('botsPage').style.display = 'none'; 
+        document.getElementById('botDetailPage').style.display = 'none'; 
+        document.getElementById('withdrawalPage').style.display = 'none'; 
+        loadMarketsPage(); 
+    }
+    
+    function showTrade(coin) { 
+        if(!currentUser) {
+            showAuthPage();
+            return;
+        }
+        currentTradeCoin = coin || 'BTC'; 
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'none'; 
+        document.getElementById('profilePage').style.display = 'none'; 
+        document.getElementById('marketsPage').style.display = 'none'; 
+        document.getElementById('tradePage').style.display = 'block'; 
+        document.getElementById('botsPage').style.display = 'none'; 
+        document.getElementById('botDetailPage').style.display = 'none'; 
+        document.getElementById('withdrawalPage').style.display = 'none'; 
+        loadTradePage(); 
+    }
+    
+    function showBots() { 
+        if(!currentUser) {
+            showAuthPage();
+            return;
+        }
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'none'; 
+        document.getElementById('profilePage').style.display = 'none'; 
+        document.getElementById('marketsPage').style.display = 'none'; 
+        document.getElementById('tradePage').style.display = 'none'; 
+        document.getElementById('botsPage').style.display = 'block'; 
+        document.getElementById('botDetailPage').style.display = 'none'; 
+        document.getElementById('withdrawalPage').style.display = 'none'; 
+        loadSavedBotConfigs(); 
+    }
+    
+    function showWithdrawalPage() { 
+        if(!currentUser) {
+            showAuthPage();
+            return;
+        }
+        document.getElementById('homepage').style.display = 'none'; 
+        document.getElementById('authPage').style.display = 'none'; 
+        document.getElementById('dashboard').style.display = 'none'; 
+        document.getElementById('profilePage').style.display = 'none'; 
+        document.getElementById('marketsPage').style.display = 'none'; 
+        document.getElementById('tradePage').style.display = 'none'; 
+        document.getElementById('botsPage').style.display = 'none'; 
+        document.getElementById('botDetailPage').style.display = 'none'; 
+        document.getElementById('withdrawalPage').style.display = 'block'; 
+        if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`; 
+        renderWithdrawalHistory(); 
     }
     
     function generateTxId() { return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase(); }
     
-    // CHANGE #1: Withdrawal history as card boxes (matching watchlist style)
     function renderWithdrawalHistory() { 
-        let container = document.getElementById('withdrawalHistoryContainer'); 
-        if(!container) return; 
-        if(!withdrawals || withdrawals.length === 0) { 
-            container.innerHTML = '<div style="text-align:center; color:#a0a0c0; padding:20px;">No withdrawals yet</div>'; 
+        let tbody = document.getElementById('withdrawalHistoryBody'); 
+        if(!tbody) return; 
+        if(withdrawals.length === 0) { 
+            tbody.innerHTML = '<table><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>'; 
             return; 
         } 
         let html = ''; 
         for(let w of withdrawals) { 
-            let truncatedAddress = w.address.length > 15 ? w.address.substring(0,12)+'...' + w.address.substring(w.address.length-4) : w.address; 
-            let statusClass = w.status === 'Pending' ? 'pending' : 'approved';
-            html += `<div class="withdrawal-box" onclick="showTransactionDetails(${w.id})">
-                <div class="withdrawal-info">
-                    <h4>${w.asset}</h4>
-                    <p class="address-truncated">${truncatedAddress}</p>
-                </div>
-                <div class="withdrawal-details">
-                    <div class="amount">$${w.amount.toFixed(2)}</div>
-                    <div class="withdrawal-status ${statusClass}">${w.status}</div>
-                </div>
-            </div>`; 
+            let truncatedAddress = w.address.length > 15 ? w.address.substring(0,12)+'...' : w.address; 
+            let statusClass = w.status === 'Pending' ? 'status-pending' : 'status-approved'; 
+            html += `<tr onclick="showTransactionDetails(${w.id})"><td>$${w.amount.toFixed(2)}</td><td>${w.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${w.status}</td></tr>`; 
         } 
-        container.innerHTML = html; 
+        tbody.innerHTML = html; 
     }
     
     function showTransactionDetails(id) { 
         let tx = withdrawals.find(w => w.id === id); 
-        if(!tx) return;
-        currentOpenTxId = id;
+        if(!tx) return; 
         document.getElementById('txDateTime').innerHTML = tx.dateTime; 
         document.getElementById('txAmount').innerHTML = `$${tx.amount.toFixed(2)}`; 
         document.getElementById('txAsset').innerHTML = tx.asset; 
@@ -1387,20 +1517,11 @@
         document.getElementById('txAddress').innerHTML = tx.address; 
         document.getElementById('txFee').innerHTML = `$${tx.fee.toFixed(2)}`; 
         document.getElementById('txId').innerHTML = tx.txId; 
-        const statusElement = document.getElementById('txStatus');
-        statusElement.innerHTML = tx.status;
-        if(tx.status === 'Approved') {
-            statusElement.style.color = '#48bb78';
-        } else {
-            statusElement.style.color = '#f59e0b';
-        }
+        document.getElementById('txStatus').innerHTML = tx.status; 
         document.getElementById('txDetailModal').style.display = 'block'; 
     }
     
-    function closeTxModal() { 
-        document.getElementById('txDetailModal').style.display = 'none';
-        currentOpenTxId = null;
-    }
+    function closeTxModal() { document.getElementById('txDetailModal').style.display = 'none'; }
     
     document.addEventListener('click', function(e) { 
         if(e.target.classList && e.target.classList.contains('asset-option')) { 
@@ -1488,24 +1609,30 @@
     function startRealTimeChart() {
         if(priceUpdateInterval) clearInterval(priceUpdateInterval);
         
+        // Update price every 2-3 seconds (real-time movement)
         priceUpdateInterval = setInterval(function() {
             let coinId = currentTradeCoin.toLowerCase();
             let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
             let randomMove = (Math.random() - 0.5) * 0.0008 * currentPrice;
             let newPrice = currentPrice + randomMove;
             
+            // Update current price
             if(currentPrices[coinId]) {
                 currentPrices[coinId] = Math.max(newPrice, currentPrice * 0.99);
             }
             
+            // Update the current candle with new price
             updateCurrentCandlePrice(currentPrices[coinId]);
             
+            // Update trade price display if trade page is open
             if(document.getElementById('tradePage').style.display === 'block') {
                 updateTradePriceDisplay();
             }
             
+            // Update chart stats
             updateChartStats();
             
+            // Check if it's time to close current candle and create a new one
             let now = Date.now();
             let intervalMs = getIntervalMilliseconds(currentInterval);
             if(!lastCandleTime) {
@@ -2145,8 +2272,9 @@
         if(tradesElement) tradesElement.innerHTML = botStats.totalTrades; 
         let winRate = botStats.totalTrades>0 ? (botStats.wins/botStats.totalTrades*100) : 0; 
         let winRateElement = document.getElementById('botWinRate'); 
-        if(winRateElement) {
+        if(winRateElement) { 
             winRateElement.innerHTML = `${winRate.toFixed(1)}%`;
+            // Win rate color follows last trade result (green on win, red on loss)
             if(lastTradeResult === 'win') {
                 winRateElement.className = 'stat-value win-rate-positive';
             } else if(lastTradeResult === 'loss') {
@@ -2159,17 +2287,23 @@
         if(balanceElement) balanceElement.innerHTML = `$${botStats.botBalance.toFixed(2)}`; 
     }
     
+    // calculateProfitLoss with 60% win rate and small realistic profits (0.1% to 0.4%)
     function calculateProfitLoss(amount) { 
+        // 60% chance to win (random distribution)
         let isWin = Math.random() * 100 <= 60;
         
         if(isWin) { 
+            // Small profit: 0.1% to 0.4% of the trade amount (realistic)
             let profitPercent = 0.1 + (Math.random() * 0.3);
             let profit = amount * (profitPercent / 100);
+            // Ensure minimum profit of $0.03 for very small trades
             if(profit < 0.03 && amount >= 10) profit = 0.03;
             return { profit: profit, isWin: true, percent: profitPercent };
         } else { 
+            // Small loss: 0.05% to 0.2% of the trade amount (realistic)
             let lossPercent = 0.05 + (Math.random() * 0.15);
             let loss = amount * (lossPercent / 100);
+            // Ensure minimum loss of $0.02 for very small trades
             if(loss < 0.02 && amount >= 10) loss = 0.02;
             return { profit: -loss, isWin: false, percent: lossPercent };
         } 
