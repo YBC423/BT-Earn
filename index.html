@@ -801,7 +801,7 @@
             <div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div>
             <button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">Withdraw</button>
         </div>
-        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody></table></div>
+        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody>}</div>
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
@@ -845,8 +845,8 @@
         </div>
         <div class="indicators" id="indicators"><button class="indicator-btn active" data-indicator="MA">MA</button><button class="indicator-btn" data-indicator="EMA">EMA</button><button class="indicator-btn" data-indicator="BOLL">BOLL</button><button class="indicator-btn" data-indicator="MACD">MACD</button></div>
         <div class="chart-tabs"><div class="chart-tab active" data-tab="orderbook">Order Book</div><div class="chart-tab" data-tab="trades">Trades</div></div>
-        <div id="orderBookPanel"><table class="order-book-table" style="width:100%"><thead><tr><th>Price (USDT)</th><th>Qty (BTC)</th><th>Total</th></tr></thead><tbody id="orderBookBody"></tbody>}</div>
-        <div id="tradesPanel" style="display:none;"><table class="order-book-table" style="width:100%"><thead><tr><th>Time</th><th>Price</th><th>Qty</th><th>Type</th></tr></thead><tbody id="tradesBody"></tbody>}</div>
+        <div id="orderBookPanel"><table class="order-book-table" style="width:100%"><thead> <th>Price (USDT)</th><th>Qty (BTC)</th><th>Total</th> </thead><tbody id="orderBookBody"></tbody></table></div>
+        <div id="tradesPanel" style="display:none;"><table class="order-book-table" style="width:100%"><thead> <th>Time</th><th>Price</th><th>Qty</th><th>Type</th> </thead><tbody id="tradesBody"></tbody></table></div>
     </div>
 </div>
 
@@ -913,6 +913,106 @@
     
     function delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    // ============ OPEN CONFIG MODAL - FIXED ============
+    function openConfigModal(botName) {
+        console.log("Opening config modal for: " + botName);
+        
+        // Store current bot name
+        currentConfigBot = botName;
+        
+        // Get modal element
+        let modal = document.getElementById('configModal');
+        let title = document.getElementById('configModalTitle');
+        let assetSelect = document.getElementById('configAssetSelect');
+        
+        // Set title based on bot name
+        if(botName === 'Bitcoin Accumulation') {
+            title.innerHTML = 'Configure Bitcoin Accumulation Bot';
+            if(assetSelect) assetSelect.value = 'BTC';
+        } else if(botName === 'ETH DCA Pro') {
+            title.innerHTML = 'Configure ETH DCA Pro Bot';
+            if(assetSelect) assetSelect.value = 'ETH';
+        } else {
+            title.innerHTML = 'Configure Bot';
+        }
+        
+        // Load saved configuration if exists
+        let savedConfig = localStorage.getItem('botConfig_' + botName);
+        if(savedConfig) {
+            let config = JSON.parse(savedConfig);
+            if(assetSelect) assetSelect.value = config.asset;
+            let amountInput = document.getElementById('configAmount');
+            if(amountInput) amountInput.value = config.amount;
+        } else {
+            let amountInput = document.getElementById('configAmount');
+            if(amountInput) amountInput.value = 100;
+        }
+        
+        // Show modal
+        if(modal) {
+            modal.style.display = 'block';
+        } else {
+            console.error("Config modal not found!");
+            showCustomModal('Error', 'Configuration modal not found', 'error');
+        }
+    }
+    
+    function closeConfigModal() {
+        let modal = document.getElementById('configModal');
+        if(modal) {
+            modal.style.display = 'none';
+        }
+        currentConfigBot = null;
+    }
+    
+    function saveConfig() {
+        if(!currentConfigBot) {
+            showCustomModal('Error', 'No bot selected for configuration', 'error');
+            return;
+        }
+        
+        let asset = document.getElementById('configAssetSelect').value;
+        let amount = parseFloat(document.getElementById('configAmount').value);
+        
+        if(isNaN(amount) || amount < 10) {
+            showCustomModal('Invalid Amount', 'Minimum investment amount is $10', 'error');
+            return;
+        }
+        if(amount > 10000) {
+            showCustomModal('Invalid Amount', 'Maximum investment amount is $10,000', 'error');
+            return;
+        }
+        
+        let config = { 
+            asset: asset, 
+            amount: amount, 
+            configured: true,
+            configuredAt: new Date().toISOString()
+        };
+        
+        localStorage.setItem('botConfig_' + currentConfigBot, JSON.stringify(config));
+        
+        // Update bot card UI
+        let botKey = currentConfigBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
+        let botStatusSpan = document.getElementById(`botStatus${botKey}`);
+        let botPerfSpan = document.getElementById(`botPerf${botKey}`);
+        
+        if(botStatusSpan) {
+            botStatusSpan.innerHTML = 'Configured';
+            botStatusSpan.style.background = 'rgba(72,187,120,0.2)';
+            botStatusSpan.style.color = '#48bb78';
+        }
+        
+        if(botPerfSpan) {
+            botPerfSpan.innerHTML = `Performance: $${amount} per trade (${asset})`;
+            botPerfSpan.style.color = '#48bb78';
+        }
+        
+        showCustomModal('Success', `${currentConfigBot} configured successfully!\n\nAsset: ${asset}\nInvestment: $${amount} per trade`, 'success');
+        
+        closeConfigModal();
     }
     
     // ============ AUTHENTICATION FUNCTIONS WITH SPINNERS ============
@@ -1366,7 +1466,7 @@
         } 
     });
     
-    // FIXED: Chart Functions - Now working properly
+    // Chart Functions
     function generateCandleData(basePrice, count) { 
         let candles = []; 
         let currentPrice = basePrice; 
@@ -1482,54 +1582,26 @@
         document.getElementById('tradesBody').innerHTML = tradesHtml; 
     }
     
-    // FIXED: openChartModal with safety checks
     function openChartModal() { 
-        console.log("Opening chart modal...");
-        
-        // Safety check: make sure we have a modal element
         let modal = document.getElementById('chartModal'); 
-        if(!modal) {
-            console.error("Chart modal not found!");
-            return;
-        }
-        
-        // Get current coin price
+        if(!modal) return;
         let coinId = currentTradeCoin.toLowerCase(); 
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; 
-        
-        // Generate candle data
         candleData = generateCandleData(currentPrice, 30); 
-        
-        // Update chart title
         let titleElement = document.getElementById('chartCoinTitle');
-        if(titleElement) {
-            titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`; 
-        }
-        
-        // Show modal
+        if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`; 
         modal.style.display = 'block'; 
-        
-        // Draw chart after a short delay to ensure canvas is ready
         setTimeout(() => { 
             let canvas = document.getElementById('candleCanvas'); 
             if(canvas) {
                 let container = canvas.parentElement; 
-                if(container) {
-                    canvas.width = Math.max(800, container.clientWidth - 20); 
-                } else {
-                    canvas.width = 900;
-                }
+                if(container) canvas.width = Math.max(800, container.clientWidth - 20); 
+                else canvas.width = 900;
                 drawCandlestickChart(); 
             }
         }, 100); 
-        
-        // Update stats
         updateChartStats(); 
-        
-        // Clear existing interval
         if(chartUpdateInterval) clearInterval(chartUpdateInterval); 
-        
-        // Start real-time updates
         chartUpdateInterval = setInterval(() => { 
             let coinId = currentTradeCoin.toLowerCase(); 
             let newPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; 
@@ -1923,67 +1995,6 @@
         } 
     }
     
-    function openConfigModal(botName) { 
-        currentConfigBot = botName; 
-        let modal = document.getElementById('configModal'); 
-        let title = document.getElementById('configModalTitle'); 
-        let assetSelect = document.getElementById('configAssetSelect'); 
-        if(botName === 'Bitcoin Accumulation') { 
-            title.innerHTML = 'Configure Bitcoin Accumulation Bot'; 
-            assetSelect.value = 'BTC'; 
-        } else if(botName === 'ETH DCA Pro') { 
-            title.innerHTML = 'Configure ETH DCA Pro Bot'; 
-            assetSelect.value = 'ETH'; 
-        } 
-        let savedConfig = localStorage.getItem('botConfig_' + botName); 
-        if(savedConfig) { 
-            let config = JSON.parse(savedConfig); 
-            assetSelect.value = config.asset; 
-            document.getElementById('configAmount').value = config.amount; 
-        } else { 
-            document.getElementById('configAmount').value = 100; 
-        } 
-        modal.style.display = 'block'; 
-    }
-    
-    function closeConfigModal() { 
-        document.getElementById('configModal').style.display = 'none'; 
-        currentConfigBot = null; 
-    }
-    
-    function saveConfig() { 
-        let asset = document.getElementById('configAssetSelect').value; 
-        let amount = document.getElementById('configAmount').value; 
-        if(amount < 10) { 
-            showCustomModal('Invalid Amount', 'Minimum investment amount is $10', 'error'); 
-            return; 
-        } 
-        if(amount > 10000) { 
-            showCustomModal('Invalid Amount', 'Maximum investment amount is $10,000', 'error'); 
-            return; 
-        } 
-        let config = { asset: asset, amount: amount, configured: true }; 
-        localStorage.setItem('botConfig_' + currentConfigBot, JSON.stringify(config)); 
-        updateBotCardUI(currentConfigBot, asset, amount); 
-        showCustomModal('Success', `${currentConfigBot} configured successfully!\nAsset: ${asset}\nInvestment: $${amount} per trade`, 'success'); 
-        closeConfigModal(); 
-    }
-    
-    function updateBotCardUI(botName, asset, amount) { 
-        let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'; 
-        let botStatusSpan = document.getElementById(`botStatus${botKey}`); 
-        let botPerfSpan = document.getElementById(`botPerf${botKey}`); 
-        if(botStatusSpan) { 
-            botStatusSpan.innerHTML = 'Configured'; 
-            botStatusSpan.style.background = 'rgba(72,187,120,0.2)'; 
-            botStatusSpan.style.color = '#48bb78'; 
-        } 
-        if(botPerfSpan) { 
-            botPerfSpan.innerHTML = `Performance: $${amount} per trade (${asset})`; 
-            botPerfSpan.style.color = '#48bb78'; 
-        } 
-    }
-    
     function loadSavedBotConfigs() { 
         let botNames = ['Bitcoin Accumulation', 'ETH DCA Pro']; 
         for(let botName of botNames) { 
@@ -2225,9 +2236,6 @@
             withdrawals = userData.withdrawals || [];
         }
         showDashboard();
-    } else {
-        // Homepage will be shown after loading screen fades out
-        // Loading screen handles visibility
     }
     
     document.body.classList.add('loaded');
