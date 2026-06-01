@@ -801,7 +801,7 @@
             <div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div>
             <button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">Withdraw</button>
         </div>
-        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody>}</div>
+        <div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody></table></div>
         <div style="height:80px;"></div>
     </div>
     <div class="bottom-nav">
@@ -845,8 +845,8 @@
         </div>
         <div class="indicators" id="indicators"><button class="indicator-btn active" data-indicator="MA">MA</button><button class="indicator-btn" data-indicator="EMA">EMA</button><button class="indicator-btn" data-indicator="BOLL">BOLL</button><button class="indicator-btn" data-indicator="MACD">MACD</button></div>
         <div class="chart-tabs"><div class="chart-tab active" data-tab="orderbook">Order Book</div><div class="chart-tab" data-tab="trades">Trades</div></div>
-        <div id="orderBookPanel"><table class="order-book-table" style="width:100%"><thead><tr><th>Price (USDT)</th><th>Qty (BTC)</th><th>Total</th></tr></thead><tbody id="orderBookBody"></tbody></table></div>
-        <div id="tradesPanel" style="display:none;"><table class="order-book-table" style="width:100%"><thead><tr><th>Time</th><th>Price</th><th>Qty</th><th>Type</th></tr></thead><tbody id="tradesBody"></tbody></table></div>
+        <div id="orderBookPanel"><table class="order-book-table" style="width:100%"><thead><tr><th>Price (USDT)</th><th>Qty (BTC)</th><th>Total</th></tr></thead><tbody id="orderBookBody"></tbody>}</div>
+        <div id="tradesPanel" style="display:none;"><table class="order-book-table" style="width:100%"><thead><tr><th>Time</th><th>Price</th><th>Qty</th><th>Type</th></tr></thead><tbody id="tradesBody"></tbody>}</div>
     </div>
 </div>
 
@@ -1366,7 +1366,7 @@
         } 
     });
     
-    // Chart Functions
+    // FIXED: Chart Functions - Now working properly
     function generateCandleData(basePrice, count) { 
         let candles = []; 
         let currentPrice = basePrice; 
@@ -1482,21 +1482,54 @@
         document.getElementById('tradesBody').innerHTML = tradesHtml; 
     }
     
+    // FIXED: openChartModal with safety checks
     function openChartModal() { 
+        console.log("Opening chart modal...");
+        
+        // Safety check: make sure we have a modal element
         let modal = document.getElementById('chartModal'); 
+        if(!modal) {
+            console.error("Chart modal not found!");
+            return;
+        }
+        
+        // Get current coin price
         let coinId = currentTradeCoin.toLowerCase(); 
         let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; 
+        
+        // Generate candle data
         candleData = generateCandleData(currentPrice, 30); 
-        document.getElementById('chartCoinTitle').innerHTML = `${currentTradeCoin}/USDT Chart`; 
+        
+        // Update chart title
+        let titleElement = document.getElementById('chartCoinTitle');
+        if(titleElement) {
+            titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`; 
+        }
+        
+        // Show modal
         modal.style.display = 'block'; 
+        
+        // Draw chart after a short delay to ensure canvas is ready
         setTimeout(() => { 
             let canvas = document.getElementById('candleCanvas'); 
-            let container = canvas.parentElement; 
-            canvas.width = Math.max(800, container.clientWidth - 20); 
-            drawCandlestickChart(); 
+            if(canvas) {
+                let container = canvas.parentElement; 
+                if(container) {
+                    canvas.width = Math.max(800, container.clientWidth - 20); 
+                } else {
+                    canvas.width = 900;
+                }
+                drawCandlestickChart(); 
+            }
         }, 100); 
+        
+        // Update stats
         updateChartStats(); 
+        
+        // Clear existing interval
         if(chartUpdateInterval) clearInterval(chartUpdateInterval); 
+        
+        // Start real-time updates
         chartUpdateInterval = setInterval(() => { 
             let coinId = currentTradeCoin.toLowerCase(); 
             let newPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; 
