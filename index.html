@@ -8,7 +8,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, getDocs, query, where, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDjv41yKM3ViDPbf9TQmiVKgXKkQn88uZE",
@@ -33,6 +33,13 @@
   window.setDoc = setDoc;
   window.getDoc = getDoc;
   window.updateDoc = updateDoc;
+  window.collection = collection;
+  window.addDoc = addDoc;
+  window.getDocs = getDocs;
+  window.query = query;
+  window.where = where;
+  window.orderBy = orderBy;
+  window.writeBatch = writeBatch;
 </script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -627,7 +634,7 @@ border-radius: 4px;
 <script>
 // ============ GLOBAL VARIABLES ============
 let currentUser = null;
-let holdings = { usdt: 0.00 };  // CHANGED: Starting balance from $10.00 to $0.00
+let holdings = { usdt: 0.00 };
 let currentPrices = {};
 let currentTradeCoin = 'BTC';
 let currentTradeMode = 'buy';
@@ -644,6 +651,7 @@ let botStats = { botName: '', asset: '', amountPerTrade: 100, totalPL: 0, totalR
 let botLastSessionOutcome = {};
 let selectedDepositAsset = 'USDT';
 let currentPaymentQr = null;
+let transactions = []; // Store trade history
 
 const FALLBACK_PRICES = { btc: 73786.00, eth: 2022.64, bnb: 580.00, sol: 145.00, usdt: 1.00, trx: 0.12, usdc: 1.00, xrp: 0.52, doge: 0.12, btcChange: -0.48, ethChange: -0.84, bnbChange: 0.32, solChange: 1.24, usdtChange: 0.00 };
 currentPrices = { ...FALLBACK_PRICES };
@@ -662,20 +670,83 @@ function toggleSidebar() { document.getElementById('sidebar').classList.toggle('
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 function navigateTo(page) { closeSidebar(); if(page === 'home') showDashboard(); else if(page === 'markets') showMarkets(); else if(page === 'trade') showTrade(currentTradeCoin); else if(page === 'bots') showBots(); else if(page === 'profile') showProfile(); }
 
-// Logo spinner for buttons
 function getLogoSpinner() { return `<div class="logo-spinner"><span class="spinner-letter">B</span><span class="spinner-letter">T</span><span class="spinner-letter">-</span><span class="spinner-letter">E</span><span class="spinner-letter">A</span><span class="spinner-letter">R</span><span class="spinner-letter">N</span></div>`; }
 function showButtonSpinner(buttonId, originalText) { const btn = document.getElementById(buttonId); if(btn) { btn.dataset.originalText = originalText; btn.innerHTML = getLogoSpinner(); btn.disabled = true; btn.classList.add('btn-loading'); } }
 function hideButtonSpinner(buttonId) { const btn = document.getElementById(buttonId); if(btn && btn.dataset.originalText) { btn.innerHTML = btn.dataset.originalText; btn.disabled = false; btn.classList.remove('btn-loading'); } }
 function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
+// ============ FIREBASE PERMANENT STORAGE FUNCTIONS ============
+async function saveHoldingsToFirestore() {
+    if (!currentUser) return;
+    try {
+        const db = window.firebaseDb;
+        const userRef = window.doc(db, 'users', currentUser.uid);
+        await window.updateDoc(userRef, { holdings: holdings });
+    } catch(e) { console.log("Error saving holdings:", e); }
+}
+
+async function saveTransactionToFirestore(type, coin, quantity, price, total) {
+    if (!currentUser) return;
+    try {
+        const db = window.firebaseDb;
+        const txRef = window.collection(db, 'users', currentUser.uid, 'transactions');
+        await window.addDoc(txRef, {
+            type: type,
+            coin: coin,
+            quantity: quantity,
+            price: price,
+            total: total,
+            timestamp: new Date().toISOString(),
+            status: 'completed'
+        });
+    } catch(e) { console.log("Error saving transaction:", e); }
+}
+
+async function saveWithdrawalToFirestore(withdrawal) {
+    if (!currentUser) return;
+    try {
+        const db = window.firebaseDb;
+        const withdrawalRef = window.collection(db, 'users', currentUser.uid, 'withdrawals');
+        await window.addDoc(withdrawalRef, withdrawal);
+    } catch(e) { console.log("Error saving withdrawal:", e); }
+}
+
+async function loadWithdrawalsFromFirestore() {
+    if (!currentUser) return;
+    try {
+        const db = window.firebaseDb;
+        const withdrawalRef = window.collection(db, 'users', currentUser.uid, 'withdrawals');
+        const q = window.query(withdrawalRef, window.orderBy('timestamp', 'desc'));
+        const snapshot = await window.getDocs(q);
+        withdrawals = [];
+        snapshot.forEach(doc => {
+            withdrawals.push({ id: doc.id, ...doc.data() });
+        });
+        renderWithdrawalHistory();
+    } catch(e) { console.log("Error loading withdrawals:", e); }
+}
+
+async function loadTransactionsFromFirestore() {
+    if (!currentUser) return;
+    try {
+        const db = window.firebaseDb;
+        const txRef = window.collection(db, 'users', currentUser.uid, 'transactions');
+        const q = window.query(txRef, window.orderBy('timestamp', 'desc'));
+        const snapshot = await window.getDocs(q);
+        transactions = [];
+        snapshot.forEach(doc => {
+            transactions.push({ id: doc.id, ...doc.data() });
+        });
+    } catch(e) { console.log("Error loading transactions:", e); }
+}
+
 // ============ FIREBASE AUTH WITH PERSISTENCE ============
-// Set Firebase persistence to LOCAL so user stays logged in after browser close/refresh
 async function setPersistence() {
     const auth = window.firebaseAuth;
     if (auth && auth.setPersistence) {
         try {
             await auth.setPersistence('local');
-        } catch(e) { console.log("Persistence set failed, continuing anyway"); }
+        } catch(e) { console.log("Persistence set failed"); }
     }
 }
 
@@ -701,20 +772,19 @@ async function handleSignupWithSpinner() {
         const userCredential = await window.createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
-        // Save user data to Firestore with starting balance $0.00
         const db = window.firebaseDb;
         const userRef = window.doc(db, 'users', user.uid);
         await window.setDoc(userRef, {
             name: name,
             email: email,
             country: country,
-            holdings: { usdt: 0.00 },  // CHANGED: Starting balance from $10.00 to $0.00
+            holdings: { usdt: 0.00 },
             createdAt: new Date().toISOString()
         });
         
-        // Also save locally for current session
-        holdings = { usdt: 0.00 };  // CHANGED: Starting balance from $10.00 to $0.00
+        holdings = { usdt: 0.00 };
         withdrawals = [];
+        transactions = [];
         currentUser = { uid: user.uid, name: name, email: email };
         
         hideButtonSpinner(buttonId);
@@ -745,7 +815,6 @@ async function handleLoginWithSpinner() {
         const userCredential = await window.signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
-        // Load user data from Firestore
         const db = window.firebaseDb;
         const userRef = window.doc(db, 'users', user.uid);
         const userDoc = await window.getDoc(userRef);
@@ -758,7 +827,9 @@ async function handleLoginWithSpinner() {
             holdings = { usdt: 0.00 };
             currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
         }
-        withdrawals = [];
+        
+        await loadWithdrawalsFromFirestore();
+        await loadTransactionsFromFirestore();
         
         hideButtonSpinner(buttonId);
         showCustomModal('Success', 'Logged in successfully!', 'success');
@@ -785,10 +856,10 @@ async function logoutWithSpinner() {
     currentUser = null;
     holdings = { usdt: 0.00 };
     withdrawals = [];
+    transactions = [];
     showHomepage();
 }
 
-// ============ CHECK EXISTING SESSION ON PAGE LOAD (PERSISTENCE FIX) ============
 async function checkExistingSession() {
     const auth = window.firebaseAuth;
     const db = window.firebaseDb;
@@ -796,7 +867,6 @@ async function checkExistingSession() {
     return new Promise((resolve) => {
         window.onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // User is already logged in from previous session
                 try {
                     const userRef = window.doc(db, 'users', user.uid);
                     const userDoc = await window.getDoc(userRef);
@@ -809,14 +879,14 @@ async function checkExistingSession() {
                         holdings = { usdt: 0.00 };
                         currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
                     }
-                    withdrawals = [];
+                    await loadWithdrawalsFromFirestore();
+                    await loadTransactionsFromFirestore();
                     showDashboard();
                 } catch(e) {
                     console.log("Error loading user data:", e);
                     showHomepage();
                 }
             } else {
-                // No user logged in, show homepage
                 showHomepage();
             }
             resolve();
@@ -955,7 +1025,7 @@ function showMarkets() { if(!currentUser) { showAuthPage(); return; } document.g
 function showTrade(coin) { if(!currentUser) { showAuthPage(); return; } currentTradeCoin = coin || 'BTC'; document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'block'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; document.getElementById('depositPage').style.display = 'none'; document.getElementById('depositPaymentPage').style.display = 'none'; loadTradePage(); }
 function showBots() { if(!currentUser) { showAuthPage(); return; } document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'block'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; document.getElementById('depositPage').style.display = 'none'; document.getElementById('depositPaymentPage').style.display = 'none'; loadSavedBotConfigs(); }
 function showDepositPage() { document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; document.getElementById('depositPage').style.display = 'block'; document.getElementById('depositPaymentPage').style.display = 'none'; selectDepositAsset('USDT'); document.getElementById('depositAmount').value = ''; }
-function showWithdrawalPage() { if(!currentUser) { showAuthPage(); return; } document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'block'; document.getElementById('depositPage').style.display = 'none'; document.getElementById('depositPaymentPage').style.display = 'none'; if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`; renderWithdrawalHistory(); }
+function showWithdrawalPage() { if(!currentUser) { showAuthPage(); return; } document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'block'; document.getElementById('depositPage').style.display = 'none'; document.getElementById('depositPaymentPage').style.display = 'none'; if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`; loadWithdrawalsFromFirestore(); }
 
 async function fetchPrices() { try { let ids = ['bitcoin','ethereum','binancecoin','solana','tron','usd-coin','ripple','dogecoin','tether']; let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24hr_change=true`; let res = await fetch(url); if(!res.ok) return true; let data = await res.json(); if(data.bitcoin?.usd !== undefined) { currentPrices = { btc: data.bitcoin?.usd || FALLBACK_PRICES.btc, eth: data.ethereum?.usd || FALLBACK_PRICES.eth, bnb: data.binancecoin?.usd || FALLBACK_PRICES.bnb, sol: data.solana?.usd || FALLBACK_PRICES.sol, trx: data.tron?.usd || FALLBACK_PRICES.trx, usdc: data['usd-coin']?.usd || FALLBACK_PRICES.usdc, usdt: data.tether?.usd || FALLBACK_PRICES.usdt, xrp: data.ripple?.usd || FALLBACK_PRICES.xrp, doge: data.dogecoin?.usd || FALLBACK_PRICES.doge, btcChange: data.bitcoin?.usd_24h_change || FALLBACK_PRICES.btcChange, ethChange: data.ethereum?.usd_24h_change || FALLBACK_PRICES.ethChange, bnbChange: data.binancecoin?.usd_24h_change || FALLBACK_PRICES.bnbChange, solChange: data.solana?.usd_24h_change || FALLBACK_PRICES.solChange, usdtChange: data.tether?.usd_24h_change || FALLBACK_PRICES.usdtChange }; } return true; } catch(e) { return true; } }
 async function loadDashboard() { await fetchPrices(); renderCrypto(); renderWatchlist(); updatePortfolioTotal(); updateLastUpdatedText(); renderHomepageWatchlist(); }
@@ -972,10 +1042,39 @@ function refreshMarketsPrices() { loadMarketsPage(); }
 function renderHomepageWatchlist() { let watchCoins = [{id:'btc',name:'BTC',full:'Bitcoin'},{id:'eth',name:'ETH',full:'Ethereum'},{id:'usdt',name:'USDT',full:'Tether'},{id:'usdc',name:'USDC',full:'USD Coin'}]; let html = ''; for(let coin of watchCoins) { let price = currentPrices[coin.id] || 0; let change = currentPrices[coin.id+'Change'] || 0; let changeClass = change >= 0 ? 'positive' : 'negative'; html += `<div class="watchlist-item"><div class="coin-info"><h4>${coin.name}</h4><p>${coin.full}</p></div><div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div></div>`; } let container = document.getElementById('homepageWatchlist'); if(container) container.innerHTML = html; }
 function loadTradePage() { document.getElementById('tradeCoinSelect').value = currentTradeCoin; updateTradePriceDisplay(); setTradeMode(currentTradeMode); calculateTotal(); }
 function changeTradeCoin() { currentTradeCoin = document.getElementById('tradeCoinSelect').value; updateTradePriceDisplay(); calculateTotal(); if(document.getElementById('chartModal').style.display === 'block') { let coinId = currentTradeCoin.toLowerCase(); let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; candleData = generateInitialCandleData(currentPrice, 30, currentInterval); lastCandleTime = Date.now(); drawCandlestickChart(); let titleElement = document.getElementById('chartCoinTitle'); if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`; } }
-function updateTradePriceDisplay() { let coinId = currentTradeCoin.toLowerCase(); let price = currentPrices[coinId] || 0; let change = currentPrices[coinId+'Change'] || 0; document.getElementById('tradePrice').innerHTML = `$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}`; let changeClass = change >= 0 ? 'positive' : 'negative'; document.getElementById('tradeChange').innerHTML = `${change>=0?'+':''}${change.toFixed(2)}%`; document.getElementById('tradeChange').className = 'trade-change ' + changeClass; document.getElementById('tradePriceInput').value = price; document.getElementById('tradeCoinSymbol').innerHTML = currentTradeCoin; let availableBalance = holdings[coinId] || 0; document.getElementById('tradeBalanceInfo').innerHTML = `Available: ${availableBalance.toFixed(8)} ${currentTradeCoin}`; }
+function updateTradePriceDisplay() { let coinId = currentTradeCoin.toLowerCase(); let price = currentPrices[coinId] || 0; let change = currentPrices[coinId+'Change'] || 0; document.getElementById('tradePrice').innerHTML = `$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}`; let changeClass = change >= 0 ? 'positive' : 'negative'; document.getElementById('tradeChange').innerHTML = `${change>=0?'+':''}${change.toFixed(2)}%`; document.getElementById('tradeChange').className = 'trade-change ' + changeClass; document.getElementById('tradePriceInput').value = price; document.getElementById('tradeCoinSymbol').innerHTML = currentTradeCoin; let availableBalance = holdings[currentTradeCoin.toLowerCase()] || 0; document.getElementById('tradeBalanceInfo').innerHTML = `Available: ${availableBalance.toFixed(8)} ${currentTradeCoin}`; }
 function setTradeMode(mode) { currentTradeMode = mode; let buyTab = document.querySelector('.trade-tab.buy'); let sellTab = document.querySelector('.trade-tab.sell'); let confirmBtn = document.getElementById('tradeConfirmBtn'); if(mode === 'buy') { buyTab.classList.add('active'); sellTab.classList.remove('active'); confirmBtn.className = 'confirm-btn buy'; confirmBtn.innerHTML = `Buy ${currentTradeCoin}`; } else { sellTab.classList.add('active'); buyTab.classList.remove('active'); confirmBtn.className = 'confirm-btn sell'; confirmBtn.innerHTML = `Sell ${currentTradeCoin}`; } }
 function calculateTotal() { let quantity = parseFloat(document.getElementById('tradeQuantityInput').value) || 0; let price = parseFloat(document.getElementById('tradePriceInput').value) || 0; let total = quantity * price; document.getElementById('tradeTotalValue').innerHTML = `$${total.toFixed(2)}`; }
-function executeTrade() { let coinId = currentTradeCoin.toLowerCase(); let quantity = parseFloat(document.getElementById('tradeQuantityInput').value) || 0; let price = parseFloat(document.getElementById('tradePriceInput').value) || 0; let total = quantity * price; if(quantity <= 0) { showCustomModal('Invalid Quantity', 'Please enter a valid quantity', 'error'); return; } if(currentTradeMode === 'buy') { let costInUSDT = total; if(holdings.usdt < costInUSDT) { showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)} USDT available`, 'error'); return; } showCustomModal('Order Placed', `Buy order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`, 'success'); holdings.usdt = holdings.usdt - costInUSDT; holdings[coinId] = (holdings[coinId] || 0) + quantity; } else { if(holdings[coinId] < quantity) { showCustomModal('Insufficient Balance', `You have ${(holdings[coinId] || 0).toFixed(8)} ${currentTradeCoin} available`, 'error'); return; } showCustomModal('Order Placed', `Sell order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`, 'success'); holdings[coinId] = holdings[coinId] - quantity; holdings.usdt = holdings.usdt + total; } document.getElementById('tradeQuantityInput').value = ''; updateTradePriceDisplay(); updatePortfolioTotal(); renderCrypto(); renderMarketsCrypto(); renderHomepageWatchlist(); updateLastUpdatedText(); if(activeBot && botStats) { botStats.botBalance = holdings.usdt; updateBotStatsDisplay(); } }
+async function executeTrade() {
+    let coinId = currentTradeCoin.toLowerCase();
+    let quantity = parseFloat(document.getElementById('tradeQuantityInput').value) || 0;
+    let price = parseFloat(document.getElementById('tradePriceInput').value) || 0;
+    let total = quantity * price;
+    if(quantity <= 0) { showCustomModal('Invalid Quantity', 'Please enter a valid quantity', 'error'); return; }
+    if(currentTradeMode === 'buy') {
+        let costInUSDT = total;
+        if(holdings.usdt < costInUSDT) { showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)} USDT available`, 'error'); return; }
+        showCustomModal('Order Placed', `Buy order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`, 'success');
+        holdings.usdt = holdings.usdt - costInUSDT;
+        holdings[coinId] = (holdings[coinId] || 0) + quantity;
+        await saveTransactionToFirestore('buy', currentTradeCoin, quantity, price, total);
+    } else {
+        if((holdings[coinId] || 0) < quantity) { showCustomModal('Insufficient Balance', `You have ${(holdings[coinId] || 0).toFixed(8)} ${currentTradeCoin} available`, 'error'); return; }
+        showCustomModal('Order Placed', `Sell order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`, 'success');
+        holdings[coinId] = (holdings[coinId] || 0) - quantity;
+        holdings.usdt = holdings.usdt + total;
+        await saveTransactionToFirestore('sell', currentTradeCoin, quantity, price, total);
+    }
+    await saveHoldingsToFirestore();
+    document.getElementById('tradeQuantityInput').value = '';
+    updateTradePriceDisplay();
+    updatePortfolioTotal();
+    renderCrypto();
+    renderMarketsCrypto();
+    renderHomepageWatchlist();
+    updateLastUpdatedText();
+    if(activeBot && botStats) { botStats.botBalance = holdings.usdt; updateBotStatsDisplay(); }
+}
 function renderProfile() { if(!currentUser) return; const memberSince = new Date().toLocaleString('en-US',{month:'long',year:'numeric'}); const profileHTML = `<div class="profile-header"><div class="profile-avatar">${currentUser.email ? currentUser.email.charAt(0).toUpperCase() : 'U'}</div><h2>${currentUser.name || currentUser.email || 'User'}</h2><p>Member since ${memberSince}</p></div><div class="profile-section"><h3>Personal Information</h3><div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${currentUser.name || 'Not set'}</span></div><div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span></div><div class="info-row"><span class="info-label">Account Type</span><span class="info-value">Standard</span></div></div><div class="profile-section"><h3>Account Security</h3><div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span></div><div class="info-row"><span class="info-label">Last Login</span><span class="info-value">${new Date().toLocaleString()}</span></div></div><div class="profile-section"><h3>Preferences</h3><div class="preference-row"><span class="preference-label">Theme</span><span class="preference-value">Dark</span></div><div class="preference-row"><span class="preference-label">Language</span><span class="preference-value">English</span></div></div><button class="profile-logout-btn" onclick="logoutWithSpinner()">Logout</button>`; document.getElementById('profileContainer').innerHTML = profileHTML; }
 function populateCountries() { const countriesList = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia","Botswana","Brazil","Brunei","Bulgaria","Burkina","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Korea, North","Korea, South","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent","Samoa","San Marino","Sao Tome","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"]; let countrySelect = document.getElementById('signupCountry'); if(countrySelect) { countrySelect.innerHTML = ''; for(let country of countriesList) { let option = document.createElement('option'); option.value = country; option.textContent = country; countrySelect.appendChild(option); } } }
 function updateDateTime() { let now = new Date(); let dateTimeElement = document.getElementById('dateTimeDisplay'); if(dateTimeElement) { dateTimeElement.innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>`; } } setInterval(updateDateTime, 1000); updateDateTime();
@@ -1046,7 +1145,7 @@ let loss = amount * (lossPercent / 100);
 if(loss < 0.08 && amount >= 10) loss = 0.08; 
 return { profit: -loss, isWin: false, percent: lossPercent }; 
 } }
-function executeBotTrade() { 
+async function executeBotTrade() { 
 if(!botStats.isRunning || botStats.isPaused) return; 
 let amount = botStats.amountPerTrade; 
 let isMediumRisk = (activeBot === 'ETH DCA Pro'); 
@@ -1068,6 +1167,8 @@ botStats.botBalance += profit;
 botStats.totalTrades++; 
 botStats.totalRuns++; 
 holdings.usdt += profit; 
+await saveHoldingsToFirestore();
+await saveTransactionToFirestore('bot_trade', botStats.asset, profit/100, 1, profit);
 updatePortfolioTotal(); 
 renderCrypto(); 
 renderMarketsCrypto(); 
@@ -1137,7 +1238,7 @@ let html = '';
 for(let w of withdrawals) {
 let truncatedAddress = w.address.length > 15 ? w.address.substring(0,12)+'...' : w.address;
 let statusClass = w.status === 'Pending' ? 'status-pending' : 'status-approved';
-html += `<tr onclick="showTransactionDetails(${w.id})"><td>$${w.amount.toFixed(2)}</td><td>${w.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${w.status}</td></tr>`;
+html += `<tr onclick="showTransactionDetails('${w.id}')"><td>$${w.amount.toFixed(2)}</td><td>${w.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${w.status}</td></tr>`;
 }
 tbody.innerHTML = html;
 }
@@ -1154,33 +1255,24 @@ if(!address || address.length < 10) { hideButtonSpinner(buttonId); showCustomMod
 if(amount > holdings.usdt) { hideButtonSpinner(buttonId); showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)}`, 'error'); return; }
 let txId = generateTxId();
 let fee = 1.00;
-let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'TRC20', fee: fee, txId, status: 'Pending', dateTime: new Date().toLocaleString() };
-withdrawals.push(withdrawal);
+let withdrawal = { amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'TRC20', fee: fee, txId, status: 'Pending', dateTime: new Date().toLocaleString(), timestamp: new Date().toISOString() };
+await saveWithdrawalToFirestore(withdrawal);
+await loadWithdrawalsFromFirestore();
 holdings.usdt -= amount;
-renderWithdrawalHistory();
+await saveHoldingsToFirestore();
 document.getElementById('withdrawAmount').value = '';
 document.getElementById('walletAddress').value = '';
 if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
 hideButtonSpinner(buttonId);
 showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted.`, 'success');
-setTimeout(() => {
-let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
-if(idx !== -1 && withdrawals[idx].status === 'Pending') {
-withdrawals[idx].status = 'Approved';
-renderWithdrawalHistory();
-if(document.getElementById('txDetailModal').style.display === 'block' && currentTxId === withdrawal.id) { updateTxModal(withdrawals[idx]); }
-}
+setTimeout(async () => {
+    const latestWithdrawals = await loadWithdrawalsFromFirestore();
+    renderWithdrawalHistory();
 }, 30000);
 }
 function showTransactionDetails(id) {
 let tx = withdrawals.find(w => w.id === id);
 if(!tx) return;
-currentTxId = tx.id;
-updateTxModal(tx);
-document.getElementById('txDetailModal').style.display = 'block';
-}
-function updateTxModal(tx) {
-let amountReceived = tx.amount - tx.fee;
 document.getElementById('txAmount').innerHTML = `$${tx.amount.toFixed(2)}`;
 document.getElementById('txAsset').innerHTML = tx.asset;
 document.getElementById('txAddress').innerHTML = tx.address;
@@ -1188,10 +1280,12 @@ document.getElementById('txStatus').innerHTML = tx.status;
 document.getElementById('txDateTime').innerHTML = tx.dateTime;
 document.getElementById('txNetwork').innerHTML = tx.network;
 document.getElementById('txFee').innerHTML = `$${tx.fee.toFixed(2)}`;
+let amountReceived = tx.amount - tx.fee;
 document.getElementById('txAmountReceived').innerHTML = `$${amountReceived.toFixed(2)}`;
 document.getElementById('txId').innerHTML = tx.txId;
+document.getElementById('txDetailModal').style.display = 'block';
 }
-function closeTxModal() { document.getElementById('txDetailModal').style.display = 'none'; currentTxId = null; }
+function closeTxModal() { document.getElementById('txDetailModal').style.display = 'none'; }
 // Event listeners for asset selector
 document.addEventListener('click', function(e) {
 if(e.target.classList && e.target.classList.contains('asset-option')) {
@@ -1253,8 +1347,6 @@ setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
 populateCountries();
 updateMarqueePrices();
 setInterval(updateMarqueePrices,30000);
-
-// Check for existing Firebase session (PERSISTENCE FIX)
 checkExistingSession();
 });
 async function updateMarqueePrices() {
