@@ -7,7 +7,7 @@
 <!-- Firebase SDKs -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -28,6 +28,7 @@
   window.firebaseDb = db;
   window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
   window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+  window.onAuthStateChanged = onAuthStateChanged;
   window.doc = doc;
   window.setDoc = setDoc;
   window.getDoc = getDoc;
@@ -626,7 +627,7 @@ border-radius: 4px;
 <script>
 // ============ GLOBAL VARIABLES ============
 let currentUser = null;
-let holdings = { usdt: 10.00 };
+let holdings = { usdt: 0.00 };  // CHANGED: Starting balance from $10.00 to $0.00
 let currentPrices = {};
 let currentTradeCoin = 'BTC';
 let currentTradeMode = 'buy';
@@ -667,10 +668,21 @@ function showButtonSpinner(buttonId, originalText) { const btn = document.getEle
 function hideButtonSpinner(buttonId) { const btn = document.getElementById(buttonId); if(btn && btn.dataset.originalText) { btn.innerHTML = btn.dataset.originalText; btn.disabled = false; btn.classList.remove('btn-loading'); } }
 function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-// ============ FIREBASE AUTH ============
+// ============ FIREBASE AUTH WITH PERSISTENCE ============
+// Set Firebase persistence to LOCAL so user stays logged in after browser close/refresh
+async function setPersistence() {
+    const auth = window.firebaseAuth;
+    if (auth && auth.setPersistence) {
+        try {
+            await auth.setPersistence('local');
+        } catch(e) { console.log("Persistence set failed, continuing anyway"); }
+    }
+}
+
 async function handleSignupWithSpinner() {
     const buttonId = 'signupBtn';
     showButtonSpinner(buttonId, 'Create Account');
+    await setPersistence();
     await delay(4000);
     
     let name = document.getElementById('signupName').value;
@@ -689,19 +701,19 @@ async function handleSignupWithSpinner() {
         const userCredential = await window.createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
-        // Save user data to Firestore
+        // Save user data to Firestore with starting balance $0.00
         const db = window.firebaseDb;
         const userRef = window.doc(db, 'users', user.uid);
         await window.setDoc(userRef, {
             name: name,
             email: email,
             country: country,
-            holdings: { usdt: 10.00 },
+            holdings: { usdt: 0.00 },  // CHANGED: Starting balance from $10.00 to $0.00
             createdAt: new Date().toISOString()
         });
         
         // Also save locally for current session
-        holdings = { usdt: 10.00 };
+        holdings = { usdt: 0.00 };  // CHANGED: Starting balance from $10.00 to $0.00
         withdrawals = [];
         currentUser = { uid: user.uid, name: name, email: email };
         
@@ -719,6 +731,7 @@ async function handleSignupWithSpinner() {
 async function handleLoginWithSpinner() {
     const buttonId = 'loginBtn';
     showButtonSpinner(buttonId, 'Login');
+    await setPersistence();
     await delay(4000);
     
     let email = document.getElementById('loginEmail').value;
@@ -739,10 +752,10 @@ async function handleLoginWithSpinner() {
         
         if (userDoc.exists()) {
             const userData = userDoc.data();
-            holdings = userData.holdings || { usdt: 10.00 };
+            holdings = userData.holdings || { usdt: 0.00 };
             currentUser = { uid: user.uid, name: userData.name, email: user.email };
         } else {
-            holdings = { usdt: 10.00 };
+            holdings = { usdt: 0.00 };
             currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
         }
         withdrawals = [];
@@ -770,9 +783,45 @@ async function logoutWithSpinner() {
     } catch(e) {}
     
     currentUser = null;
-    holdings = { usdt: 10.00 };
+    holdings = { usdt: 0.00 };
     withdrawals = [];
     showHomepage();
+}
+
+// ============ CHECK EXISTING SESSION ON PAGE LOAD (PERSISTENCE FIX) ============
+async function checkExistingSession() {
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
+    
+    return new Promise((resolve) => {
+        window.onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is already logged in from previous session
+                try {
+                    const userRef = window.doc(db, 'users', user.uid);
+                    const userDoc = await window.getDoc(userRef);
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        holdings = userData.holdings || { usdt: 0.00 };
+                        currentUser = { uid: user.uid, name: userData.name, email: user.email };
+                    } else {
+                        holdings = { usdt: 0.00 };
+                        currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
+                    }
+                    withdrawals = [];
+                    showDashboard();
+                } catch(e) {
+                    console.log("Error loading user data:", e);
+                    showHomepage();
+                }
+            } else {
+                // No user logged in, show homepage
+                showHomepage();
+            }
+            resolve();
+        });
+    });
 }
 
 // ============ DEPOSIT / PAYMENT ============
@@ -897,7 +946,7 @@ function goBackToDepositPage() {
     }
 }
 
-// ============ OTHER FUNCTIONS (unchanged from original except minor fixes) ============
+// ============ OTHER FUNCTIONS ============
 function showHomepage() { document.getElementById('homepage').style.display = 'block'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; document.getElementById('depositPage').style.display = 'none'; document.getElementById('depositPaymentPage').style.display = 'none'; renderHomepageWatchlist(); }
 function showAuthPage() { document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'block'; document.getElementById('dashboard').style.display = 'none'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; document.getElementById('depositPage').style.display = 'none'; document.getElementById('depositPaymentPage').style.display = 'none'; populateCountries(); document.getElementById('signupName').value = ''; document.getElementById('signupEmail').value = ''; document.getElementById('signupPassword').value = ''; document.getElementById('signupConfirmPassword').value = ''; document.getElementById('loginEmail').value = ''; document.getElementById('loginPassword').value = ''; }
 function showDashboard() { if(!currentUser) { showAuthPage(); return; } document.getElementById('homepage').style.display = 'none'; document.getElementById('authPage').style.display = 'none'; document.getElementById('dashboard').style.display = 'block'; document.getElementById('profilePage').style.display = 'none'; document.getElementById('marketsPage').style.display = 'none'; document.getElementById('tradePage').style.display = 'none'; document.getElementById('botsPage').style.display = 'none'; document.getElementById('botDetailPage').style.display = 'none'; document.getElementById('withdrawalPage').style.display = 'none'; document.getElementById('depositPage').style.display = 'none'; document.getElementById('depositPaymentPage').style.display = 'none'; loadDashboard(); }
@@ -933,7 +982,7 @@ function updateDateTime() { let now = new Date(); let dateTimeElement = document
 function toggleFAQ(el) { let ans = el.nextElementSibling; let plus = el.querySelector('.plus'); if(ans.style.display==='block') { ans.style.display='none'; plus.textContent='+'; } else { ans.style.display='block'; plus.textContent='−'; } }
 function makeDraggable(element) { let pos1=0,pos2=0,pos3=0,pos4=0; element.onmousedown = dragMouseDown; function dragMouseDown(e) { e.preventDefault(); pos3 = e.clientX; pos4 = e.clientY; document.onmouseup = closeDragElement; document.onmousemove = elementDrag; } function elementDrag(e) { e.preventDefault(); pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY; pos3 = e.clientX; pos4 = e.clientY; let top = element.offsetTop - pos2; let left = element.offsetLeft - pos1; let maxX = window.innerWidth - element.offsetWidth; let maxY = window.innerHeight - element.offsetHeight; left = Math.min(Math.max(0,left), maxX); top = Math.min(Math.max(0,top), maxY); element.style.top = top + 'px'; element.style.left = left + 'px'; element.style.bottom = 'auto'; element.style.right = 'auto'; } function closeDragElement() { document.onmouseup = null; document.onmousemove = null; } }
 let chatWidget = document.getElementById('chatWidget'); if(chatWidget) makeDraggable(chatWidget);
-// Chart functions (simplified)
+// Chart functions
 let currentInterval = '1h'; let lastCandleTime = null; let priceUpdateInterval = null;
 function getIntervalMilliseconds(interval) { switch(interval) { case '1m': return 60000; case '5m': return 300000; case '15m': return 900000; case '1h': return 3600000; case '4h': return 14400000; case '1D': return 86400000; default: return 3600000; } }
 function generateInitialCandleData(basePrice, count, interval) { let candles = []; let currentPrice = basePrice; let intervalMs = getIntervalMilliseconds(interval); let now = Date.now(); for(let i = count; i > 0; i--) { let open = currentPrice; let change = (Math.random() - 0.5) * 0.002 * currentPrice; let close = currentPrice + change; let high = Math.max(open, close) + (Math.random() * 0.0015 * currentPrice); let low = Math.min(open, close) - (Math.random() * 0.0015 * currentPrice); let volume = Math.random() * 100 + 20; let time = now - (i * intervalMs); candles.push({ open, high, low, close, volume, time }); currentPrice = close; } return candles; }
@@ -944,7 +993,7 @@ function drawCandlestickChart() { let canvas = document.getElementById('candleCa
 function updateChartStats() { let coinId = currentTradeCoin.toLowerCase(); let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; let change = currentPrices[coinId+'Change'] || 0; let high = currentPrice * (1 + Math.abs(change)/100 + 0.005); let low = currentPrice * (1 - Math.abs(change)/100 - 0.005); let volume = (Math.random() * 500 + 100).toFixed(2); let ma7 = currentPrice * (1 + (Math.random()-0.5)*0.01); let ma14 = currentPrice * (1 + (Math.random()-0.5)*0.008); let ma28 = currentPrice * (1 + (Math.random()-0.5)*0.005); if(document.getElementById('statHigh')) document.getElementById('statHigh').innerHTML = `$${high.toFixed(2)}`; if(document.getElementById('statLow')) document.getElementById('statLow').innerHTML = `$${low.toFixed(2)}`; if(document.getElementById('statVolume')) document.getElementById('statVolume').innerHTML = `${volume}M`; if(document.getElementById('statMA7')) document.getElementById('statMA7').innerHTML = `$${ma7.toFixed(2)}`; if(document.getElementById('statMA14')) document.getElementById('statMA14').innerHTML = `$${ma14.toFixed(2)}`; if(document.getElementById('statMA28')) document.getElementById('statMA28').innerHTML = `$${ma28.toFixed(2)}`; let orderBookHtml = ''; for(let i=0; i<8; i++) { let price = currentPrice * (1 + (Math.random()-0.5)*0.002); let qty = (Math.random() * 2).toFixed(4); let total = (price * qty).toFixed(2); let priceColor = i < 4 ? 'ask-price' : 'bid-price'; orderBookHtml += `<tr><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`; } if(document.getElementById('orderBookBody')) document.getElementById('orderBookBody').innerHTML = orderBookHtml; let tradesHtml = ''; for(let i=0; i<10; i++) { let type = Math.random() > 0.5 ? 'Buy' : 'Sell'; let typeColor = type === 'Buy' ? 'buy-color' : 'sell-color'; let price = currentPrice * (1 + (Math.random()-0.5)*0.001); let qty = (Math.random() * 1).toFixed(4); let time = new Date(Date.now() - i*60000).toLocaleTimeString(); tradesHtml += `<tr><td>${time}</td><td class="${typeColor}">$${price.toFixed(2)}</td><td>${qty}</td><td class="${typeColor}">${type}</td></tr>`; } if(document.getElementById('tradesBody')) document.getElementById('tradesBody').innerHTML = tradesHtml; }
 function openChartModal() { let modal = document.getElementById('chartModal'); if(!modal) { showCustomModal('Error', 'Chart modal not available', 'error'); return; } let coinId = currentTradeCoin.toLowerCase(); let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId]; candleData = generateInitialCandleData(currentPrice, 30, currentInterval); lastCandleTime = Date.now(); let titleElement = document.getElementById('chartCoinTitle'); if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`; modal.style.display = 'block'; requestAnimationFrame(function() { let canvas = document.getElementById('candleCanvas'); if(canvas) { let container = canvas.parentElement; if(container) canvas.width = Math.max(800, container.clientWidth - 20); else canvas.width = 900; drawCandlestickChart(); } updateChartStats(); }); startRealTimeChart(); }
 function closeChartModal() { let modal = document.getElementById('chartModal'); if(modal) modal.style.display = 'none'; if(priceUpdateInterval) { clearInterval(priceUpdateInterval); priceUpdateInterval = null; } lastCandleTime = null; }
-// Bot functions (unchanged)
+// Bot functions
 function loadSavedBotConfigs() { let botNames = ['Bitcoin Accumulation', 'ETH DCA Pro']; for(let botName of botNames) { let savedConfig = localStorage.getItem('botConfig_' + botName); let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH'; let botStatusSpan = document.getElementById(`botStatus${botKey}`); let botPerfSpan = document.getElementById(`botPerf${botKey}`); if(savedConfig && botStatusSpan && botPerfSpan) { let config = JSON.parse(savedConfig); botStatusSpan.innerHTML = 'Configured'; botStatusSpan.style.background = 'rgba(72,187,120,0.2)'; botStatusSpan.style.color = '#48bb78'; botPerfSpan.innerHTML = `Performance: $${config.amount} per trade (${config.asset})`; botPerfSpan.style.color = '#48bb78'; } } }
 function showBotDetail(botName) { 
 let savedConfig = localStorage.getItem('botConfig_'+botName); 
@@ -1079,7 +1128,7 @@ showCustomModal('Success', `${currentConfigBot} configured!\nAsset: ${asset}\nIn
 closeConfigModal();
 }
 async function startBotWithSpinner(botName) { let buttonId = botName === 'Bitcoin Accumulation' ? 'startBotBitcoinBtn' : 'startBotETHBtn'; const button = document.getElementById(buttonId); if(!button) return; const originalText = button.innerHTML; button.innerHTML = getLogoSpinner(); button.disabled = true; await delay(4000); button.innerHTML = originalText; button.disabled = false; showBotDetail(botName); }
-// Withdrawal functions (simplified)
+// Withdrawal functions
 function renderWithdrawalHistory() {
 let tbody = document.getElementById('withdrawalHistoryBody');
 if(!tbody) return;
@@ -1192,7 +1241,7 @@ function switchToLogin() { document.querySelector('.auth-tab[data-tab="login"]')
 function switchToSignup() { document.querySelector('.auth-tab[data-tab="signup"]').classList.add('active'); document.querySelector('.auth-tab[data-tab="login"]').classList.remove('active'); document.getElementById('signupForm').classList.add('active'); document.getElementById('loginForm').classList.remove('active'); }
 if(loginTabBtn) loginTabBtn.addEventListener('click', switchToLogin);
 if(signupTabBtn) signupTabBtn.addEventListener('click', switchToSignup);
-// Load homepage after loading screen
+// Load homepage after loading screen - BUT check for existing session first
 window.addEventListener('load', function() {
 setTimeout(function() {
 const loadingScreen = document.getElementById('loadingScreen');
@@ -1200,10 +1249,13 @@ const homepage = document.getElementById('homepage');
 loadingScreen.classList.add('fade-out');
 homepage.classList.add('visible');
 setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
-}, 4000);
+}, 2000);
 populateCountries();
 updateMarqueePrices();
 setInterval(updateMarqueePrices,30000);
+
+// Check for existing Firebase session (PERSISTENCE FIX)
+checkExistingSession();
 });
 async function updateMarqueePrices() {
 try {
