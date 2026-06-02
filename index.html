@@ -622,7 +622,7 @@ border-radius: 4px;
 
 <div id="configModal" class="config-modal"><div class="config-modal-content"><div class="close-config" onclick="closeConfigModal()">×</div><h2 id="configModalTitle">Configure Bot</h2><div class="config-field"><label>Select Asset</label><select id="configAssetSelect"><option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option><option value="USDT">Tether (USDT)</option><option value="USDC">USD Coin (USDC)</option></select></div><div class="config-field"><label>Investment Amount per Trade (USD)</label><input type="number" id="configAmount" value="100" min="10" max="10000"><div class="helper-text">Minimum: $10 · Maximum: $10,000</div><div class="sub-text">Enter the amount you want to invest per trade</div></div><div class="config-buttons"><button class="config-cancel-btn" onclick="closeConfigModal()">Cancel</button><button class="config-save-btn" id="configSaveBtn" onclick="saveConfigWithSpinner()">Save Configuration</button></div></div></div>
 
-<div class="chat-widget" id="chatWidget" onclick="showCustomModal('Chat Support', 'Chat support coming soon! Email us at support@bt-earn.com', 'info')"><span>💬</span><span>Hi!</span></div>
+<div class="chat-widget" id="chatWidget" onclick="showChatSupportModal()"><span>💬</span><span>Hi!</span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
@@ -663,6 +663,23 @@ function closeCustomModal() { document.getElementById('customModal').classList.r
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
 function navigateTo(page) { closeSidebar(); if(page === 'home') showDashboard(); else if(page === 'markets') showMarkets(); else if(page === 'trade') showTrade(currentTradeCoin); else if(page === 'bots') showBots(); else if(page === 'profile') showProfile(); }
+
+// Updated Chat Support Function with mailto link
+function showChatSupportModal() {
+const message = `Chat support coming soon! You can email us at <a href="mailto:support.bt.earn@gmail.com" style="color: #667eea; text-decoration: underline;">support.bt.earn@gmail.com</a>`;
+showCustomModalWithHTML('Chat Support', message, 'info');
+}
+
+// Show modal with HTML content (for mailto link)
+function showCustomModalWithHTML(title, htmlMessage, type) {
+const modal = document.getElementById('customModal');
+document.getElementById('modalIcon').innerHTML = type === 'error' ? '❌' : (type === 'success' ? '✓' : 'ℹ️');
+document.getElementById('modalIcon').className = 'custom-modal-icon ' + (type === 'error' ? 'error' : (type === 'success' ? 'success' : 'info'));
+document.getElementById('modalTitle').innerHTML = title;
+const messageElement = document.getElementById('modalMessage');
+messageElement.innerHTML = htmlMessage;
+modal.classList.add('active');
+}
 
 // Logo spinner for buttons
 function getLogoSpinner() { return `<div class="logo-spinner"><span class="spinner-letter">B</span><span class="spinner-letter">T</span><span class="spinner-letter">-</span><span class="spinner-letter">E</span><span class="spinner-letter">A</span><span class="spinner-letter">R</span><span class="spinner-letter">N</span></div>`; }
