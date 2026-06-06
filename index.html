@@ -670,7 +670,35 @@ modal.classList.add('active');
 function closeCustomModal() { document.getElementById('customModal').classList.remove('active'); }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
 function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('active'); }
-function navigateTo(page) { closeSidebar(); if(page === 'home') showDashboard(); else if(page === 'markets') showMarkets(); else if(page === 'trade') showTrade(currentTradeCoin); else if(page === 'bots') showBots(); else if(page === 'profile') showProfile(); }
+
+// ============ URL ROUTING FUNCTIONS ============
+function updateURL(page) {
+  const newURL = window.location.origin + `/#/${page}`;
+  window.history.pushState({ page: page }, '', newURL);
+}
+
+function navigateTo(page) {
+  closeSidebar();
+  updateURL(page);
+  if(page === 'home') showDashboard();
+  else if(page === 'markets') showMarkets();
+  else if(page === 'trade') showTrade(currentTradeCoin);
+  else if(page === 'bots') showBots();
+  else if(page === 'profile') showProfile();
+}
+
+function checkURLForPage() {
+  const hash = window.location.hash;
+  if (hash.includes('/markets')) {
+    showMarkets();
+  } else if (hash.includes('/trade')) {
+    showTrade(currentTradeCoin);
+  } else if (hash.includes('/bots')) {
+    showBots();
+  } else if (hash.includes('/profile')) {
+    showProfile();
+  }
+}
 
 // Updated Chat Support Function with mailto link
 function showChatSupportModal() {
@@ -2193,6 +2221,7 @@ populateCountries();
 updateMarqueePrices();
 setInterval(updateMarqueePrices,30000);
 checkExistingSession();
+checkURLForPage();
 });
 
 async function updateMarqueePrices() {
