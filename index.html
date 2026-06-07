@@ -22,8 +22,6 @@
   "logo": "https://bt-earn.xyz/website_logo_2248-256x256.png"
 }
 </script>
-<!-- TradingView Widget Script -->
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 <!-- Firebase SDKs -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -305,14 +303,88 @@ opacity: 1;
 .confirm-btn { width: 100%; padding: 14px; border: none; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 .confirm-btn.buy { background: #48bb78; color: white; }
 .confirm-btn.sell { background: #e53e3e; color: white; }
+.chart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; overflow-y: auto; }
+.chart-modal-content { background: #0a0e27; margin: 60px auto; width: 95%; max-width: 900px; border-radius: 20px; padding: 20px; position: relative; border: 1px solid rgba(255,255,255,0.1); }
+.close-chart { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: white; background: rgba(255,255,255,0.1); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.close-chart:hover { background: rgba(255,255,255,0.2); }
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+.chart-header h3 { font-size: 20px; }
+.time-intervals { display: flex; gap: 8px; flex-wrap: wrap; }
+.time-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; }
+.time-btn.active { background: #667eea; }
+.candlestick-chart { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+.chart-canvas-container { position: relative; overflow-x: auto; }
+.candle-chart-canvas { display: block; width: 100%; min-width: 800px; height: 350px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+.chart-stats { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; }
+.stat-item { text-align: center; }
+.stat-label { font-size: 11px; color: #a0a0c0; }
+.stat-value { font-size: 14px; font-weight: bold; }
+.indicators { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.indicator-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 15px; cursor: pointer; font-size: 11px; }
+.indicator-btn.active { background: #667eea; }
+.chart-tabs { display: flex; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+.chart-tab { cursor: pointer; font-size: 14px; color: #a0a0c0; }
+.chart-tab.active { color: #667eea; border-bottom: 2px solid #667eea; }
 
-/* Chart Page Styles */
-.chart-page-container { padding: 100px 20px 80px; max-width: 1400px; margin: 0 auto; }
-.chart-page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-.chart-page-header h1 { font-size: 28px; }
-.back-to-trade-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 25px; border-radius: 30px; color: white; cursor: pointer; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
-.back-to-trade-btn:hover { background: rgba(255,255,255,0.1); }
-.large-chart-container { background: rgba(0,0,0,0.2); border-radius: 20px; padding: 10px; height: 600px; width: 100%; margin-top: 10px; }
+/* Professional Trades Table Styles - Bolder Text */
+.order-book-table, .trades-table {
+width: 100%;
+font-size: 13px;
+border-collapse: collapse;
+}
+.order-book-table th, .trades-table th {
+text-align: left;
+padding: 12px 8px;
+color: #a0a0c0;
+font-weight: 600;
+font-size: 12px;
+letter-spacing: 0.5px;
+border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.order-book-table td, .trades-table td {
+padding: 10px 8px;
+border-bottom: 1px solid rgba(255,255,255,0.03);
+font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+font-weight: 500;
+font-size: 13px;
+}
+.trades-table .buy-color {
+color: #48bb78;
+font-weight: 600;
+}
+.trades-table .sell-color {
+color: #e53e3e;
+font-weight: 600;
+}
+.trades-table tr:hover {
+background: rgba(255,255,255,0.03);
+}
+.order-book-table .bid-price {
+color: #48bb78;
+font-weight: 600;
+}
+.order-book-table .ask-price {
+color: #e53e3e;
+font-weight: 600;
+}
+.order-book-table td, .order-book-table td {
+font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+font-weight: 500;
+}
+.trades-container {
+max-height: 300px;
+overflow-y: auto;
+}
+.trades-container::-webkit-scrollbar {
+width: 4px;
+}
+.trades-container::-webkit-scrollbar-track {
+background: rgba(255,255,255,0.05);
+}
+.trades-container::-webkit-scrollbar-thumb {
+background: #667eea;
+border-radius: 4px;
+}
 
 .bots-container { padding: 100px 20px 80px; max-width: 1200px; margin: 0 auto; }
 .bots-header { margin-bottom: 30px; }
@@ -438,6 +510,8 @@ opacity: 1;
 .info-row, .preference-row { flex-direction: column; align-items: flex-start; gap: 8px; }
 .chat-widget { bottom: 75px; right: 10px; padding: 10px 16px; font-size: 14px; }
 .trade-price { font-size: 28px; }
+.chart-modal-content { margin: 80px auto; width: 98%; }
+.candle-chart-canvas { height: 250px; min-width: 600px; }
 .bots-grid { grid-template-columns: 1fr; }
 .bot-card { padding: 20px; }
 .stat-card .stat-value { font-size: 24px; }
@@ -450,9 +524,6 @@ opacity: 1;
 .loading-logo { font-size: 40px; }
 .history-table td { font-size: 14px; padding: 14px 8px; }
 .coin-selector { font-size: 14px; padding: 8px 12px; max-width: 180px; }
-.chart-page-container { padding: 80px 15px 80px; }
-.large-chart-container { height: 400px; }
-.chart-page-header h1 { font-size: 20px; }
 }
 </style>
 </head>
@@ -478,21 +549,18 @@ opacity: 1;
 <!-- HOMEPAGE -->
 <div id="homepage"><div class="header"><div class="logo">BT-EARN</div><div class="header-right"><div class="header-buttons"><a class="login-link" onclick="showAuthPage()">Log in</a><a class="signup-link" onclick="showAuthPage()">Sign up</a></div></div></div><div class="hero"><h1>AI Trading Algorithm of the Future</h1><p>Let the bots trade for you</p><button class="launch-btn" onclick="showAuthPage()">Launch the Bot</button></div><div class="stats-container"><div class="stats-marquee" id="statsMarquee"><span>BTC: $73,786</span><span>ETH: $2,022</span><span>BNB: $580</span><span>SOL: $145</span><span>USDT: $1.00</span></div></div><div class="features-section"><div class="features-grid"><div class="feature-box"><h3>AI Algorithm</h3><p>Analyzes the market in milliseconds</p></div><div class="feature-box"><h3>Custom Settings</h3><p>Adjust risk level, strategies, and more</p></div><div class="feature-box"><h3>Multiple Trading Pairs</h3><p>Supports 200+ trading pairs</p></div><div class="feature-box"><h3>Never misses a trading opportunity</h3><p>24/7 automated trading</p></div></div></div><div class="watchlist-section"><div class="watchlist-header"><h2>Watchlist</h2><div><span>Live Prices</span></div></div><div class="watchlist-scroll" id="homepageWatchlist"><div class="watchlist-item" onclick="showAuthPage()"><div class="coin-info"><h4>BTC</h4><p>Bitcoin</p></div><div class="coin-price"><div class="price">$73,786.00</div><div class="negative">-0.48%</div></div></div><div class="watchlist-item" onclick="showAuthPage()"><div class="coin-info"><h4>ETH</h4><p>Ethereum</p></div><div class="coin-price"><div class="price">$2,022.64</div><div class="negative">-0.84%</div></div></div><div class="watchlist-item" onclick="showAuthPage()"><div class="coin-info"><h4>BNB</h4><p>Binance Coin</p></div><div class="coin-price"><div class="price">$580.00</div><div class="positive">+0.32%</div></div></div><div class="watchlist-item" onclick="showAuthPage()"><div class="coin-info"><h4>SOL</h4><p>Solana</p></div><div class="coin-price"><div class="price">$145.00</div><div class="positive">+1.24%</div></div></div><div class="watchlist-item" onclick="showAuthPage()"><div class="coin-info"><h4>USDT</h4><p>Tether</p></div><div class="coin-price"><div class="price">$1.00</div><div class="positive">0.00%</div></div></div></div></div><div class="why-section"><h2>Why BT-EARN?</h2><div class="why-grid"><div class="why-item"><h4>Meet and Copy Trading</h4><p>Copy successful traders automatically</p></div><div class="why-item"><h4>Hold to Maximize Your Asset</h4><p>Earn rewards by holding assets</p></div><div class="why-item"><h4>BT-EARN Staking</h4><p>Stake and earn passive income</p></div></div></div><div class="security-section"><div class="security-grid"><div class="feature-box"><h3>Reliable Security</h3><p>Protect user funds with Fireblocks' security and Chainalysis' real-time monitoring.</p></div><div class="feature-box"><h3>Derivatives Trading</h3><p>Enjoy spots, copy trading, earnings, and API access—all in one platform.</p></div><div class="feature-box"><h3>Stable and Seamless</h3><p>Experience ultra-low latency, fast processing, and stable systems for smooth trading.</p></div><div class="feature-box"><h3>High Performance</h3><p>Benefit from deep liquidity and powerful tools for efficient trade execution.</p></div><div class="feature-box"><h3>Minimum commissions</h3><p>0% deposit fees, low trading commissions, and extra discounts for active traders.</p></div><div class="feature-box"><h3>Smart Trading Tools</h3><p>Deep analytics and charts. Automated trading and AI bots. API support for PRO traders.</p></div></div></div><div class="products-section"><h2>Trading Products</h2><div class="products-grid"><div class="product-card"><h4>Spot</h4><p>Over 200+ coins available. Buy and sell quickly with automatic calculation of average cost and PnL.</p><a href="#" class="learn-more">Learn More →</a></div><div class="product-card"><h4>Futures</h4><p>Supports long/short positions with leverage and profit of up to 125x from market volatilities.</p><a href="#" class="learn-more">Learn More →</a></div><div class="product-card"><h4>Grid Trading</h4><p>Create your personal trading strategy and profit 24/7 with spot grid and futures grid trading.</p><a href="#" class="learn-more">Learn More →</a></div></div></div><div class="faq-section"><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">What products does BT-EARN offer? <span class="plus">+</span></div><div class="faq-answer">BT-EARN offers Spot trading, Futures trading (up to 125x leverage), Grid trading, Copy trading, and Staking services.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How Secure is BT-EARN? <span class="plus">+</span></div><div class="faq-answer">98% of assets are stored in cold wallets. We use multi-level security system, KYC and two-factor authentication (2FA).</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to Buy Bitcoin and Other Cryptocurrencies on BT-EARN? <span class="plus">+</span></div><div class="faq-answer">You can buy crypto via SEPA Transfer, Card Payment, or P2P trading. Go to "Buy Crypto" section to get started.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to Trade Cryptocurrency on BT-EARN? <span class="plus">+</span></div><div class="faq-answer">Deposit funds, go to Spot/Futures market, choose your trading pair, and place your order.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to trade using AI Trading? <span class="plus">+</span></div><div class="faq-answer">Enable AI Trading in settings, set your risk level, and let the bot trade automatically for you.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">Registration and Security <span class="plus">+</span></div><div class="faq-answer">Sign up with email, verify identity, enable 2FA for maximum security.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">Trading and Fees <span class="plus">+</span></div><div class="faq-answer">0% deposit fees, low trading commissions. Active traders get extra discounts.</div></div></div><div class="footer"><div class="footer-links"><a href="#">About</a><a href="#">Products</a><a href="#">Trade</a><a href="#">Support</a><a href="#">Contact support</a></div><div class="copyright">© 2026 BT-EARN. All rights reserved.</div></div></div>
 
-<!-- ABOUT PAGE -->
+<!-- ABOUT PAGE (same content as homepage) -->
 <div id="aboutPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="hero"><h1>About BT-EARN</h1><p>Learn more about our AI trading platform</p></div><div class="features-section"><div class="features-grid"><div class="feature-box"><h3>AI Algorithm</h3><p>Analyzes the market in milliseconds</p></div><div class="feature-box"><h3>Custom Settings</h3><p>Adjust risk level, strategies, and more</p></div><div class="feature-box"><h3>Multiple Trading Pairs</h3><p>Supports 200+ trading pairs</p></div><div class="feature-box"><h3>Never misses a trading opportunity</h3><p>24/7 automated trading</p></div></div></div><div class="why-section"><h2>Why BT-EARN?</h2><div class="why-grid"><div class="why-item"><h4>Meet and Copy Trading</h4><p>Copy successful traders automatically</p></div><div class="why-item"><h4>Hold to Maximize Your Asset</h4><p>Earn rewards by holding assets</p></div><div class="why-item"><h4>BT-EARN Staking</h4><p>Stake and earn passive income</p></div></div></div><div class="security-section"><div class="security-grid"><div class="feature-box"><h3>Reliable Security</h3><p>Protect user funds with Fireblocks' security and Chainalysis' real-time monitoring.</p></div><div class="feature-box"><h3>Derivatives Trading</h3><p>Enjoy spots, copy trading, earnings, and API access—all in one platform.</p></div><div class="feature-box"><h3>Stable and Seamless</h3><p>Experience ultra-low latency, fast processing, and stable systems for smooth trading.</p></div><div class="feature-box"><h3>High Performance</h3><p>Benefit from deep liquidity and powerful tools for efficient trade execution.</p></div><div class="feature-box"><h3>Minimum commissions</h3><p>0% deposit fees, low trading commissions, and extra discounts for active traders.</p></div><div class="feature-box"><h3>Smart Trading Tools</h3><p>Deep analytics and charts. Automated trading and AI bots. API support for PRO traders.</p></div></div></div><div class="products-section"><h2>Trading Products</h2><div class="products-grid"><div class="product-card"><h4>Spot</h4><p>Over 200+ coins available. Buy and sell quickly with automatic calculation of average cost and PnL.</p><a href="#" class="learn-more">Learn More →</a></div><div class="product-card"><h4>Futures</h4><p>Supports long/short positions with leverage and profit of up to 125x from market volatilities.</p><a href="#" class="learn-more">Learn More →</a></div><div class="product-card"><h4>Grid Trading</h4><p>Create your personal trading strategy and profit 24/7 with spot grid and futures grid trading.</p><a href="#" class="learn-more">Learn More →</a></div></div></div><div class="faq-section"><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">What products does BT-EARN offer? <span class="plus">+</span></div><div class="faq-answer">BT-EARN offers Spot trading, Futures trading (up to 125x leverage), Grid trading, Copy trading, and Staking services.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How Secure is BT-EARN? <span class="plus">+</span></div><div class="faq-answer">98% of assets are stored in cold wallets. We use multi-level security system, KYC and two-factor authentication (2FA).</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to Buy Bitcoin and Other Cryptocurrencies on BT-EARN? <span class="plus">+</span></div><div class="faq-answer">You can buy crypto via SEPA Transfer, Card Payment, or P2P trading. Go to "Buy Crypto" section to get started.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to Trade Cryptocurrency on BT-EARN? <span class="plus">+</span></div><div class="faq-answer">Deposit funds, go to Spot/Futures market, choose your trading pair, and place your order.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to trade using AI Trading? <span class="plus">+</span></div><div class="faq-answer">Enable AI Trading in settings, set your risk level, and let the bot trade automatically for you.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">Registration and Security <span class="plus">+</span></div><div class="faq-answer">Sign up with email, verify identity, enable 2FA for maximum security.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">Trading and Fees <span class="plus">+</span></div><div class="faq-answer">0% deposit fees, low trading commissions. Active traders get extra discounts.</div></div></div><div class="footer"><div class="footer-links"><a href="#">About</a><a href="#">Products</a><a href="#">Trade</a><a href="#">Support</a><a href="#">Contact support</a></div><div class="copyright">© 2026 BT-EARN. All rights reserved.</div></div></div>
-
-<!-- CHART PAGE -->
-<div id="chartPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="chart-page-container"><div class="chart-page-header"><h1>📈 Live Chart - <span id="chartPageCoinSymbol">BTC</span>/USDT</h1><button class="back-to-trade-btn" onclick="showTrade(currentTradeCoin)">← Back to Trade</button></div><div class="large-chart-container" id="largeChartContainer"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home" onclick="showDashboard()">Home</div><div class="nav-item" data-nav="markets" onclick="showMarkets()">Markets</div><div class="nav-item" data-nav="trade" onclick="showTrade(currentTradeCoin)">Trade</div><div class="nav-item" data-nav="bots" onclick="showBots()">Bots</div><div class="nav-item" data-nav="profile" onclick="showProfile()">Profile</div></div></div>
 
 <div id="authPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div></div><div class="auth-container"><div class="auth-card"><button class="back-btn" onclick="showHomepage()">← Back</button><div class="auth-tabs"><div class="auth-tab active" data-tab="login" id="loginTabBtn">Login</div><div class="auth-tab" data-tab="signup" id="signupTabBtn">Sign Up</div></div><div id="loginForm" class="auth-form active"><h2>Welcome back</h2><p>Enter your credentials to access your account</p><div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div><div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div><button class="auth-btn" id="loginBtn" onclick="handleLoginWithSpinner()">Login</button><button class="forgot-btn" onclick="showCustomModal('Password Reset', 'Password reset link has been sent to your email address.', 'info')">Forgot Password?</button></div><div id="signupForm" class="auth-form"><h2>Create an account</h2><p>Enter your details to create a new account</p><div class="input-group"><label>Full Name</label><input type="text" id="signupName" placeholder="John Doe"></div><div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div><div class="input-group"><label>Country</label><select id="signupCountry"></select></div><div class="input-group"><label>Password</label><input type="password" id="signupPassword" placeholder="Enter your password (min 8 characters)"></div><div class="input-group"><label>Confirm Password</label><input type="password" id="signupConfirmPassword" placeholder="Confirm your password"></div><button class="auth-btn" id="signupBtn" onclick="handleSignupWithSpinner()">Create Account</button></div></div></div></div>
 
-<div id="dashboard" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="dashboard-container"><div class="dashboard-header"><h1>Dashboard</h1><div class="date-time" id="dateTimeDisplay"><div class="time">--:--:--</div><div class="date">---</div></div></div><div class="portfolio-card"><h3>REAL PORTFOLIO</h3><div class="portfolio-balance" id="portfolioBalance">$0.00</div><div class="portfolio-change" id="portfolioChange">+0.00%</div><div class="portfolio-buttons"><button class="deposit-btn" onclick="showDepositPage()">Deposit</button><button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button></div></div><div class="section-title">Your Crypto <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div><div id="cryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist</div><div id="watchlistContainer" class="watchlist-scroll"></div><div id="lastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
+<div id="dashboard" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="dashboard-container"><div class="dashboard-header"><h1>Dashboard</h1><div class="date-time" id="dateTimeDisplay"><div class="time">--:--:--</div><div class="date">---</div></div></div><div class="portfolio-card"><h3>REAL PORTFOLIO</h3><div class="portfolio-balance" id="portfolioBalance">$0.00</div><div class="portfolio-change" id="portfolioChange">+0.00%</div><div class="portfolio-buttons"><button class="deposit-btn" onclick="showDepositPage()">Deposit</button><button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button></div></div><div class="section-title">Your Crypto <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div><div id="cryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist (200 Coins)</div><div id="watchlistContainer" class="watchlist-scroll"></div><div id="lastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
 <div id="profilePage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="profile-container" id="profileContainer"></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile" style="color: #667eea;">Profile</div></div></div>
 
-<div id="marketsPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="markets-container"><div class="markets-header"><h1>Markets</h1><button class="refresh-btn" onclick="refreshMarketsPrices()">Refresh Prices</button></div><div class="section-title">Your Crypto</div><div id="marketsCryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist</div><div id="marketsWatchlistContainer" class="watchlist-scroll"></div><div id="marketsLastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets" style="color: #667eea;">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
+<div id="marketsPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="markets-container"><div class="markets-header"><h1>Markets</h1><button class="refresh-btn" onclick="refreshMarketsPrices()">Refresh Prices</button></div><div class="section-title">Your Crypto</div><div id="marketsCryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist (200 Coins)</div><div id="marketsWatchlistContainer" class="watchlist-scroll"></div><div id="marketsLastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets" style="color: #667eea;">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
-<div id="tradePage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="trade-container" id="tradeContainer"><div class="trade-header"><select id="tradeCoinSelect" class="coin-selector" onchange="changeTradeCoin()"></select><div class="chart-icon-btn" onclick="openChartPage()"><div class="chart-icon"><span></span><span></span><span></span></div><span style="font-size:12px;">Chart</span></div></div><div class="trade-price-card"><div class="trade-price" id="tradePrice">$0.00</div><div class="trade-change" id="tradeChange">+0.00%</div></div><div class="trade-tabs"><div class="trade-tab buy active" onclick="setTradeMode('buy')">Buy</div><div class="trade-tab sell" onclick="setTradeMode('sell')">Sell</div></div><div class="trade-input-section"><div class="input-row"><label>Price (USDT)</label><input type="number" id="tradePriceInput" placeholder="0.00" oninput="calculateTotal()"></div><div class="input-row"><label>Quantity (<span id="tradeCoinSymbol">BTC</span>)</label><input type="number" id="tradeQuantityInput" placeholder="0.00" oninput="calculateTotal()"></div><div class="balance-info" id="tradeBalanceInfo">Available: 0.0000 BTC</div><div class="total-value">Total: <span id="tradeTotalValue">$0.00</span></div><button class="confirm-btn" id="tradeConfirmBtn" onclick="executeTrade()">Buy BTC</button></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade" style="color: #667eea;">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
+<div id="tradePage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="trade-container" id="tradeContainer"><div class="trade-header"><select id="tradeCoinSelect" class="coin-selector" onchange="changeTradeCoin()"></select><div class="chart-icon-btn" onclick="openChartModal()"><div class="chart-icon"><span></span><span></span><span></span></div><span style="font-size:12px;">Chart</span></div></div><div class="trade-price-card"><div class="trade-price" id="tradePrice">$0.00</div><div class="trade-change" id="tradeChange">+0.00%</div></div><div class="trade-tabs"><div class="trade-tab buy active" onclick="setTradeMode('buy')">Buy</div><div class="trade-tab sell" onclick="setTradeMode('sell')">Sell</div></div><div class="trade-input-section"><div class="input-row"><label>Price (USDT)</label><input type="number" id="tradePriceInput" placeholder="0.00" oninput="calculateTotal()"></div><div class="input-row"><label>Quantity (<span id="tradeCoinSymbol">BTC</span>)</label><input type="number" id="tradeQuantityInput" placeholder="0.00" oninput="calculateTotal()"></div><div class="balance-info" id="tradeBalanceInfo">Available: 0.0000 BTC</div><div class="total-value">Total: <span id="tradeTotalValue">$0.00</span></div><button class="confirm-btn" id="tradeConfirmBtn" onclick="executeTrade()">Buy BTC</button></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade" style="color: #667eea;">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
 <div id="botsPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="bots-container"><div class="bots-header"><h1>Automated Trading</h1><p>Create and manage algorithmic trading strategies</p></div><div class="bots-stats"><div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Total Bots</div></div><div class="stat-card"><div class="stat-value">2</div><div class="stat-label">Active</div></div><div class="stat-card"><div class="stat-value">+4.8%</div><div class="stat-label">Weekly Return</div><div class="stat-sub">↑ +2.1%</div></div></div><button class="create-bot-btn" onclick="showCustomModal('Create Bot', 'Create new bot feature coming soon!', 'info')">+ Create New Bot</button><div class="dca-section"><h3>Dollar-Cost Averaging Bots</h3><button class="create-dca-btn" onclick="showCustomModal('Create DCA Bot', 'Create DCA bot feature coming soon!', 'info')">+ Create DCA Bot</button></div><div class="bots-grid"><div class="bot-card"><div class="bot-status" id="botStatusBitcoin">Not Configured</div><div class="bot-title">Bitcoin Accumulation</div><div class="bot-type">Weekly • DCA</div><div class="bot-description">Dollar-cost averaging into Bitcoin on a weekly basis</div><div class="bot-risk">Risk: <span class="risk-value">Low</span></div><div class="bot-performance" id="botPerfBitcoin">Performance: --</div><div class="bot-buttons"><button class="bot-config-btn" onclick="openConfigModal('Bitcoin Accumulation')">Configure</button><button class="bot-start-btn" id="startBotBitcoinBtn" onclick="startBotWithSpinner('Bitcoin Accumulation')">Start BA Bot</button></div></div><div class="bot-card"><div class="bot-status" id="botStatusETH">Not Configured</div><div class="bot-title">ETH DCA Pro</div><div class="bot-type">Daily • DCA</div><div class="bot-description">Dynamic DCA based on RSI and volume indicators</div><div class="bot-risk">Risk: <span class="risk-value">Medium</span></div><div class="bot-performance" id="botPerfETH">Performance: --</div><div class="bot-buttons"><button class="bot-config-btn" onclick="openConfigModal('ETH DCA Pro')">Configure</button><button class="bot-start-btn" id="startBotETHBtn" onclick="startBotWithSpinner('ETH DCA Pro')">Start DCA Pro</button></div></div></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots" style="color: #667eea;">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
@@ -504,25 +572,40 @@ opacity: 1;
 <div class="withdrawal-container">
 <h1>Fund Your Account</h1>
 <p class="subtitle">Choose your preferred deposit method below</p>
+
 <div style="margin-bottom: 25px;">
 <div id="depositOptionUSDT" onclick="selectDepositAsset('USDT')" style="display: flex; justify-content: space-between; align-items: center; padding: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(102,126,234,0.5); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.3s;">
-<div><div style="font-weight: bold; font-size: 16px;">USDT (TRC20)</div><div style="font-size: 13px; color: #a0a0c0; margin-top: 4px;">Network: TRON (TRC20)</div></div>
+<div>
+<div style="font-weight: bold; font-size: 16px;">USDT (TRC20)</div>
+<div style="font-size: 13px; color: #a0a0c0; margin-top: 4px;">Network: TRON (TRC20)</div>
+</div>
 <div id="checkUSDT" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">✓</div>
 </div>
 <div id="depositOptionBTC" onclick="selectDepositAsset('BTC')" style="display: flex; justify-content: space-between; align-items: center; padding: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; cursor: pointer; transition: 0.3s;">
-<div><div style="font-weight: bold; font-size: 16px;">BTC</div><div style="font-size: 13px; color: #a0a0c0; margin-top: 4px;">Network: BTC Network</div></div>
+<div>
+<div style="font-weight: bold; font-size: 16px;">BTC</div>
+<div style="font-size: 13px; color: #a0a0c0; margin-top: 4px;">Network: BTC Network</div>
+</div>
 <div id="checkBTC" style="width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; color: #a0a0c0; font-size: 14px;"></div>
 </div>
 </div>
+
 <div class="input-field" style="margin-bottom: 25px;">
 <label>Amount (USD)</label>
 <input type="number" id="depositAmount" placeholder="Enter amount (min $10)" style="width: 100%; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 16px;" min="10" step="1">
 <div class="helper-text" style="font-size: 11px; color: #a0a0c0; margin-top: 5px;">Minimum deposit: $10</div>
 </div>
+
 <button class="withdraw-submit-btn" id="depositPayBtn" onclick="processDepositToPayment()" style="width: 100%;">Pay</button>
 <div style="height: 80px;"></div>
 </div>
-<div class="bottom-nav"><div class="nav-item" data-nav="home" onclick="showDashboard()">Home</div><div class="nav-item" data-nav="markets" onclick="showMarkets()">Markets</div><div class="nav-item" data-nav="trade" onclick="showTrade(currentTradeCoin)">Trade</div><div class="nav-item" data-nav="bots" onclick="showBots()">Bots</div><div class="nav-item" data-nav="profile" onclick="showProfile()">Profile</div></div>
+<div class="bottom-nav">
+<div class="nav-item" data-nav="home" onclick="showDashboard()">Home</div>
+<div class="nav-item" data-nav="markets" onclick="showMarkets()">Markets</div>
+<div class="nav-item" data-nav="trade" onclick="showTrade(currentTradeCoin)">Trade</div>
+<div class="nav-item" data-nav="bots" onclick="showBots()">Bots</div>
+<div class="nav-item" data-nav="profile" onclick="showProfile()">Profile</div>
+</div>
 </div>
 
 <!-- DEPOSIT PAYMENT PAGE (STEP 2 - QR CODE) -->
@@ -531,18 +614,34 @@ opacity: 1;
 <div class="withdrawal-container" style="text-align: center;">
 <h1 id="paymentTitle">Deposit with USDT</h1>
 <p class="subtitle" id="paymentNetwork">Network: TRON (TRC20)</p>
-<div style="background: white; padding: 20px; border-radius: 20px; display: inline-block; margin-bottom: 25px;"><canvas id="paymentQrCanvas" width="200" height="200"></canvas></div>
-<div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; margin-bottom: 25px; word-break: break-all;"><p style="font-size: 13px; color: #a0a0c0; margin-bottom: 8px;">Wallet Address</p><p id="paymentWalletAddress" style="font-size: 14px; font-weight: 500; font-family: monospace;">TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj</p></div>
+
+<div style="background: white; padding: 20px; border-radius: 20px; display: inline-block; margin-bottom: 25px;">
+<canvas id="paymentQrCanvas" width="200" height="200"></canvas>
+</div>
+
+<div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; margin-bottom: 25px; word-break: break-all;">
+<p style="font-size: 13px; color: #a0a0c0; margin-bottom: 8px;">Wallet Address</p>
+<p id="paymentWalletAddress" style="font-size: 14px; font-weight: 500; font-family: monospace;">TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj</p>
+</div>
+
 <button id="paymentCopyBtn" class="withdraw-submit-btn" style="width: 100%; margin-bottom: 15px;">Copy Address</button>
 <button class="config-cancel-btn" onclick="goBackToDepositPage()" style="width: 100%;">Back</button>
 <div style="height: 80px;"></div>
 </div>
-<div class="bottom-nav"><div class="nav-item" data-nav="home" onclick="showDashboard()">Home</div><div class="nav-item" data-nav="markets" onclick="showMarkets()">Markets</div><div class="nav-item" data-nav="trade" onclick="showTrade(currentTradeCoin)">Trade</div><div class="nav-item" data-nav="bots" onclick="showBots()">Bots</div><div class="nav-item" data-nav="profile" onclick="showProfile()">Profile</div></div>
+<div class="bottom-nav">
+<div class="nav-item" data-nav="home" onclick="showDashboard()">Home</div>
+<div class="nav-item" data-nav="markets" onclick="showMarkets()">Markets</div>
+<div class="nav-item" data-nav="trade" onclick="showTrade(currentTradeCoin)">Trade</div>
+<div class="nav-item" data-nav="bots" onclick="showBots()">Bots</div>
+<div class="nav-item" data-nav="profile" onclick="showProfile()">Profile</div>
+</div>
 </div>
 
 <div id="withdrawalPage" style="display:none;"><div class="header"><div class="logo" onclick="showDashboard()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="withdrawal-container"><h1>Withdraw Funds</h1><p class="subtitle">Choose your preferred withdrawal method below</p><div class="balance-card"><div class="label">Available Balance</div><div class="amount" id="withdrawBalance">$0.00</div></div><div class="withdraw-form"><div class="asset-selector" id="assetSelector"><div class="asset-option active" data-asset="BTC">Bitcoin</div><div class="asset-option" data-asset="USDT">USDT</div></div><div class="network-info" id="networkInfo">Network: <span id="networkName">BTC Network</span></div><div class="input-field"><label>Amount (USD)</label><input type="number" id="withdrawAmount" placeholder="0.00" min="10"><div class="helper-text" style="font-size:11px; color:#a0a0c0; margin-top:5px;">Minimum withdrawal: $10</div></div><div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div><button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">Withdraw</button></div><div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"></tbody></table></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
 <div id="txDetailModal" class="tx-modal"><div class="tx-modal-content"><div class="close-tx" onclick="closeTxModal()">×</div><h2>Transaction Details</h2><div class="tx-detail-row"><span class="tx-detail-label">Amount</span><span class="tx-detail-value" id="txAmount">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Asset</span><span class="tx-detail-value" id="txAsset">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Wallet Address</span><span class="tx-detail-value" id="txAddress">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Status</span><span class="tx-detail-value" id="txStatus">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Date & Time</span><span class="tx-detail-value" id="txDateTime">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Network</span><span class="tx-detail-value" id="txNetwork">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Network Fee</span><span class="tx-detail-value" id="txFee">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Amount Received</span><span class="tx-detail-value" id="txAmountReceived">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Transaction ID</span><span class="tx-detail-value" id="txId">--</span></div></div></div>
+
+<div id="chartModal" class="chart-modal"><div class="chart-modal-content"><div class="close-chart" onclick="closeChartModal()">×</div><div class="chart-header"><h3 id="chartCoinTitle">BTC/USDT Chart</h3><div class="time-intervals" id="timeIntervals"><button class="time-btn" data-interval="1m">1m</button><button class="time-btn" data-interval="5m">5m</button><button class="time-btn" data-interval="15m">15m</button><button class="time-btn active" data-interval="1h">1h</button><button class="time-btn" data-interval="4h">4h</button><button class="time-btn" data-interval="1D">1D</button></div></div><div class="candlestick-chart"><div class="chart-canvas-container"><canvas id="candleCanvas" class="candle-chart-canvas" width="900" height="350"></canvas></div></div><div class="chart-stats" id="chartStats"><div class="stat-item"><div class="stat-label">24h High</div><div class="stat-value" id="statHigh">--</div></div><div class="stat-item"><div class="stat-label">24h Low</div><div class="stat-value" id="statLow">--</div></div><div class="stat-item"><div class="stat-label">24h Volume</div><div class="stat-value" id="statVolume">--</div></div><div class="stat-item"><div class="stat-label">MA7</div><div class="stat-value" id="statMA7">--</div></div><div class="stat-item"><div class="stat-label">MA14</div><div class="stat-value" id="statMA14">--</div></div><div class="stat-item"><div class="stat-label">MA28</div><div class="stat-value" id="statMA28">--</div></div></div><div class="indicators" id="indicators"><button class="indicator-btn active" data-indicator="MA">MA</button><button class="indicator-btn" data-indicator="EMA">EMA</button><button class="indicator-btn" data-indicator="BOLL">BOLL</button><button class="indicator-btn" data-indicator="MACD">MACD</button></div><div class="chart-tabs"><div class="chart-tab active" data-tab="orderbook">Order Book</div><div class="chart-tab" data-tab="trades">Trades</div></div><div id="orderBookPanel"><table class="order-book-table" style="width:100%"><thead><tr><th>Price (USDT)</th><th>Qty (<span id="orderBookCoinSymbol">BTC</span>)</th><th>Total</th></tr></thead><tbody id="orderBookBody"></tbody></table></div><div id="tradesPanel" style="display:none;"><div class="trades-container"><table class="trades-table" style="width:100%"><thead><tr><th>Time</th><th>Price</th><th>Qty</th><th>Type</th></tr></thead><tbody id="tradesBody"></tbody></table></div></div></div></div>
 
 <div id="configModal" class="config-modal"><div class="config-modal-content"><div class="close-config" onclick="closeConfigModal()">×</div><h2 id="configModalTitle">Configure Bot</h2><div class="config-field"><label>Select Asset</label><select id="configAssetSelect"><option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option><option value="USDT">Tether (USDT)</option></select></div><div class="config-field"><label>Investment Amount per Trade (USD)</label><input type="number" id="configAmount" value="100" min="10" max="10000"><div class="helper-text">Minimum: $10 · Maximum: $10,000</div><div class="sub-text">Enter the amount you want to invest per trade</div></div><div class="config-buttons"><button class="config-cancel-btn" onclick="closeConfigModal()">Cancel</button><button class="config-save-btn" id="configSaveBtn" onclick="saveConfigWithSpinner()">Save Configuration</button></div></div></div>
 
@@ -745,16 +844,20 @@ let holdings = { usdt: 0.00 };
 let currentPrices = {};
 let currentTradeCoin = 'BTC';
 let currentTradeMode = 'buy';
+let chartUpdateInterval = null;
+let chartRealTimeInterval = null;
+let currentInterval = '1h';
+let candleData = [];
 let currentConfigBot = null;
 let withdrawals = [];
 let activeBot = null;
 let botInterval = null;
 let lastTradeResult = null;
 let botStats = { botName: '', asset: '', amountPerTrade: 100, totalPL: 0, totalRuns: 0, totalTrades: 0, wins: 0, botBalance: 0, isRunning: false, isPaused: false, logs: [] };
+let botLastSessionOutcome = {};
 let selectedDepositAsset = 'USDT';
 let currentPaymentQr = null;
 let currentTxId = null;
-let largeChartWidget = null;
 
 const FALLBACK_PRICES = {};
 top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = coin.symbol === 'BTC' ? 73786 : (coin.symbol === 'ETH' ? 2022 : (coin.symbol === 'USDT' ? 1 : (coin.symbol === 'BNB' ? 580 : (coin.symbol === 'SOL' ? 145 : 10 + Math.random() * 100)))); FALLBACK_PRICES[coin.id+'Change'] = (Math.random() - 0.5) * 8; });
@@ -785,7 +888,6 @@ else if(page === 'about') showAboutPage();
 function showAboutPage() {
 document.getElementById('homepage').style.display = 'none';
 document.getElementById('aboutPage').style.display = 'block';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'none';
 document.getElementById('dashboard').style.display = 'none';
 document.getElementById('profilePage').style.display = 'none';
@@ -833,7 +935,9 @@ if (!currentUser || !currentUser.uid) return;
 try {
 const db = window.firebaseDb;
 const userRef = window.doc(db, 'users', currentUser.uid);
-await window.updateDoc(userRef, { withdrawals: window.arrayUnion(withdrawal) });
+await window.updateDoc(userRef, {
+withdrawals: window.arrayUnion(withdrawal)
+});
 } catch(e) { console.log("Error saving withdrawal:", e); }
 }
 
@@ -864,7 +968,9 @@ return null;
 async function setPersistence() {
 const auth = window.firebaseAuth;
 if (auth && auth.setPersistence) {
-try { await auth.setPersistence('local'); } catch(e) { console.log("Persistence set failed"); }
+try {
+await auth.setPersistence('local');
+} catch(e) { console.log("Persistence set failed, continuing anyway"); }
 }
 }
 
@@ -889,12 +995,22 @@ try {
 const auth = window.firebaseAuth;
 const userCredential = await window.createUserWithEmailAndPassword(auth, email, password);
 const user = userCredential.user;
+
 const db = window.firebaseDb;
 const userRef = window.doc(db, 'users', user.uid);
-await window.setDoc(userRef, { name, email, country, holdings: { usdt: 0.00 }, withdrawals: [], createdAt: new Date().toISOString() });
+await window.setDoc(userRef, {
+name: name,
+email: email,
+country: country,
+holdings: { usdt: 0.00 },
+withdrawals: [],
+createdAt: new Date().toISOString()
+});
+
 holdings = { usdt: 0.00 };
 withdrawals = [];
-currentUser = { uid: user.uid, name, email };
+currentUser = { uid: user.uid, name: name, email: email };
+
 hideButtonSpinner(buttonId);
 showCustomModal('Success!', 'Account created successfully!', 'success');
 showDashboard();
@@ -922,9 +1038,11 @@ try {
 const auth = window.firebaseAuth;
 const userCredential = await window.signInWithEmailAndPassword(auth, email, password);
 const user = userCredential.user;
+
 const db = window.firebaseDb;
 const userRef = window.doc(db, 'users', user.uid);
 const userDoc = await window.getDoc(userRef);
+
 if (userDoc.exists()) {
 const userData = userDoc.data();
 holdings = userData.holdings || { usdt: 0.00 };
@@ -935,6 +1053,7 @@ holdings = { usdt: 0.00 };
 withdrawals = [];
 currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
 }
+
 hideButtonSpinner(buttonId);
 showCustomModal('Success', 'Logged in successfully!', 'success');
 showDashboard();
@@ -951,7 +1070,12 @@ const originalText = btn.innerHTML;
 btn.innerHTML = getLogoSpinner();
 btn.disabled = true;
 await delay(2000);
-try { const auth = window.firebaseAuth; await auth.signOut(); } catch(e) {}
+
+try {
+const auth = window.firebaseAuth;
+await auth.signOut();
+} catch(e) {}
+
 currentUser = null;
 holdings = { usdt: 0.00 };
 withdrawals = [];
@@ -961,12 +1085,14 @@ showHomepage();
 async function checkExistingSession() {
 const auth = window.firebaseAuth;
 const db = window.firebaseDb;
+
 return new Promise((resolve) => {
 window.onAuthStateChanged(auth, async (user) => {
 if (user) {
 try {
 const userRef = window.doc(db, 'users', user.uid);
 const userDoc = await window.getDoc(userRef);
+
 if (userDoc.exists()) {
 const userData = userDoc.data();
 holdings = userData.holdings || { usdt: 0.00 };
@@ -978,8 +1104,13 @@ withdrawals = [];
 currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
 }
 showDashboard();
-} catch(e) { showHomepage(); }
-} else { showHomepage(); }
+} catch(e) {
+console.log("Error loading user data:", e);
+showHomepage();
+}
+} else {
+showHomepage();
+}
 resolve();
 });
 });
@@ -991,6 +1122,7 @@ const usdtOption = document.getElementById('depositOptionUSDT');
 const btcOption = document.getElementById('depositOptionBTC');
 const checkUSDT = document.getElementById('checkUSDT');
 const checkBTC = document.getElementById('checkBTC');
+
 if (asset === 'USDT') {
 usdtOption.style.border = '1px solid rgba(102,126,234,0.5)';
 btcOption.style.border = '1px solid rgba(255,255,255,0.08)';
@@ -1016,9 +1148,18 @@ async function processDepositToPayment() {
 const buttonId = 'depositPayBtn';
 showButtonSpinner(buttonId, 'Pay');
 await delay(2000);
+
 const amount = parseFloat(document.getElementById('depositAmount').value);
-if (isNaN(amount) || amount < 10) { hideButtonSpinner(buttonId); showCustomModal('Invalid Amount', 'Minimum deposit is $10', 'error'); return; }
-let address = '', title = '', network = '';
+if (isNaN(amount) || amount < 10) {
+hideButtonSpinner(buttonId);
+showCustomModal('Invalid Amount', 'Minimum deposit is $10', 'error');
+return;
+}
+
+let address = '';
+let title = '';
+let network = '';
+
 if (selectedDepositAsset === 'USDT') {
 address = 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj';
 title = 'Deposit with USDT';
@@ -1028,22 +1169,60 @@ address = '1HpuFKWciiek3QxLtSY8D2oX2npLc8jZ5T';
 title = 'Deposit with BTC';
 network = 'Network: BTC Network';
 }
+
 document.getElementById('paymentTitle').innerHTML = title;
 document.getElementById('paymentNetwork').innerHTML = network;
 document.getElementById('paymentWalletAddress').innerHTML = address;
+
 const canvas = document.getElementById('paymentQrCanvas');
 const ctx = canvas.getContext('2d');
 ctx.fillStyle = '#ffffff';
 ctx.fillRect(0, 0, 200, 200);
+
 if (typeof QRCode !== 'undefined') {
 try {
 if (currentPaymentQr) currentPaymentQr.clear();
-currentPaymentQr = new QRCode(canvas, { text: address, width: 200, height: 200, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
-} catch(e) { ctx.fillStyle = '#fff'; ctx.fillRect(0,0,200,200); ctx.fillStyle = '#000'; ctx.font = '12px Arial'; ctx.fillText('QR Code', 70, 100); ctx.fillText(address.substring(0,20)+'...', 20, 140); }
-} else { ctx.fillStyle = '#fff'; ctx.fillRect(0,0,200,200); ctx.fillStyle = '#000'; ctx.font = '12px Arial'; ctx.fillText('QR Code', 70, 100); ctx.fillText(address.substring(0,20)+'...', 20, 140); }
+currentPaymentQr = new QRCode(canvas, {
+text: address,
+width: 200,
+height: 200,
+colorDark: "#000000",
+colorLight: "#ffffff",
+correctLevel: QRCode.CorrectLevel.H
+});
+} catch(e) {
+ctx.fillStyle = '#fff';
+ctx.fillRect(0, 0, 200, 200);
+ctx.fillStyle = '#000';
+ctx.font = '12px Arial';
+ctx.fillText('QR Code', 70, 100);
+ctx.fillText(address.substring(0, 20)+'...', 20, 140);
+}
+} else {
+ctx.fillStyle = '#fff';
+ctx.fillRect(0, 0, 200, 200);
+ctx.fillStyle = '#000';
+ctx.font = '12px Arial';
+ctx.fillText('QR Code', 70, 100);
+ctx.fillText(address.substring(0, 20)+'...', 20, 140);
+}
+
 const copyBtn = document.getElementById('paymentCopyBtn');
 const originalText = copyBtn.innerHTML;
-copyBtn.onclick = function() { navigator.clipboard.writeText(address).then(() => { copyBtn.innerHTML = 'Copied!'; setTimeout(() => { copyBtn.innerHTML = originalText; }, 1000); }).catch(() => { copyBtn.innerHTML = 'Failed!'; setTimeout(() => { copyBtn.innerHTML = originalText; }, 1000); }); };
+copyBtn.onclick = function() {
+navigator.clipboard.writeText(address).then(() => {
+copyBtn.innerHTML = 'Copied!';
+setTimeout(() => {
+copyBtn.innerHTML = originalText;
+}, 1000);
+}).catch(() => {
+copyBtn.innerHTML = 'Failed!';
+setTimeout(() => {
+copyBtn.innerHTML = originalText;
+}, 1000);
+});
+};
+
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'block';
 hideButtonSpinner(buttonId);
@@ -1052,13 +1231,15 @@ hideButtonSpinner(buttonId);
 function goBackToDepositPage() {
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'block';
-if (currentPaymentQr) { currentPaymentQr.clear(); currentPaymentQr = null; }
+if (currentPaymentQr) {
+currentPaymentQr.clear();
+currentPaymentQr = null;
+}
 }
 
 function showHomepage() {
 document.getElementById('homepage').style.display = 'block';
 document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'none';
 document.getElementById('dashboard').style.display = 'none';
 document.getElementById('profilePage').style.display = 'none';
@@ -1074,7 +1255,6 @@ document.getElementById('depositPaymentPage').style.display = 'none';
 function showAuthPage() {
 document.getElementById('homepage').style.display = 'none';
 document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'block';
 document.getElementById('dashboard').style.display = 'none';
 document.getElementById('profilePage').style.display = 'none';
@@ -1086,13 +1266,18 @@ document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 populateCountries();
+document.getElementById('signupName').value = '';
+document.getElementById('signupEmail').value = '';
+document.getElementById('signupPassword').value = '';
+document.getElementById('signupConfirmPassword').value = '';
+document.getElementById('loginEmail').value = '';
+document.getElementById('loginPassword').value = '';
 }
 
 function showDashboard() {
 if(!currentUser) { showAuthPage(); return; }
 document.getElementById('homepage').style.display = 'none';
 document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'none';
 document.getElementById('dashboard').style.display = 'block';
 document.getElementById('profilePage').style.display = 'none';
@@ -1110,7 +1295,6 @@ function showProfile() {
 if(!currentUser) { showAuthPage(); return; }
 document.getElementById('homepage').style.display = 'none';
 document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'none';
 document.getElementById('dashboard').style.display = 'none';
 document.getElementById('profilePage').style.display = 'block';
@@ -1128,7 +1312,6 @@ function showMarkets() {
 if(!currentUser) { showAuthPage(); return; }
 document.getElementById('homepage').style.display = 'none';
 document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'none';
 document.getElementById('dashboard').style.display = 'none';
 document.getElementById('profilePage').style.display = 'none';
@@ -1147,7 +1330,6 @@ if(!currentUser) { showAuthPage(); return; }
 currentTradeCoin = coin || 'BTC';
 document.getElementById('homepage').style.display = 'none';
 document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'none';
 document.getElementById('dashboard').style.display = 'none';
 document.getElementById('profilePage').style.display = 'none';
@@ -1165,7 +1347,6 @@ function showBots() {
 if(!currentUser) { showAuthPage(); return; }
 document.getElementById('homepage').style.display = 'none';
 document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'none';
 document.getElementById('dashboard').style.display = 'none';
 document.getElementById('profilePage').style.display = 'none';
@@ -1182,7 +1363,6 @@ loadSavedBotConfigs();
 function showDepositPage() {
 document.getElementById('homepage').style.display = 'none';
 document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'none';
 document.getElementById('dashboard').style.display = 'none';
 document.getElementById('profilePage').style.display = 'none';
@@ -1201,7 +1381,6 @@ function showWithdrawalPage() {
 if(!currentUser) { showAuthPage(); return; }
 document.getElementById('homepage').style.display = 'none';
 document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'none';
 document.getElementById('authPage').style.display = 'none';
 document.getElementById('dashboard').style.display = 'none';
 document.getElementById('profilePage').style.display = 'none';
@@ -1214,66 +1393,6 @@ document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
 renderWithdrawalHistory();
-}
-
-function showChartPage() {
-if(!currentUser) { showAuthPage(); return; }
-document.getElementById('homepage').style.display = 'none';
-document.getElementById('aboutPage').style.display = 'none';
-document.getElementById('authPage').style.display = 'none';
-document.getElementById('dashboard').style.display = 'none';
-document.getElementById('profilePage').style.display = 'none';
-document.getElementById('marketsPage').style.display = 'none';
-document.getElementById('tradePage').style.display = 'none';
-document.getElementById('botsPage').style.display = 'none';
-document.getElementById('botDetailPage').style.display = 'none';
-document.getElementById('withdrawalPage').style.display = 'none';
-document.getElementById('depositPage').style.display = 'none';
-document.getElementById('depositPaymentPage').style.display = 'none';
-document.getElementById('chartPage').style.display = 'block';
-initLargeChart();
-}
-
-function openChartPage() {
-showChartPage();
-}
-
-function initLargeChart() {
-if (largeChartWidget) {
-try { largeChartWidget.remove(); } catch(e) {}
-largeChartWidget = null;
-}
-const container = document.getElementById('largeChartContainer');
-if (!container) return;
-container.innerHTML = '';
-let tvSymbol = `BINANCE:${currentTradeCoin}USDT`;
-if (currentTradeCoin === 'USDT') tvSymbol = 'BINANCE:BTCUSDT';
-document.getElementById('chartPageCoinSymbol').innerHTML = currentTradeCoin;
-largeChartWidget = new TradingView.widget({
-    width: "100%",
-    height: "100%",
-    symbol: tvSymbol,
-    interval: "60",
-    timezone: "Etc/UTC",
-    theme: "dark",
-    style: "1",
-    locale: "en",
-    toolbar_bg: "#0a0e27",
-    enable_publishing: false,
-    allow_symbol_change: false,
-    container_id: "largeChartContainer",
-    hide_side_toolbar: false,
-    save_image: false,
-    studies: ["MASimple@tv-basicstudies", "RSI@tv-basicstudies", "MACD@tv-basicstudies"],
-    overrides: {
-        "mainSeriesProperties.candleStyle.upColor": "#48bb78",
-        "mainSeriesProperties.candleStyle.downColor": "#e53e3e",
-        "mainSeriesProperties.candleStyle.borderUpColor": "#48bb78",
-        "mainSeriesProperties.candleStyle.borderDownColor": "#e53e3e",
-        "mainSeriesProperties.candleStyle.wickUpColor": "#48bb78",
-        "mainSeriesProperties.candleStyle.wickDownColor": "#e53e3e"
-    }
-});
 }
 
 async function fetchPrices() {
@@ -1289,7 +1408,6 @@ currentPrices[coin.id] = data[coin.id].usd || FALLBACK_PRICES[coin.id];
 currentPrices[coin.id+'Change'] = data[coin.id].usd_24h_change || FALLBACK_PRICES[coin.id+'Change'];
 }
 }
-updateTradePriceDisplay();
 return true;
 } catch(e) { return true; }
 }
@@ -1320,8 +1438,6 @@ let usdtValue = usdtPrice * holdings.usdt;
 let html = `<div class="crypto-item" onclick="showTrade('USDT')"><div><h4>USDT</h4><p>Tether</p><div class="positive">0.00%</div></div><div style="text-align:right;"><div class="price">$${usdtPrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div style="font-size:12px;color:#a0a0c0;">Amount: ${holdings.usdt.toFixed(4)} USDT</div><div>Value: $${usdtValue.toFixed(2)}</div><button class="trade-btn" style="margin-top:10px;" onclick="event.stopPropagation(); showTrade('USDT')">Trade</button></div></div>`;
 let container = document.getElementById('cryptoContainer');
 if(container) container.innerHTML = html;
-let marketsContainer = document.getElementById('marketsCryptoContainer');
-if(marketsContainer) marketsContainer.innerHTML = html;
 }
 
 function updatePortfolioTotal() {
@@ -1333,13 +1449,21 @@ if(balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`;
 function updateLastUpdatedText() {
 let lastUpdatedText = document.getElementById('lastUpdatedText');
 if(lastUpdatedText) lastUpdatedText.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko (200 Coins)`;
-let marketsLastUpdated = document.getElementById('marketsLastUpdatedText');
-if(marketsLastUpdated) marketsLastUpdated.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko (200 Coins)`;
 }
 
-async function refreshDashboardPrices() { await fetchPrices(); renderCrypto(); renderWatchlist(); updatePortfolioTotal(); updateLastUpdatedText(); }
+async function refreshDashboardPrices() {
+await fetchPrices();
+renderCrypto();
+renderWatchlist();
+updatePortfolioTotal();
+updateLastUpdatedText();
+}
 
-function loadMarketsPage() { renderMarketsCrypto(); renderMarketsWatchlist(); updateMarketsLastUpdatedText(); }
+function loadMarketsPage() {
+renderMarketsCrypto();
+renderMarketsWatchlist();
+updateMarketsLastUpdatedText();
+}
 
 function renderMarketsWatchlist() {
 let html = '';
@@ -1366,7 +1490,9 @@ let lastUpdatedText = document.getElementById('marketsLastUpdatedText');
 if(lastUpdatedText) lastUpdatedText.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko (200 Coins)`;
 }
 
-function refreshMarketsPrices() { loadMarketsPage(); }
+function refreshMarketsPrices() {
+loadMarketsPage();
+}
 
 function populateTradeDropdown() {
 let select = document.getElementById('tradeCoinSelect');
@@ -1392,6 +1518,18 @@ function changeTradeCoin() {
 currentTradeCoin = document.getElementById('tradeCoinSelect').value;
 updateTradePriceDisplay();
 calculateTotal();
+if(document.getElementById('chartModal').style.display === 'block') {
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
+let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
+lastCandleTime = Date.now();
+drawCandlestickChart();
+let titleElement = document.getElementById('chartCoinTitle');
+if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`;
+let orderBookSymbol = document.getElementById('orderBookCoinSymbol');
+if(orderBookSymbol) orderBookSymbol.innerHTML = currentTradeCoin;
+}
 }
 
 function updateTradePriceDisplay() {
@@ -1440,15 +1578,24 @@ let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
 let quantity = parseFloat(document.getElementById('tradeQuantityInput').value) || 0;
 let price = parseFloat(document.getElementById('tradePriceInput').value) || 0;
 let total = quantity * price;
-if(quantity <= 0) { showCustomModal('Invalid Quantity', 'Please enter a valid quantity', 'error'); return; }
+if(quantity <= 0) {
+showCustomModal('Invalid Quantity', 'Please enter a valid quantity', 'error');
+return;
+}
 if(currentTradeMode === 'buy') {
 let costInUSDT = total;
-if(holdings.usdt < costInUSDT) { showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)} USDT available`, 'error'); return; }
+if(holdings.usdt < costInUSDT) {
+showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)} USDT available`, 'error');
+return;
+}
 showCustomModal('Order Placed', `Buy order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`, 'success');
 holdings.usdt = holdings.usdt - costInUSDT;
 holdings[coinId] = (holdings[coinId] || 0) + quantity;
 } else {
-if(holdings[coinId] < quantity) { showCustomModal('Insufficient Balance', `You have ${(holdings[coinId] || 0).toFixed(8)} ${currentTradeCoin} available`, 'error'); return; }
+if(holdings[coinId] < quantity) {
+showCustomModal('Insufficient Balance', `You have ${(holdings[coinId] || 0).toFixed(8)} ${currentTradeCoin} available`, 'error');
+return;
+}
 showCustomModal('Order Placed', `Sell order placed: ${quantity} ${currentTradeCoin} at $${price} = $${total.toFixed(2)}`, 'success');
 holdings[coinId] = holdings[coinId] - quantity;
 holdings.usdt = holdings.usdt + total;
@@ -1457,8 +1604,12 @@ document.getElementById('tradeQuantityInput').value = '';
 updateTradePriceDisplay();
 updatePortfolioTotal();
 renderCrypto();
+renderMarketsCrypto();
 updateLastUpdatedText();
-if(activeBot && botStats) { botStats.botBalance = holdings.usdt; updateBotStatsDisplay(); }
+if(activeBot && botStats) {
+botStats.botBalance = holdings.usdt;
+updateBotStatsDisplay();
+}
 await saveUserHoldingsToFirestore();
 }
 
@@ -1472,13 +1623,23 @@ document.getElementById('profileContainer').innerHTML = profileHTML;
 function populateCountries() {
 const countriesList = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia","Botswana","Brazil","Brunei","Bulgaria","Burkina","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Korea, North","Korea, South","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palau","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent","Samoa","San Marino","Sao Tome","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
 let countrySelect = document.getElementById('signupCountry');
-if(countrySelect) { countrySelect.innerHTML = ''; for(let country of countriesList) { let option = document.createElement('option'); option.value = country; option.textContent = country; countrySelect.appendChild(option); } }
+if(countrySelect) {
+countrySelect.innerHTML = '';
+for(let country of countriesList) {
+let option = document.createElement('option');
+option.value = country;
+option.textContent = country;
+countrySelect.appendChild(option);
+}
+}
 }
 
 function updateDateTime() {
 let now = new Date();
 let dateTimeElement = document.getElementById('dateTimeDisplay');
-if(dateTimeElement) { dateTimeElement.innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>`; }
+if(dateTimeElement) {
+dateTimeElement.innerHTML = `<div class="time">${now.toLocaleTimeString()}</div><div class="date">${now.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>`;
+}
 }
 setInterval(updateDateTime, 1000);
 updateDateTime();
@@ -1486,21 +1647,273 @@ updateDateTime();
 function toggleFAQ(el) {
 let ans = el.nextElementSibling;
 let plus = el.querySelector('.plus');
-if(ans.style.display==='block') { ans.style.display='none'; plus.textContent='+'; }
-else { ans.style.display='block'; plus.textContent='−'; }
+if(ans.style.display==='block') {
+ans.style.display='none';
+plus.textContent='+';
+} else {
+ans.style.display='block';
+plus.textContent='−';
+}
 }
 
 function makeDraggable(element) {
 let pos1=0,pos2=0,pos3=0,pos4=0;
 element.onmousedown = dragMouseDown;
-function dragMouseDown(e) { e.preventDefault(); pos3 = e.clientX; pos4 = e.clientY; document.onmouseup = closeDragElement; document.onmousemove = elementDrag; }
-function elementDrag(e) { e.preventDefault(); pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY; pos3 = e.clientX; pos4 = e.clientY; let top = element.offsetTop - pos2; let left = element.offsetLeft - pos1; let maxX = window.innerWidth - element.offsetWidth; let maxY = window.innerHeight - element.offsetHeight; left = Math.min(Math.max(0,left), maxX); top = Math.min(Math.max(0,top), maxY); element.style.top = top + 'px'; element.style.left = left + 'px'; element.style.bottom = 'auto'; element.style.right = 'auto'; }
-function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
+function dragMouseDown(e) {
+e.preventDefault();
+pos3 = e.clientX;
+pos4 = e.clientY;
+document.onmouseup = closeDragElement;
+document.onmousemove = elementDrag;
+}
+function elementDrag(e) {
+e.preventDefault();
+pos1 = pos3 - e.clientX;
+pos2 = pos4 - e.clientY;
+pos3 = e.clientX;
+pos4 = e.clientY;
+let top = element.offsetTop - pos2;
+let left = element.offsetLeft - pos1;
+let maxX = window.innerWidth - element.offsetWidth;
+let maxY = window.innerHeight - element.offsetHeight;
+left = Math.min(Math.max(0,left), maxX);
+top = Math.min(Math.max(0,top), maxY);
+element.style.top = top + 'px';
+element.style.left = left + 'px';
+element.style.bottom = 'auto';
+element.style.right = 'auto';
+}
+function closeDragElement() {
+document.onmouseup = null;
+document.onmousemove = null;
+}
 }
 let chatWidget = document.getElementById('chatWidget');
 if(chatWidget) makeDraggable(chatWidget);
 
-// Bot functions
+// Chart functions
+let lastCandleTime = null;
+let priceUpdateInterval = null;
+
+function getIntervalMilliseconds(interval) {
+switch(interval) {
+case '1m': return 60000;
+case '5m': return 300000;
+case '15m': return 900000;
+case '1h': return 3600000;
+case '4h': return 14400000;
+case '1D': return 86400000;
+default: return 3600000;
+}
+}
+
+function generateInitialCandleData(basePrice, count, interval) {
+let candles = [];
+let currentPrice = basePrice;
+let intervalMs = getIntervalMilliseconds(interval);
+let now = Date.now();
+for(let i = count; i > 0; i--) {
+let open = currentPrice;
+let change = (Math.random() - 0.5) * 0.002 * currentPrice;
+let close = currentPrice + change;
+let high = Math.max(open, close) + (Math.random() * 0.0015 * currentPrice);
+let low = Math.min(open, close) - (Math.random() * 0.0015 * currentPrice);
+let volume = Math.random() * 100 + 20;
+let time = now - (i * intervalMs);
+candles.push({ open, high, low, close, volume, time });
+currentPrice = close;
+}
+return candles;
+}
+
+function addNewCandle() {
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
+let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+let newCandle = { open: currentPrice, high: currentPrice, low: currentPrice, close: currentPrice, volume: Math.random() * 100 + 20, time: Date.now() };
+candleData.push(newCandle);
+if(candleData.length > 50) candleData.shift();
+lastCandleTime = Date.now();
+drawCandlestickChart();
+}
+
+function updateCurrentCandlePrice(newPrice) {
+if(candleData.length === 0) return;
+let currentCandle = candleData[candleData.length - 1];
+currentCandle.close = newPrice;
+currentCandle.high = Math.max(currentCandle.high, newPrice);
+currentCandle.low = Math.min(currentCandle.low, newPrice);
+drawCandlestickChart();
+}
+
+function startRealTimeChart() {
+if(priceUpdateInterval) clearInterval(priceUpdateInterval);
+priceUpdateInterval = setInterval(function() {
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
+let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+let randomMove = (Math.random() - 0.5) * 0.0008 * currentPrice;
+let newPrice = currentPrice + randomMove;
+if(currentPrices[coinId]) {
+currentPrices[coinId] = Math.max(newPrice, currentPrice * 0.99);
+}
+updateCurrentCandlePrice(currentPrices[coinId]);
+if(document.getElementById('tradePage').style.display === 'block') {
+updateTradePriceDisplay();
+}
+updateChartStats();
+let now = Date.now();
+let intervalMs = getIntervalMilliseconds(currentInterval);
+if(!lastCandleTime) {
+lastCandleTime = now;
+} else if(now - lastCandleTime >= intervalMs) {
+addNewCandle();
+}
+}, 2500);
+}
+
+function drawCandlestickChart() {
+let canvas = document.getElementById('candleCanvas');
+if(!canvas) return;
+let ctx = canvas.getContext('2d');
+let width = canvas.width;
+let height = canvas.height;
+ctx.clearRect(0,0,width,height);
+if(candleData.length === 0) return;
+let candleWidth = (width - 80) / candleData.length;
+let maxPrice = Math.max(...candleData.map(c => c.high));
+let minPrice = Math.min(...candleData.map(c => c.low));
+let priceRange = maxPrice - minPrice;
+if(priceRange === 0) priceRange = 1;
+ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+ctx.lineWidth = 0.5;
+for(let i=0; i<=5; i++) {
+let y = 40 + (i * (height - 80) / 5);
+ctx.beginPath();
+ctx.moveTo(60, y);
+ctx.lineTo(width - 20, y);
+ctx.stroke();
+let price = maxPrice - (i * priceRange / 5);
+ctx.fillStyle = '#a0a0c0';
+ctx.font = '10px Arial';
+ctx.fillText(price.toFixed(2), 5, y + 3);
+}
+for(let i=0; i<candleData.length; i++) {
+let candle = candleData[i];
+let x = 60 + (i * candleWidth);
+let isGreen = candle.close >= candle.open;
+let color = isGreen ? '#48bb78' : '#e53e3e';
+let openY = 40 + ((maxPrice - candle.open) / priceRange) * (height - 80);
+let closeY = 40 + ((maxPrice - candle.close) / priceRange) * (height - 80);
+let highY = 40 + ((maxPrice - candle.high) / priceRange) * (height - 80);
+let lowY = 40 + ((maxPrice - candle.low) / priceRange) * (height - 80);
+let bodyTop = Math.min(openY, closeY);
+let bodyHeight = Math.abs(closeY - openY);
+let bodyWidth = candleWidth * 0.6;
+ctx.beginPath();
+ctx.moveTo(x + bodyWidth/2, highY);
+ctx.lineTo(x + bodyWidth/2, lowY);
+ctx.strokeStyle = color;
+ctx.lineWidth = 1;
+ctx.stroke();
+ctx.fillStyle = color;
+ctx.fillRect(x + (candleWidth - bodyWidth)/2, bodyTop, bodyWidth, Math.max(1, bodyHeight));
+}
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
+let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+let currentY = 40 + ((maxPrice - currentPrice) / priceRange) * (height - 80);
+ctx.beginPath();
+ctx.moveTo(60, currentY);
+ctx.lineTo(width - 20, currentY);
+ctx.strokeStyle = '#667eea';
+ctx.lineWidth = 1;
+ctx.setLineDash([5,5]);
+ctx.stroke();
+ctx.setLineDash([]);
+ctx.fillStyle = '#667eea';
+ctx.font = '10px Arial';
+ctx.fillText(`Current: $${currentPrice.toFixed(2)}`, width - 120, currentY - 3);
+}
+
+function updateChartStats() {
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
+let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+let change = currentPrices[coinId+'Change'] || 0;
+let high = currentPrice * (1 + Math.abs(change)/100 + 0.005);
+let low = currentPrice * (1 - Math.abs(change)/100 - 0.005);
+let volume = (Math.random() * 500 + 100).toFixed(2);
+let ma7 = currentPrice * (1 + (Math.random()-0.5)*0.01);
+let ma14 = currentPrice * (1 + (Math.random()-0.5)*0.008);
+let ma28 = currentPrice * (1 + (Math.random()-0.5)*0.005);
+if(document.getElementById('statHigh')) document.getElementById('statHigh').innerHTML = `$${high.toFixed(2)}`;
+if(document.getElementById('statLow')) document.getElementById('statLow').innerHTML = `$${low.toFixed(2)}`;
+if(document.getElementById('statVolume')) document.getElementById('statVolume').innerHTML = `${volume}M`;
+if(document.getElementById('statMA7')) document.getElementById('statMA7').innerHTML = `$${ma7.toFixed(2)}`;
+if(document.getElementById('statMA14')) document.getElementById('statMA14').innerHTML = `$${ma14.toFixed(2)}`;
+if(document.getElementById('statMA28')) document.getElementById('statMA28').innerHTML = `$${ma28.toFixed(2)}`;
+let orderBookHtml = '';
+for(let i=0; i<8; i++) {
+let price = currentPrice * (1 + (Math.random()-0.5)*0.002);
+let qty = (Math.random() * 2).toFixed(4);
+let total = (price * qty).toFixed(2);
+let priceColor = i < 4 ? 'ask-price' : 'bid-price';
+orderBookHtml += `<tr><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
+}
+if(document.getElementById('orderBookBody')) document.getElementById('orderBookBody').innerHTML = orderBookHtml;
+let tradesHtml = '';
+for(let i=0; i<10; i++) {
+let type = Math.random() > 0.5 ? 'Buy' : 'Sell';
+let typeColor = type === 'Buy' ? 'buy-color' : 'sell-color';
+let price = currentPrice * (1 + (Math.random()-0.5)*0.001);
+let qty = (Math.random() * 1).toFixed(4);
+let time = new Date(Date.now() - i*60000).toLocaleTimeString();
+tradesHtml += `<tr><td>${time}</td><td class="${typeColor}">$${price.toFixed(2)}</td><td>${qty}</td><td class="${typeColor}">${type}</td></tr>`;
+}
+if(document.getElementById('tradesBody')) document.getElementById('tradesBody').innerHTML = tradesHtml;
+}
+
+function openChartModal() {
+let modal = document.getElementById('chartModal');
+if(!modal) {
+showCustomModal('Error', 'Chart modal not available', 'error');
+return;
+}
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
+let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
+lastCandleTime = Date.now();
+let titleElement = document.getElementById('chartCoinTitle');
+if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`;
+let orderBookSymbol = document.getElementById('orderBookCoinSymbol');
+if(orderBookSymbol) orderBookSymbol.innerHTML = currentTradeCoin;
+modal.style.display = 'block';
+requestAnimationFrame(function() {
+let canvas = document.getElementById('candleCanvas');
+if(canvas) {
+let container = canvas.parentElement;
+if(container) canvas.width = Math.max(800, container.clientWidth - 20);
+else canvas.width = 900;
+drawCandlestickChart();
+}
+updateChartStats();
+});
+startRealTimeChart();
+}
+
+function closeChartModal() {
+let modal = document.getElementById('chartModal');
+if(modal) modal.style.display = 'none';
+if(priceUpdateInterval) {
+clearInterval(priceUpdateInterval);
+priceUpdateInterval = null;
+}
+lastCandleTime = null;
+}
+
+// Bot functions (unchanged)
 async function loadSavedBotConfigs() {
 let botNames = ['Bitcoin Accumulation', 'ETH DCA Pro'];
 for(let botName of botNames) {
@@ -1520,12 +1933,33 @@ botPerfSpan.style.color = '#48bb78';
 
 function showBotDetail(botName) {
 loadBotConfigFromFirestore(botName).then(async (savedConfig) => {
-if(!savedConfig) { showCustomModal('Bot Not Configured','Please configure the bot first before starting','error'); return; }
+if(!savedConfig) {
+showCustomModal('Bot Not Configured','Please configure the bot first before starting','error');
+return;
+}
 let config = savedConfig;
-if(config.amount > holdings.usdt) { showCustomModal('Insufficient Balance', `You need $${config.amount} USDT to run this bot. Your balance: $${holdings.usdt.toFixed(2)}`, 'error'); return; }
+
+if(config.amount > holdings.usdt) {
+showCustomModal('Insufficient Balance', `You need $${config.amount} USDT to run this bot. Your balance: $${holdings.usdt.toFixed(2)}`, 'error');
+return;
+}
+
 activeBot = botName;
+let isMediumRisk = (botName === 'ETH DCA Pro');
 lastTradeResult = null;
-botStats = { botName, asset:config.asset, amountPerTrade:parseFloat(config.amount), totalPL:0, totalRuns:0, totalTrades:0, wins:0, botBalance:holdings.usdt, isRunning:false, isPaused:false, logs:[] };
+botStats = {
+botName,
+asset:config.asset,
+amountPerTrade:parseFloat(config.amount),
+totalPL:0,
+totalRuns:0,
+totalTrades:0,
+wins:0,
+botBalance:holdings.usdt,
+isRunning:false,
+isPaused:false,
+logs:[]
+};
 addBotLog('High-Frequency Trading System loaded','info');
 addBotLog(`Account Balance: $${holdings.usdt.toFixed(2)}`,'info');
 addBotLog('STANDARD Tier Active - Optimized for consistent small profits','info');
@@ -1585,9 +2019,13 @@ let winRate = botStats.totalTrades>0 ? (botStats.wins/botStats.totalTrades*100) 
 let winRateElement = document.getElementById('botWinRate');
 if(winRateElement) {
 winRateElement.innerHTML = `${winRate.toFixed(1)}%`;
-if(lastTradeResult === 'win') winRateElement.className = 'stat-value win-rate-positive';
-else if(lastTradeResult === 'loss') winRateElement.className = 'stat-value win-rate-negative';
-else winRateElement.className = 'stat-value';
+if(lastTradeResult === 'win') {
+winRateElement.className = 'stat-value win-rate-positive';
+} else if(lastTradeResult === 'loss') {
+winRateElement.className = 'stat-value win-rate-negative';
+} else {
+winRateElement.className = 'stat-value';
+}
 }
 let balanceElement = document.getElementById('botBalance');
 if(balanceElement) balanceElement.innerHTML = `$${botStats.botBalance.toFixed(2)}`;
@@ -1635,9 +2073,20 @@ return { profit: -loss, isWin: false, percent: lossPercent };
 async function executeBotTrade() {
 if(!botStats.isRunning || botStats.isPaused) return;
 let amount = botStats.amountPerTrade;
-if(holdings.usdt < amount) { addBotLog(`Insufficient balance! Need $${amount} USDT. Stopping bot.`,'error'); stopBotTrading(); return; }
+
+if(holdings.usdt < amount) {
+addBotLog(`Insufficient balance! Need $${amount} USDT. Stopping bot.`,'error');
+stopBotTrading();
+return;
+}
+
 let isMediumRisk = (activeBot === 'ETH DCA Pro');
-let result = isMediumRisk ? calculateProfitLossMedium(amount) : calculateProfitLossLow(amount);
+let result;
+if(isMediumRisk) {
+result = calculateProfitLossMedium(amount);
+} else {
+result = calculateProfitLossLow(amount);
+}
 let profit = result.profit;
 let isWin = result.isWin;
 lastTradeResult = isWin ? 'win' : 'loss';
@@ -1652,6 +2101,7 @@ botStats.totalRuns++;
 holdings.usdt += profit;
 updatePortfolioTotal();
 renderCrypto();
+renderMarketsCrypto();
 await saveUserHoldingsToFirestore();
 addBotLog(`New Balance: $${holdings.usdt.toFixed(2)}`,'info');
 updateBotStatsDisplay();
@@ -1697,7 +2147,10 @@ addBotLog(`Bot resumed - Trading active`,'info');
 }
 
 function stopBotTrading() {
-if(botInterval) { clearInterval(botInterval); botInterval = null; }
+if(botInterval) {
+clearInterval(botInterval);
+botInterval = null;
+}
 botStats.isRunning = false;
 botStats.isPaused = false;
 document.getElementById('botDetailStatus').className = 'bot-status-badge stopped';
@@ -1709,16 +2162,27 @@ addBotLog(`Bot stopped - Final P/L: ${botStats.totalPL>=0?'+':''}$${Math.abs(bot
 let botKey = activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
 let botStatusSpan = document.getElementById(`botStatus${botKey}`);
 let botPerfSpan = document.getElementById(`botPerf${botKey}`);
-if(botStatusSpan) { botStatusSpan.innerHTML = 'Not Configured'; botStatusSpan.style.background = 'rgba(229,62,62,0.2)'; botStatusSpan.style.color = '#e53e3e'; }
-if(botPerfSpan) { botPerfSpan.innerHTML = 'Performance: --'; botPerfSpan.style.color = '#a0a0c0'; }
+if(botStatusSpan) {
+botStatusSpan.innerHTML = 'Not Configured';
+botStatusSpan.style.background = 'rgba(229,62,62,0.2)';
+botStatusSpan.style.color = '#e53e3e';
+}
+if(botPerfSpan) {
+botPerfSpan.innerHTML = 'Performance: --';
+botPerfSpan.style.color = '#a0a0c0';
+}
 activeBot = null;
 lastTradeResult = null;
-setTimeout(() => { showBots(); }, 2000);
+setTimeout(() => {
+showBots();
+}, 2000);
 }
 
 function controlBotAction(action) {
-if(action === 'start') { if(botStats.isPaused) resumeBotTrading(); else startBotTrading(); }
-else if(action === 'pause') pauseBotTrading();
+if(action === 'start') {
+if(botStats.isPaused) resumeBotTrading();
+else startBotTrading();
+} else if(action === 'pause') pauseBotTrading();
 else if(action === 'stop') stopBotTrading();
 }
 
@@ -1739,12 +2203,25 @@ title.innerHTML = 'Configure ETH DCA Pro Bot (Medium Risk)';
 if(assetSelect) assetSelect.value = 'ETH';
 if(helperText) helperText.innerHTML = 'Minimum: $15 · Maximum: $15,000';
 if(amountInput) amountInput.min = 15; amountInput.max = 15000;
+} else { title.innerHTML = 'Configure Bot'; }
+
+loadBotConfigFromFirestore(botName).then(config => {
+if(config) {
+if(assetSelect) assetSelect.value = config.asset;
+if(amountInput) amountInput.value = config.amount;
+} else {
+if(amountInput) amountInput.value = 100;
 }
-loadBotConfigFromFirestore(botName).then(config => { if(config) { if(assetSelect) assetSelect.value = config.asset; if(amountInput) amountInput.value = config.amount; } else { if(amountInput) amountInput.value = 100; } });
+});
+
 if(modal) modal.style.display = 'block';
 }
 
-function closeConfigModal() { let modal = document.getElementById('configModal'); if(modal) modal.style.display = 'none'; currentConfigBot = null; }
+function closeConfigModal() {
+let modal = document.getElementById('configModal');
+if(modal) modal.style.display = 'none';
+currentConfigBot = null;
+}
 
 async function saveConfigWithSpinner() {
 const buttonId = 'configSaveBtn';
@@ -1758,9 +2235,16 @@ let minAmount = (currentConfigBot === 'ETH DCA Pro') ? 15 : 10;
 let maxAmount = (currentConfigBot === 'ETH DCA Pro') ? 15000 : 10000;
 if(isNaN(amount) || amount < minAmount) { hideButtonSpinner(buttonId); showCustomModal('Invalid Amount', `Minimum $${minAmount}`, 'error'); return; }
 if(amount > maxAmount) { hideButtonSpinner(buttonId); showCustomModal('Invalid Amount', `Maximum $${maxAmount}`, 'error'); return; }
-if(amount > holdings.usdt) { hideButtonSpinner(buttonId); showCustomModal('Insufficient Balance', `You need $${amount} USDT to run this bot. Your balance: $${holdings.usdt.toFixed(2)}`, 'error'); return; }
+
+if(amount > holdings.usdt) {
+hideButtonSpinner(buttonId);
+showCustomModal('Insufficient Balance', `You need $${amount} USDT to run this bot. Your balance: $${holdings.usdt.toFixed(2)}`, 'error');
+return;
+}
+
 let config = { asset, amount, configured: true, configuredAt: new Date().toISOString() };
 await saveBotConfigToFirestore(currentConfigBot, config);
+
 let botKey = currentConfigBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
 let botStatusSpan = document.getElementById(`botStatus${botKey}`);
 let botPerfSpan = document.getElementById(`botPerf${botKey}`);
@@ -1809,19 +2293,24 @@ let address = document.getElementById('walletAddress').value;
 if(isNaN(amount) || amount < 10) { hideButtonSpinner(buttonId); showCustomModal('Invalid Amount', 'Minimum withdrawal is $10', 'error'); return; }
 if(!address || address.length < 10) { hideButtonSpinner(buttonId); showCustomModal('Invalid Address', 'Valid address required', 'error'); return; }
 if(amount > holdings.usdt) { hideButtonSpinner(buttonId); showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)}`, 'error'); return; }
+
 let txId = generateTxId();
 let fee = 1.00;
-let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'TRC20', fee, txId, status: 'Pending', dateTime: new Date().toLocaleString() };
+let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'TRC20', fee: fee, txId, status: 'Pending', dateTime: new Date().toLocaleString() };
+
 withdrawals.push(withdrawal);
 holdings.usdt -= amount;
+
 await saveWithdrawalToFirestore(withdrawal);
 await saveUserHoldingsToFirestore();
+
 renderWithdrawalHistory();
 document.getElementById('withdrawAmount').value = '';
 document.getElementById('walletAddress').value = '';
 if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
 hideButtonSpinner(buttonId);
 showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted.`, 'success');
+
 setTimeout(async () => {
 let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
 if(idx !== -1 && withdrawals[idx].status === 'Pending') {
@@ -1873,6 +2362,28 @@ let networkName = document.getElementById('networkName');
 let walletLabel = document.getElementById('walletAddressLabel');
 if(asset === 'BTC') { networkName.innerHTML = 'BTC Network'; walletLabel.innerHTML = 'Bitcoin Wallet Address'; }
 else { networkName.innerHTML = 'TRC20'; walletLabel.innerHTML = 'USDT (TRC20) Wallet Address'; }
+}
+if(e.target.classList && e.target.classList.contains('time-btn')) {
+document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+e.target.classList.add('active');
+currentInterval = e.target.getAttribute('data-interval');
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
+let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
+lastCandleTime = Date.now();
+drawCandlestickChart();
+}
+if(e.target.classList && e.target.classList.contains('indicator-btn')) {
+document.querySelectorAll('.indicator-btn').forEach(btn => btn.classList.remove('active'));
+e.target.classList.add('active');
+}
+if(e.target.classList && e.target.classList.contains('chart-tab')) {
+document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
+e.target.classList.add('active');
+let tab = e.target.getAttribute('data-tab');
+if(tab === 'orderbook') { document.getElementById('orderBookPanel').style.display = 'block'; document.getElementById('tradesPanel').style.display = 'none'; }
+else { document.getElementById('orderBookPanel').style.display = 'none'; document.getElementById('tradesPanel').style.display = 'block'; }
 }
 const navItem = e.target.closest('.nav-item');
 if(navItem) {
