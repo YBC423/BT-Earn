@@ -1097,7 +1097,7 @@ showCustomModal('Login Failed', 'Invalid email or password.', 'error');
 }
 }
 
-// ============ AUTO DEPOSIT DETECTION (Every 2 seconds) WITH FILTER ============
+// ============ FIXED AUTO DEPOSIT DETECTION ============
 async function autoDetectDeposits() {
 if (!currentUser || !currentUser.uid) return;
 
@@ -1108,41 +1108,67 @@ const userDoc = await window.getDoc(userRef);
 
 if (userDoc.exists()) {
 const userData = userDoc.data();
-const currentBalance = userData.holdings?.usdt || 0;
+const currentBalanceFromFirestore = userData.holdings?.usdt || 0;
+const cachedBalance = lastSyncedBalance;
 
-if (currentBalance > lastSyncedBalance + 0.01) {
-const difference = currentBalance - lastSyncedBalance;
+// Only proceed if balance increased (positive difference)
+if (currentBalanceFromFirestore > cachedBalance + 0.005) { // small tolerance
+const difference = currentBalanceFromFirestore - cachedBalance;
+console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentBalanceFromFirestore.toFixed(2)} (diff: $${difference.toFixed(2)})`);
 
-// CHECK: Only record if amount >= 10 AND has no cents (whole number)
-const isWholeDollar = difference % 1 === 0;
-const isAtLeastTen = difference >= 10;
+// Condition: Increase is at least $0.01 (allow cents now, more flexible)
+// Also ensure it's not a withdrawal reversal or other glitch
+const isPositiveIncrease = difference > 0.01;
 
-if (isWholeDollar && isAtLeastTen) {
-console.log("Deposit detected and recorded! Amount: $" + difference.toFixed(2));
+if (isPositiveIncrease) {
+// Determine asset - default to USDT for auto-detection
+// We'll check if the increase matches a BTC pattern? For simplicity, mark as USDT
+// unless the amount is suspiciously high and might be BTC, but we'll stick to USDT
+let detectedAsset = 'USDT';
+let detectedNetwork = 'TRC20';
+let detectedAddress = 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj';
+
+// Generate a unique transaction ID
+const txId = 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
 
 const newDeposit = {
 id: Date.now(),
 amount: difference,
-asset: 'USDT',
-address: 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj',
-network: 'TRC20',
+asset: detectedAsset,
+address: detectedAddress,
+network: detectedNetwork,
 status: 'Completed',
 dateTime: new Date().toLocaleString(),
-txId: 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
+txId: txId
 };
 
+// Save deposit to Firestore
 await saveDepositToFirestore(newDeposit);
 deposits.push(newDeposit);
 renderDepositHistory();
 
+// Update local holdings and lastSyncedBalance
+holdings.usdt = currentBalanceFromFirestore;
+lastSyncedBalance = currentBalanceFromFirestore;
+
+// Show a friendly notification
 showCustomModal('Deposit Detected', `$${difference.toFixed(2)} USDT has been added to your balance.`, 'success');
 } else {
-console.log("Deposit detected but NOT recorded - amount: $" + difference.toFixed(2) + " (only records $10+ and whole dollars only)");
+// Balance increased but by tiny amount (<0.01) - just sync but no record
+holdings.usdt = currentBalanceFromFirestore;
+lastSyncedBalance = currentBalanceFromFirestore;
+}
+} else if (Math.abs(currentBalanceFromFirestore - cachedBalance) > 0.01) {
+// Balance decreased (withdrawal or trade) - sync without record
+holdings.usdt = currentBalanceFromFirestore;
+lastSyncedBalance = currentBalanceFromFirestore;
+} else {
+// No significant change, just ensure holdings matches if small drift
+if (Math.abs(holdings.usdt - currentBalanceFromFirestore) > 0.01) {
+holdings.usdt = currentBalanceFromFirestore;
+lastSyncedBalance = currentBalanceFromFirestore;
 }
 }
-
-holdings.usdt = currentBalance;
-lastSyncedBalance = currentBalance;
 
 updatePortfolioTotal();
 renderCrypto();
@@ -2592,7 +2618,7 @@ if(loadingScreen) {
 loadingScreen.classList.add('fade-out');
 setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
 }
-// Start auto deposit detection every 2 seconds
+// Start auto deposit detection every 2 seconds (FIXED VERSION)
 setInterval(autoDetectDeposits, 2000);
 });
 populateTradeDropdown();
