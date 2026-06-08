@@ -596,7 +596,7 @@ border-radius: 4px;
 
 <!-- Deposit History Table -->
 <div class="history-section" style="margin-top: 40px;">
-<h3>Deposit History</h3>
+<h3>Deposit And Trade History</h3>
 <table class="history-table">
 <thead>
 <tr>
@@ -1083,10 +1083,11 @@ currentUser = { uid: user.uid, name: userData.name, email: user.email };
 holdings = { usdt: 0.00 };
 withdrawals = [];
 deposits = [];
-currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email ];
+currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
 }
 
-// REMOVED: Auto-detect deposit from balance (syncDepositsFromBalance) - no longer creates automatic deposit records
+// Auto-detect and create deposit records for balance increases from Firebase Console
+await syncDepositsFromBalance();
 
 hideButtonSpinner(buttonId);
 showCustomModal('Success', 'Logged in successfully!', 'success');
@@ -1094,6 +1095,53 @@ showDashboard();
 } catch (error) {
 hideButtonSpinner(buttonId);
 showCustomModal('Login Failed', 'Invalid email or password.', 'error');
+}
+}
+
+// AUTO-DEPOSIT DETECTION FUNCTION
+async function syncDepositsFromBalance() {
+if (!currentUser || !currentUser.uid) return;
+
+try {
+const db = window.firebaseDb;
+const userRef = window.doc(db, 'users', currentUser.uid);
+const userDoc = await window.getDoc(userRef);
+
+if (userDoc.exists()) {
+const userData = userDoc.data();
+const currentBalance = userData.holdings?.usdt || 0;
+const existingDeposits = userData.deposits || [];
+
+// Calculate total deposit amount from existing records
+let totalDeposited = 0;
+for (let dep of existingDeposits) {
+if (dep.asset === 'USDT') {
+totalDeposited += dep.amount;
+}
+}
+
+// If current balance is higher than total deposited, create missing deposit record
+if (currentBalance > totalDeposited + 0.01) { // Small tolerance for floating point
+const difference = currentBalance - totalDeposited;
+
+const newDeposit = {
+id: Date.now(),
+amount: difference,
+asset: 'USDT',
+address: 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj',
+network: 'TRC20',
+status: 'Completed',
+dateTime: new Date().toLocaleString(),
+txId: 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
+};
+
+await saveDepositToFirestore(newDeposit);
+deposits.push(newDeposit);
+console.log(`Auto-created deposit record for $${difference.toFixed(2)} USDT`);
+}
+}
+} catch(e) {
+console.log("Error syncing deposits:", e);
 }
 }
 
@@ -1140,7 +1188,7 @@ withdrawals = [];
 deposits = [];
 currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
 }
-// REMOVED: Auto-deposit detection
+await syncDepositsFromBalance();
 showDashboard();
 } catch(e) {
 console.log("Error loading user data:", e);
@@ -1939,7 +1987,7 @@ let price = currentPrice * (1 + (Math.random()-0.5)*0.002);
 let qty = (Math.random() * 2).toFixed(4);
 let total = (price * qty).toFixed(2);
 let priceColor = i < 4 ? 'ask-price' : 'bid-price';
-orderBookHtml += `<tr><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
+orderBookHtml += `</table><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
 }
 if(document.getElementById('orderBookBody')) document.getElementById('orderBookBody').innerHTML = orderBookHtml;
 let tradesHtml = '';
@@ -1991,13 +2039,13 @@ liveSimulationInterval = null;
 function renderDepositHistory() {
 let tbody = document.getElementById('depositHistoryBody');
 if(!tbody) return;
-if(!deposits || deposits.length === 0) { tbody.innerHTML = '<table><td colspan="4" style="text-align:center; color:#a0a0c0;">No deposits yet</td></tr>'; return; }
+if(!deposits || deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No deposits yet</td></tr>'; return; }
 let sortedDeposits = [...deposits].sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
 let html = '';
 for(let d of sortedDeposits) {
 let truncatedAddress = d.address.length > 15 ? d.address.substring(0,12)+'...' : d.address;
 let statusClass = d.status === 'Pending' ? 'status-pending' : 'status-approved';
-html += `<tr onclick="showDepositTransactionDetails(${d.id})"><tr>$${d.amount.toFixed(2)}</td><td>${d.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${d.status}</td></tr>`;
+html += `<tr onclick="showDepositTransactionDetails(${d.id})"><td>$${d.amount.toFixed(2)}</td><td>${d.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${d.status}</td></tr>`;
 }
 tbody.innerHTML = html;
 }
@@ -2069,7 +2117,7 @@ if(document.getElementById('withdrawBalance')) document.getElementById('withdraw
 hideButtonSpinner(buttonId);
 showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted.`, 'success');
 
-// Withdrawal approval after 30 seconds
+// FIXED: Withdrawal approval after 30 seconds
 setTimeout(async () => {
 try {
 let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
