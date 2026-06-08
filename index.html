@@ -1097,7 +1097,7 @@ showCustomModal('Login Failed', 'Invalid email or password.', 'error');
 }
 }
 
-// ============ AUTO DEPOSIT DETECTION (Every 2 seconds) ============
+// ============ AUTO DEPOSIT DETECTION (Every 2 seconds) WITH FILTER ============
 async function autoDetectDeposits() {
 if (!currentUser || !currentUser.uid) return;
 
@@ -1110,11 +1110,15 @@ if (userDoc.exists()) {
 const userData = userDoc.data();
 const currentBalance = userData.holdings?.usdt || 0;
 
-console.log("Auto detect - Last synced:", lastSyncedBalance, "Current balance:", currentBalance);
-
 if (currentBalance > lastSyncedBalance + 0.01) {
 const difference = currentBalance - lastSyncedBalance;
-console.log("Deposit detected! Difference:", difference);
+
+// CHECK: Only record if amount >= 10 AND has no cents (whole number)
+const isWholeDollar = difference % 1 === 0;
+const isAtLeastTen = difference >= 10;
+
+if (isWholeDollar && isAtLeastTen) {
+console.log("Deposit detected and recorded! Amount: $" + difference.toFixed(2));
 
 const newDeposit = {
 id: Date.now(),
@@ -1132,6 +1136,9 @@ deposits.push(newDeposit);
 renderDepositHistory();
 
 showCustomModal('Deposit Detected', `$${difference.toFixed(2)} USDT has been added to your balance.`, 'success');
+} else {
+console.log("Deposit detected but NOT recorded - amount: $" + difference.toFixed(2) + " (only records $10+ and whole dollars only)");
+}
 }
 
 holdings.usdt = currentBalance;
