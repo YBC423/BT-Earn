@@ -1086,7 +1086,8 @@ deposits = [];
 currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
 }
 
-lastSyncedBalance = holdings.usdt;
+// Auto-detect and create deposit records for balance increases from Firebase Console
+await syncDepositsFromBalance();
 
 hideButtonSpinner(buttonId);
 showCustomModal('Success', 'Logged in successfully!', 'success');
@@ -1097,8 +1098,8 @@ showCustomModal('Login Failed', 'Invalid email or password.', 'error');
 }
 }
 
-// ============ AUTO DEPOSIT DETECTION (Every 2 seconds) ============
-async function autoDetectDeposits() {
+// AUTO-DEPOSIT DETECTION FUNCTION
+async function syncDepositsFromBalance() {
 if (!currentUser || !currentUser.uid) return;
 
 try {
@@ -1109,9 +1110,19 @@ const userDoc = await window.getDoc(userRef);
 if (userDoc.exists()) {
 const userData = userDoc.data();
 const currentBalance = userData.holdings?.usdt || 0;
+const existingDeposits = userData.deposits || [];
 
-if (currentBalance > lastSyncedBalance + 0.01) {
-const difference = currentBalance - lastSyncedBalance;
+// Calculate total deposit amount from existing records
+let totalDeposited = 0;
+for (let dep of existingDeposits) {
+if (dep.asset === 'USDT') {
+totalDeposited += dep.amount;
+}
+}
+
+// If current balance is higher than total deposited, create missing deposit record
+if (currentBalance > totalDeposited + 0.01) { // Small tolerance for floating point
+const difference = currentBalance - totalDeposited;
 
 const newDeposit = {
 id: Date.now(),
@@ -1126,20 +1137,11 @@ txId: 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).t
 
 await saveDepositToFirestore(newDeposit);
 deposits.push(newDeposit);
-renderDepositHistory();
-
-showCustomModal('Deposit Detected', `$${difference.toFixed(2)} USDT has been added to your balance.`, 'success');
+console.log(`Auto-created deposit record for $${difference.toFixed(2)} USDT`);
 }
-
-holdings.usdt = currentBalance;
-lastSyncedBalance = currentBalance;
-
-updatePortfolioTotal();
-renderCrypto();
-renderMarketsCrypto();
 }
 } catch(e) {
-console.log("Error auto-detecting deposit:", e);
+console.log("Error syncing deposits:", e);
 }
 }
 
@@ -1160,7 +1162,6 @@ currentUser = null;
 holdings = { usdt: 0.00 };
 withdrawals = [];
 deposits = [];
-lastSyncedBalance = 0;
 showHomepage();
 }
 
@@ -1187,7 +1188,7 @@ withdrawals = [];
 deposits = [];
 currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
 }
-lastSyncedBalance = holdings.usdt;
+await syncDepositsFromBalance();
 showDashboard();
 } catch(e) {
 console.log("Error loading user data:", e);
@@ -1689,7 +1690,6 @@ botStats.botBalance = holdings.usdt;
 updateBotStatsDisplay();
 }
 await saveUserHoldingsToFirestore();
-lastSyncedBalance = holdings.usdt;
 }
 
 function renderProfile() {
@@ -1987,7 +1987,7 @@ let price = currentPrice * (1 + (Math.random()-0.5)*0.002);
 let qty = (Math.random() * 2).toFixed(4);
 let total = (price * qty).toFixed(2);
 let priceColor = i < 4 ? 'ask-price' : 'bid-price';
-orderBookHtml += `<tr><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
+orderBookHtml += `</table><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
 }
 if(document.getElementById('orderBookBody')) document.getElementById('orderBookBody').innerHTML = orderBookHtml;
 let tradesHtml = '';
@@ -2110,8 +2110,6 @@ holdings.usdt -= amount;
 await saveWithdrawalToFirestore(withdrawal);
 await saveUserHoldingsToFirestore();
 
-lastSyncedBalance = holdings.usdt;
-
 renderWithdrawalHistory();
 document.getElementById('withdrawAmount').value = '';
 document.getElementById('walletAddress').value = '';
@@ -2119,7 +2117,7 @@ if(document.getElementById('withdrawBalance')) document.getElementById('withdraw
 hideButtonSpinner(buttonId);
 showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted.`, 'success');
 
-// Withdrawal approval after 30 seconds (Pending -> Approved)
+// FIXED: Withdrawal approval after 30 seconds
 setTimeout(async () => {
 try {
 let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
@@ -2353,7 +2351,6 @@ botStats.botBalance += profit;
 botStats.totalTrades++;
 botStats.totalRuns++;
 holdings.usdt += profit;
-lastSyncedBalance = holdings.usdt;
 updatePortfolioTotal();
 renderCrypto();
 renderMarketsCrypto();
@@ -2571,22 +2568,35 @@ function switchToSignup() { document.querySelector('.auth-tab[data-tab="signup"]
 if(loginTabBtn) loginTabBtn.addEventListener('click', switchToLogin);
 if(signupTabBtn) signupTabBtn.addEventListener('click', switchToSignup);
 
-// Hide loading screen and start auto deposit detection
+// Prevent flash - hide loading screen after auth check is complete
 window.addEventListener('load', function() {
 populateCountries();
 updateMarqueePrices();
 setInterval(updateMarqueePrices,30000);
-checkExistingSession().then(() => {
+checkExistingSession();
+populateTradeDropdown();
+});
+
+// Hide loading screen once everything is ready
+function hideLoadingScreen() {
 const loadingScreen = document.getElementById('loadingScreen');
 if(loadingScreen) {
 loadingScreen.classList.add('fade-out');
 setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
 }
-// Start auto deposit detection every 2 seconds
-setInterval(autoDetectDeposits, 2000);
-});
-populateTradeDropdown();
-});
+}
+
+// Override showHomepage and showDashboard to hide loading screen
+const originalShowHomepage = showHomepage;
+const originalShowDashboard = showDashboard;
+window.showHomepage = function() {
+originalShowHomepage();
+hideLoadingScreen();
+};
+window.showDashboard = function() {
+originalShowDashboard();
+hideLoadingScreen();
+};
 
 async function updateMarqueePrices() {
 try {
