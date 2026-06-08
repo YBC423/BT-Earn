@@ -1110,10 +1110,12 @@ if (userDoc.exists()) {
 const userData = userDoc.data();
 const currentBalance = userData.holdings?.usdt || 0;
 
-if (currentBalance !== lastSyncedBalance) {
-const difference = currentBalance - lastSyncedBalance;
+console.log("Auto detect - Last synced:", lastSyncedBalance, "Current balance:", currentBalance);
 
-if (difference > 0.01) {
+if (currentBalance > lastSyncedBalance + 0.01) {
+const difference = currentBalance - lastSyncedBalance;
+console.log("Deposit detected! Difference:", difference);
+
 const newDeposit = {
 id: Date.now(),
 amount: difference,
@@ -1138,7 +1140,6 @@ lastSyncedBalance = currentBalance;
 updatePortfolioTotal();
 renderCrypto();
 renderMarketsCrypto();
-}
 }
 } catch(e) {
 console.log("Error auto-detecting deposit:", e);
@@ -1999,7 +2000,7 @@ let typeColor = type === 'Buy' ? 'buy-color' : 'sell-color';
 let price = currentPrice * (1 + (Math.random()-0.5)*0.001);
 let qty = (Math.random() * 1).toFixed(4);
 let time = new Date(Date.now() - i*60000).toLocaleTimeString();
-tradesHtml += `<tr><td>${time}<tr><td class="${typeColor}">$${price.toFixed(2)}</td><td>${qty}</td><td class="${typeColor}">${type}</td></tr>`;
+tradesHtml += `<tr><td>${time}</td><td class="${typeColor}">$${price.toFixed(2)}</td><td>${qty}</td><td class="${typeColor}">${type}</td></tr>`;
 }
 if(document.getElementById('tradesBody')) document.getElementById('tradesBody').innerHTML = tradesHtml;
 }
