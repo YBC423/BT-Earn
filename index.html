@@ -596,7 +596,7 @@ border-radius: 4px;
 
 <!-- Deposit History Table -->
 <div class="history-section" style="margin-top: 40px;">
-<h3>Deposit History</h3>
+<h3>Deposit And Trade History</h3>
 <table class="history-table">
 <thead>
 <tr>
@@ -1987,7 +1987,7 @@ let price = currentPrice * (1 + (Math.random()-0.5)*0.002);
 let qty = (Math.random() * 2).toFixed(4);
 let total = (price * qty).toFixed(2);
 let priceColor = i < 4 ? 'ask-price' : 'bid-price';
-orderBookHtml += `<table><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
+orderBookHtml += `<tr><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
 }
 if(document.getElementById('orderBookBody')) document.getElementById('orderBookBody').innerHTML = orderBookHtml;
 let tradesHtml = '';
@@ -2039,7 +2039,7 @@ liveSimulationInterval = null;
 function renderDepositHistory() {
 let tbody = document.getElementById('depositHistoryBody');
 if(!tbody) return;
-if(!deposits || deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No deposits yet</td></tr>'; return; }
+if(!deposits || deposits.length === 0) { tbody.innerHTML = '<td><td colspan="4" style="text-align:center; color:#a0a0c0;">No deposits yet</td></tr>'; return; }
 let sortedDeposits = [...deposits].sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
 let html = '';
 for(let d of sortedDeposits) {
@@ -2563,7 +2563,6 @@ if(signupTabBtn) signupTabBtn.addEventListener('click', switchToSignup);
 
 // Prevent flash - hide loading screen after auth check is complete
 window.addEventListener('load', function() {
-// Loading screen will be hidden after auth check in checkExistingSession
 populateCountries();
 updateMarqueePrices();
 setInterval(updateMarqueePrices,30000);
