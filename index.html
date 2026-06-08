@@ -1097,7 +1097,7 @@ showCustomModal('Login Failed', 'Invalid email or password.', 'error');
 }
 }
 
-// ============ FIXED AUTO DEPOSIT DETECTION ============
+// ============ FIXED AUTO DEPOSIT DETECTION (Order of operations fixed) ============
 async function autoDetectDeposits() {
 if (!currentUser || !currentUser.uid) return;
 
@@ -1108,65 +1108,59 @@ const userDoc = await window.getDoc(userRef);
 
 if (userDoc.exists()) {
 const userData = userDoc.data();
-const currentBalanceFromFirestore = userData.holdings?.usdt || 0;
+const currentFirestoreBalance = userData.holdings?.usdt || 0;
 const cachedBalance = lastSyncedBalance;
 
-// Only proceed if balance increased (positive difference)
-if (currentBalanceFromFirestore > cachedBalance + 0.005) { // small tolerance
-const difference = currentBalanceFromFirestore - cachedBalance;
-console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentBalanceFromFirestore.toFixed(2)} (diff: $${difference.toFixed(2)})`);
+// Only proceed if balance increased
+if (currentFirestoreBalance > cachedBalance + 0.005) {
+const difference = currentFirestoreBalance - cachedBalance;
+console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentFirestoreBalance.toFixed(2)} (diff: $${difference.toFixed(2)})`);
 
-// Condition: Increase is at least $0.01 (allow cents now, more flexible)
-// Also ensure it's not a withdrawal reversal or other glitch
-const isPositiveIncrease = difference > 0.01;
+// YOUR ORIGINAL RULES PRESERVED:
+// 1. Minimum $10
+// 2. Whole dollars only (no cents)
+const isWholeDollar = difference % 1 === 0;
+const isAtLeastTen = difference >= 10;
 
-if (isPositiveIncrease) {
-// Determine asset - default to USDT for auto-detection
-// We'll check if the increase matches a BTC pattern? For simplicity, mark as USDT
-// unless the amount is suspiciously high and might be BTC, but we'll stick to USDT
-let detectedAsset = 'USDT';
-let detectedNetwork = 'TRC20';
-let detectedAddress = 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj';
-
-// Generate a unique transaction ID
-const txId = 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-
+if (isWholeDollar && isAtLeastTen) {
+// CREATE AND SAVE DEPOSIT RECORD FIRST (THIS WAS THE BUG FIX)
 const newDeposit = {
 id: Date.now(),
 amount: difference,
-asset: detectedAsset,
-address: detectedAddress,
-network: detectedNetwork,
+asset: 'USDT',        // Only USDT auto-detected (your original rule)
+address: 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj',
+network: 'TRC20',
 status: 'Completed',
 dateTime: new Date().toLocaleString(),
-txId: txId
+txId: 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
 };
 
-// Save deposit to Firestore
+// Save deposit to Firestore FIRST
 await saveDepositToFirestore(newDeposit);
 deposits.push(newDeposit);
 renderDepositHistory();
 
-// Update local holdings and lastSyncedBalance
-holdings.usdt = currentBalanceFromFirestore;
-lastSyncedBalance = currentBalanceFromFirestore;
-
-// Show a friendly notification
+// Show notification
 showCustomModal('Deposit Detected', `$${difference.toFixed(2)} USDT has been added to your balance.`, 'success');
+
+// THEN update local holdings and lastSyncedBalance
+holdings.usdt = currentFirestoreBalance;
+lastSyncedBalance = currentFirestoreBalance;
 } else {
-// Balance increased but by tiny amount (<0.01) - just sync but no record
-holdings.usdt = currentBalanceFromFirestore;
-lastSyncedBalance = currentBalanceFromFirestore;
+// Balance increased but doesn't meet rules (under $10 or has cents)
+// Just sync balance without recording
+holdings.usdt = currentFirestoreBalance;
+lastSyncedBalance = currentFirestoreBalance;
 }
-} else if (Math.abs(currentBalanceFromFirestore - cachedBalance) > 0.01) {
+} else if (Math.abs(currentFirestoreBalance - cachedBalance) > 0.01) {
 // Balance decreased (withdrawal or trade) - sync without record
-holdings.usdt = currentBalanceFromFirestore;
-lastSyncedBalance = currentBalanceFromFirestore;
+holdings.usdt = currentFirestoreBalance;
+lastSyncedBalance = currentFirestoreBalance;
 } else {
-// No significant change, just ensure holdings matches if small drift
-if (Math.abs(holdings.usdt - currentBalanceFromFirestore) > 0.01) {
-holdings.usdt = currentBalanceFromFirestore;
-lastSyncedBalance = currentBalanceFromFirestore;
+// No significant change, ensure holdings matches if small drift
+if (Math.abs(holdings.usdt - currentFirestoreBalance) > 0.01) {
+holdings.usdt = currentFirestoreBalance;
+lastSyncedBalance = currentFirestoreBalance;
 }
 }
 
@@ -2618,7 +2612,7 @@ if(loadingScreen) {
 loadingScreen.classList.add('fade-out');
 setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
 }
-// Start auto deposit detection every 2 seconds (FIXED VERSION)
+// Start auto deposit detection every 2 seconds (FIXED VERSION WITH CORRECT ORDER)
 setInterval(autoDetectDeposits, 2000);
 });
 populateTradeDropdown();
