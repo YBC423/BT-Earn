@@ -69,7 +69,7 @@ display: flex;
 justify-content: center;
 align-items: center;
 z-index: 9999;
-transition: opacity 0.5s ease;
+transition: opacity 0.3s ease;
 }
 .loading-screen.fade-out {
 opacity: 0;
@@ -102,13 +102,9 @@ display: inline-block;
 50% { opacity: 0.3; transform: scale(0.85); }
 }
 
-/* Hide homepage initially */
-#homepage {
-opacity: 0;
-transition: opacity 0.8s ease;
-}
-#homepage.visible {
-opacity: 1;
+/* Hide all pages initially to prevent flash */
+#homepage, #aboutPage, #authPage, #dashboard, #profilePage, #marketsPage, #tradePage, #botsPage, #botDetailPage, #withdrawalPage, #depositPage, #depositPaymentPage {
+display: none;
 }
 
 .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 60px; background: #0a0e27; border-bottom: 1px solid rgba(255,255,255,0.08); position: fixed; width: 100%; top: 0; z-index: 1000; backdrop-filter: blur(10px); }
@@ -1788,16 +1784,6 @@ else if(currentInterval === '1h') days = 1;
 else if(currentInterval === '4h') days = 7;
 else if(currentInterval === '1D') days = 30;
 
-let intervalMap = {
-'1m': '1',
-'5m': '5',
-'15m': '15',
-'1h': '60',
-'4h': '240',
-'1D': '1440'
-};
-let minuteInterval = intervalMap[currentInterval] || '60';
-
 let url = `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`;
 try {
 let res = await fetch(url);
@@ -2001,7 +1987,7 @@ let price = currentPrice * (1 + (Math.random()-0.5)*0.002);
 let qty = (Math.random() * 2).toFixed(4);
 let total = (price * qty).toFixed(2);
 let priceColor = i < 4 ? 'ask-price' : 'bid-price';
-orderBookHtml += `<tr><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
+orderBookHtml += `<table><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
 }
 if(document.getElementById('orderBookBody')) document.getElementById('orderBookBody').innerHTML = orderBookHtml;
 let tradesHtml = '';
@@ -2575,20 +2561,36 @@ function switchToSignup() { document.querySelector('.auth-tab[data-tab="signup"]
 if(loginTabBtn) loginTabBtn.addEventListener('click', switchToLogin);
 if(signupTabBtn) signupTabBtn.addEventListener('click', switchToSignup);
 
+// Prevent flash - hide loading screen after auth check is complete
 window.addEventListener('load', function() {
-setTimeout(function() {
-const loadingScreen = document.getElementById('loadingScreen');
-const homepage = document.getElementById('homepage');
-loadingScreen.classList.add('fade-out');
-homepage.classList.add('visible');
-setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
-}, 2000);
+// Loading screen will be hidden after auth check in checkExistingSession
 populateCountries();
 updateMarqueePrices();
 setInterval(updateMarqueePrices,30000);
 checkExistingSession();
 populateTradeDropdown();
 });
+
+// Hide loading screen once everything is ready
+function hideLoadingScreen() {
+const loadingScreen = document.getElementById('loadingScreen');
+if(loadingScreen) {
+loadingScreen.classList.add('fade-out');
+setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
+}
+}
+
+// Override showHomepage and showDashboard to hide loading screen
+const originalShowHomepage = showHomepage;
+const originalShowDashboard = showDashboard;
+window.showHomepage = function() {
+originalShowHomepage();
+hideLoadingScreen();
+};
+window.showDashboard = function() {
+originalShowDashboard();
+hideLoadingScreen();
+};
 
 async function updateMarqueePrices() {
 try {
