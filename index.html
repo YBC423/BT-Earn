@@ -554,11 +554,11 @@ border-radius: 4px;
 
 <div id="authPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div></div><div class="auth-container"><div class="auth-card"><button class="back-btn" onclick="showHomepage()">← Back</button><div class="auth-tabs"><div class="auth-tab active" data-tab="login" id="loginTabBtn">Login</div><div class="auth-tab" data-tab="signup" id="signupTabBtn">Sign Up</div></div><div id="loginForm" class="auth-form active"><h2>Welcome back</h2><p>Enter your credentials to access your account</p><div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div><div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div><button class="auth-btn" id="loginBtn" onclick="handleLoginWithSpinner()">Login</button><button class="forgot-btn" onclick="showCustomModal('Password Reset', 'Password reset link has been sent to your email address.', 'info')">Forgot Password?</button></div><div id="signupForm" class="auth-form"><h2>Create an account</h2><p>Enter your details to create a new account</p><div class="input-group"><label>Full Name</label><input type="text" id="signupName" placeholder="John Doe"></div><div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div><div class="input-group"><label>Country</label><select id="signupCountry"></select></div><div class="input-group"><label>Password</label><input type="password" id="signupPassword" placeholder="Enter your password (min 8 characters)"></div><div class="input-group"><label>Confirm Password</label><input type="password" id="signupConfirmPassword" placeholder="Confirm your password"></div><button class="auth-btn" id="signupBtn" onclick="handleSignupWithSpinner()">Create Account</button></div></div></div></div>
 
-<div id="dashboard" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="dashboard-container"><div class="dashboard-header"><h1>Dashboard</h1><div class="date-time" id="dateTimeDisplay"><div class="time">--:--:--</div><div class="date">---</div></div></div><div class="portfolio-card"><h3>REAL PORTFOLIO</h3><div class="portfolio-balance" id="portfolioBalance">$0.00</div><div class="portfolio-change" id="portfolioChange">+0.00%</div><div class="portfolio-buttons"><button class="deposit-btn" onclick="showDepositPage()">Deposit</button><button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button></div></div><div class="section-title">Your Crypto <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div><div id="cryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist (200 Coins)</div><div id="watchlistContainer" class="watchlist-scroll"></div><div id="lastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
+<div id="dashboard" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="dashboard-container"><div class="dashboard-header"><h1>Dashboard</h1><div class="date-time" id="dateTimeDisplay"><div class="time">--:--:--</div><div class="date">---</div></div></div><div class="portfolio-card"><h3>REAL PORTFOLIO</h3><div class="portfolio-balance" id="portfolioBalance">$0.00</div><div class="portfolio-change" id="portfolioChange">+0.00%</div><div class="portfolio-buttons"><button class="deposit-btn" onclick="showDepositPage()">Deposit</button><button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button></div></div><div class="section-title">Your Crypto <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div><div id="cryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist</div><div id="watchlistContainer" class="watchlist-scroll"></div><div id="lastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
 <div id="profilePage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="profile-container" id="profileContainer"></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile" style="color: #667eea;">Profile</div></div></div>
 
-<div id="marketsPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="markets-container"><div class="markets-header"><h1>Markets</h1><button class="refresh-btn" onclick="refreshMarketsPrices()">Refresh Prices</button></div><div class="section-title">Your Crypto</div><div id="marketsCryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist (200 Coins)</div><div id="marketsWatchlistContainer" class="watchlist-scroll"></div><div id="marketsLastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets" style="color: #667eea;">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
+<div id="marketsPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="markets-container"><div class="markets-header"><h1>Markets</h1><button class="refresh-btn" onclick="refreshMarketsPrices()">Refresh Prices</button></div><div class="section-title">Your Crypto</div><div id="marketsCryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist</div><div id="marketsWatchlistContainer" class="watchlist-scroll"></div><div id="marketsLastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets" style="color: #667eea;">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
 <div id="tradePage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="trade-container" id="tradeContainer"><div class="trade-header"><select id="tradeCoinSelect" class="coin-selector" onchange="changeTradeCoin()"></select><div class="chart-icon-btn" onclick="openChartModal()"><div class="chart-icon"><span></span><span></span><span></span></div><span style="font-size:12px;">Chart</span></div></div><div class="trade-price-card"><div class="trade-price" id="tradePrice">$0.00</div><div class="trade-change" id="tradeChange">+0.00%</div></div><div class="trade-tabs"><div class="trade-tab buy active" onclick="setTradeMode('buy')">Buy</div><div class="trade-tab sell" onclick="setTradeMode('sell')">Sell</div></div><div class="trade-input-section"><div class="input-row"><label>Price (USDT)</label><input type="number" id="tradePriceInput" placeholder="0.00" oninput="calculateTotal()"></div><div class="input-row"><label>Quantity (<span id="tradeCoinSymbol">BTC</span>)</label><input type="number" id="tradeQuantityInput" placeholder="0.00" oninput="calculateTotal()"></div><div class="balance-info" id="tradeBalanceInfo">Available: 0.0000 BTC</div><div class="total-value">Total: <span id="tradeTotalValue">$0.00</span></div><button class="confirm-btn" id="tradeConfirmBtn" onclick="executeTrade()">Buy BTC</button></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade" style="color: #667eea;">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
@@ -597,6 +597,25 @@ border-radius: 4px;
 </div>
 
 <button class="withdraw-submit-btn" id="depositPayBtn" onclick="processDepositToPayment()" style="width: 100%;">Pay</button>
+
+<!-- Deposit History Table -->
+<div class="history-section" style="margin-top: 40px;">
+<h3>Deposit History</h3>
+<table class="history-table">
+<thead>
+<tr>
+<th>Amount</th>
+<th>Asset</th>
+<th>Address</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="depositHistoryBody">
+<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No deposits yet</td></tr>
+</tbody>
+</table>
+</div>
+
 <div style="height: 80px;"></div>
 </div>
 <div class="bottom-nav">
@@ -850,6 +869,7 @@ let currentInterval = '1h';
 let candleData = [];
 let currentConfigBot = null;
 let withdrawals = [];
+let deposits = [];
 let activeBot = null;
 let botInterval = null;
 let lastTradeResult = null;
@@ -941,6 +961,17 @@ withdrawals: window.arrayUnion(withdrawal)
 } catch(e) { console.log("Error saving withdrawal:", e); }
 }
 
+async function saveDepositToFirestore(deposit) {
+if (!currentUser || !currentUser.uid) return;
+try {
+const db = window.firebaseDb;
+const userRef = window.doc(db, 'users', currentUser.uid);
+await window.updateDoc(userRef, {
+deposits: window.arrayUnion(deposit)
+});
+} catch(e) { console.log("Error saving deposit:", e); }
+}
+
 async function saveBotConfigToFirestore(botName, config) {
 if (!currentUser || !currentUser.uid) return;
 try {
@@ -1004,11 +1035,13 @@ email: email,
 country: country,
 holdings: { usdt: 0.00 },
 withdrawals: [],
+deposits: [],
 createdAt: new Date().toISOString()
 });
 
 holdings = { usdt: 0.00 };
 withdrawals = [];
+deposits = [];
 currentUser = { uid: user.uid, name: name, email: email };
 
 hideButtonSpinner(buttonId);
@@ -1047,10 +1080,12 @@ if (userDoc.exists()) {
 const userData = userDoc.data();
 holdings = userData.holdings || { usdt: 0.00 };
 withdrawals = userData.withdrawals || [];
+deposits = userData.deposits || [];
 currentUser = { uid: user.uid, name: userData.name, email: user.email };
 } else {
 holdings = { usdt: 0.00 };
 withdrawals = [];
+deposits = [];
 currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
 }
 
@@ -1079,6 +1114,7 @@ await auth.signOut();
 currentUser = null;
 holdings = { usdt: 0.00 };
 withdrawals = [];
+deposits = [];
 showHomepage();
 }
 
@@ -1097,10 +1133,12 @@ if (userDoc.exists()) {
 const userData = userDoc.data();
 holdings = userData.holdings || { usdt: 0.00 };
 withdrawals = userData.withdrawals || [];
+deposits = userData.deposits || [];
 currentUser = { uid: user.uid, name: userData.name, email: user.email };
 } else {
 holdings = { usdt: 0.00 };
 withdrawals = [];
+deposits = [];
 currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
 }
 showDashboard();
@@ -1235,6 +1273,7 @@ if (currentPaymentQr) {
 currentPaymentQr.clear();
 currentPaymentQr = null;
 }
+renderDepositHistory();
 }
 
 function showHomepage() {
@@ -1375,6 +1414,7 @@ document.getElementById('depositPage').style.display = 'block';
 document.getElementById('depositPaymentPage').style.display = 'none';
 selectDepositAsset('USDT');
 document.getElementById('depositAmount').value = '';
+renderDepositHistory();
 }
 
 function showWithdrawalPage() {
@@ -1519,16 +1559,7 @@ currentTradeCoin = document.getElementById('tradeCoinSelect').value;
 updateTradePriceDisplay();
 calculateTotal();
 if(document.getElementById('chartModal').style.display === 'block') {
-let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
-let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
-let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
-lastCandleTime = Date.now();
-drawCandlestickChart();
-let titleElement = document.getElementById('chartCoinTitle');
-if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`;
-let orderBookSymbol = document.getElementById('orderBookCoinSymbol');
-if(orderBookSymbol) orderBookSymbol.innerHTML = currentTradeCoin;
+fetchRealCandleData();
 }
 }
 
@@ -1691,9 +1722,93 @@ document.onmousemove = null;
 let chatWidget = document.getElementById('chatWidget');
 if(chatWidget) makeDraggable(chatWidget);
 
-// Chart functions
-let lastCandleTime = null;
-let priceUpdateInterval = null;
+// ============ REAL COINGECKO CHART FUNCTIONS ============
+
+async function fetchRealCandleData() {
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+if(!coinData) return;
+let coinId = coinData.id;
+let days = 1;
+if(currentInterval === '1m') days = 1;
+else if(currentInterval === '5m') days = 1;
+else if(currentInterval === '15m') days = 1;
+else if(currentInterval === '1h') days = 1;
+else if(currentInterval === '4h') days = 7;
+else if(currentInterval === '1D') days = 30;
+
+let intervalMap = {
+'1m': '1',
+'5m': '5',
+'15m': '15',
+'1h': '60',
+'4h': '240',
+'1D': '1440'
+};
+let minuteInterval = intervalMap[currentInterval] || '60';
+
+let url = `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}&interval=${minuteInterval === '1' ? '1m' : 'hourly'}`;
+try {
+let res = await fetch(url);
+if(!res.ok) throw new Error('API error');
+let data = await res.json();
+if(data && data.length > 0) {
+candleData = data.map(candle => ({
+time: candle[0],
+open: candle[1],
+high: candle[2],
+low: candle[3],
+close: candle[4]
+}));
+drawCandlestickChart();
+updateChartStats();
+}
+} catch(e) {
+console.log("Error fetching candle data:", e);
+let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
+drawCandlestickChart();
+}
+}
+
+async function fetchRealTimePrice() {
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+if(!coinData) return;
+let coinId = coinData.id;
+try {
+let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`);
+if(!res.ok) throw new Error('API error');
+let data = await res.json();
+if(data[coinId]) {
+let newPrice = data[coinId].usd;
+let newChange = data[coinId].usd_24h_change || 0;
+currentPrices[coinId] = newPrice;
+currentPrices[coinId+'Change'] = newChange;
+if(document.getElementById('tradePage').style.display === 'block') {
+updateTradePriceDisplay();
+}
+if(document.getElementById('chartModal').style.display === 'block') {
+if(candleData.length > 0) {
+let lastCandle = candleData[candleData.length - 1];
+if(lastCandle) {
+lastCandle.close = newPrice;
+lastCandle.high = Math.max(lastCandle.high, newPrice);
+lastCandle.low = Math.min(lastCandle.low, newPrice);
+drawCandlestickChart();
+}
+}
+updateChartStats();
+}
+}
+} catch(e) { console.log("Error fetching real time price:", e); }
+}
+
+function startRealTimeChart() {
+if(chartRealTimeInterval) clearInterval(chartRealTimeInterval);
+fetchRealCandleData();
+chartRealTimeInterval = setInterval(() => {
+fetchRealTimePrice();
+}, 10000);
+}
 
 function getIntervalMilliseconds(interval) {
 switch(interval) {
@@ -1720,56 +1835,10 @@ let high = Math.max(open, close) + (Math.random() * 0.0015 * currentPrice);
 let low = Math.min(open, close) - (Math.random() * 0.0015 * currentPrice);
 let volume = Math.random() * 100 + 20;
 let time = now - (i * intervalMs);
-candles.push({ open, high, low, close, volume, time });
+candles.push({ time, open, high, low, close, volume });
 currentPrice = close;
 }
 return candles;
-}
-
-function addNewCandle() {
-let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
-let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
-let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-let newCandle = { open: currentPrice, high: currentPrice, low: currentPrice, close: currentPrice, volume: Math.random() * 100 + 20, time: Date.now() };
-candleData.push(newCandle);
-if(candleData.length > 50) candleData.shift();
-lastCandleTime = Date.now();
-drawCandlestickChart();
-}
-
-function updateCurrentCandlePrice(newPrice) {
-if(candleData.length === 0) return;
-let currentCandle = candleData[candleData.length - 1];
-currentCandle.close = newPrice;
-currentCandle.high = Math.max(currentCandle.high, newPrice);
-currentCandle.low = Math.min(currentCandle.low, newPrice);
-drawCandlestickChart();
-}
-
-function startRealTimeChart() {
-if(priceUpdateInterval) clearInterval(priceUpdateInterval);
-priceUpdateInterval = setInterval(function() {
-let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
-let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
-let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-let randomMove = (Math.random() - 0.5) * 0.0008 * currentPrice;
-let newPrice = currentPrice + randomMove;
-if(currentPrices[coinId]) {
-currentPrices[coinId] = Math.max(newPrice, currentPrice * 0.99);
-}
-updateCurrentCandlePrice(currentPrices[coinId]);
-if(document.getElementById('tradePage').style.display === 'block') {
-updateTradePriceDisplay();
-}
-updateChartStats();
-let now = Date.now();
-let intervalMs = getIntervalMilliseconds(currentInterval);
-if(!lastCandleTime) {
-lastCandleTime = now;
-} else if(now - lastCandleTime >= intervalMs) {
-addNewCandle();
-}
-}, 2500);
 }
 
 function drawCandlestickChart() {
@@ -1779,7 +1848,7 @@ let ctx = canvas.getContext('2d');
 let width = canvas.width;
 let height = canvas.height;
 ctx.clearRect(0,0,width,height);
-if(candleData.length === 0) return;
+if(!candleData || candleData.length === 0) return;
 let candleWidth = (width - 80) / candleData.length;
 let maxPrice = Math.max(...candleData.map(c => c.high));
 let minPrice = Math.min(...candleData.map(c => c.low));
@@ -1836,9 +1905,10 @@ ctx.font = '10px Arial';
 ctx.fillText(`Current: $${currentPrice.toFixed(2)}`, width - 120, currentY - 3);
 }
 
-function updateChartStats() {
+async function updateChartStats() {
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
-let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
+if(!coinData) return;
+let coinId = coinData.id;
 let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
 let change = currentPrices[coinId+'Change'] || 0;
 let high = currentPrice * (1 + Math.abs(change)/100 + 0.005);
@@ -1883,8 +1953,7 @@ return;
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
 let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
 let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
-lastCandleTime = Date.now();
+candleData = [];
 let titleElement = document.getElementById('chartCoinTitle');
 if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`;
 let orderBookSymbol = document.getElementById('orderBookCoinSymbol');
@@ -1896,7 +1965,7 @@ if(canvas) {
 let container = canvas.parentElement;
 if(container) canvas.width = Math.max(800, container.clientWidth - 20);
 else canvas.width = 900;
-drawCandlestickChart();
+fetchRealCandleData();
 }
 updateChartStats();
 });
@@ -1906,14 +1975,80 @@ startRealTimeChart();
 function closeChartModal() {
 let modal = document.getElementById('chartModal');
 if(modal) modal.style.display = 'none';
-if(priceUpdateInterval) {
-clearInterval(priceUpdateInterval);
-priceUpdateInterval = null;
+if(chartRealTimeInterval) {
+clearInterval(chartRealTimeInterval);
+chartRealTimeInterval = null;
 }
-lastCandleTime = null;
 }
 
-// Bot functions (unchanged)
+// ============ DEPOSIT HISTORY FUNCTIONS ============
+
+function renderDepositHistory() {
+let tbody = document.getElementById('depositHistoryBody');
+if(!tbody) return;
+if(!deposits || deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No deposits yet</td></tr>'; return; }
+let html = '';
+for(let d of deposits) {
+let truncatedAddress = d.address.length > 15 ? d.address.substring(0,12)+'...' : d.address;
+let statusClass = d.status === 'Pending' ? 'status-pending' : 'status-approved';
+html += `<tr onclick="showDepositTransactionDetails(${d.id})"><td>$${d.amount.toFixed(2)}</td><td>${d.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${d.status}</td></tr>`;
+}
+tbody.innerHTML = html;
+}
+
+function showDepositTransactionDetails(id) {
+let tx = deposits.find(d => d.id === id);
+if(!tx) return;
+currentTxId = tx.id;
+updateDepositTxModal(tx);
+document.getElementById('txDetailModal').style.display = 'block';
+}
+
+function updateDepositTxModal(tx) {
+let amountReceived = tx.amount;
+document.getElementById('txAmount').innerHTML = `$${tx.amount.toFixed(2)}`;
+document.getElementById('txAsset').innerHTML = tx.asset;
+document.getElementById('txAddress').innerHTML = tx.address;
+document.getElementById('txStatus').innerHTML = tx.status;
+document.getElementById('txDateTime').innerHTML = tx.dateTime;
+document.getElementById('txNetwork').innerHTML = tx.network;
+document.getElementById('txFee').innerHTML = `$0.00`;
+document.getElementById('txAmountReceived').innerHTML = `$${amountReceived.toFixed(2)}`;
+document.getElementById('txId').innerHTML = tx.txId;
+}
+
+// Admin function to add deposit manually in Firebase
+async function addDepositToUser(amount, asset) {
+if(!currentUser || !currentUser.uid) return;
+let address = '';
+if(asset === 'USDT') address = 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj';
+else if(asset === 'BTC') address = '1HpuFKWciiek3QxLtSY8D2oX2npLc8jZ5T';
+let deposit = {
+id: Date.now(),
+amount: amount,
+asset: asset,
+address: address,
+network: asset === 'BTC' ? 'BTC Network' : 'TRC20',
+status: 'Completed',
+dateTime: new Date().toLocaleString(),
+txId: 'DEP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
+};
+deposits.push(deposit);
+if(asset === 'USDT') holdings.usdt += amount;
+else if(asset === 'BTC') {
+let btcPrice = currentPrices.bitcoin || 73786;
+let usdtValue = amount * btcPrice;
+holdings.usdt += usdtValue;
+}
+await saveDepositToFirestore(deposit);
+await saveUserHoldingsToFirestore();
+renderDepositHistory();
+updatePortfolioTotal();
+renderCrypto();
+renderMarketsCrypto();
+}
+
+// ============ BOT FUNCTIONS ============
 async function loadSavedBotConfigs() {
 let botNames = ['Bitcoin Accumulation', 'ETH DCA Pro'];
 for(let botName of botNames) {
@@ -2367,12 +2502,9 @@ if(e.target.classList && e.target.classList.contains('time-btn')) {
 document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
 e.target.classList.add('active');
 currentInterval = e.target.getAttribute('data-interval');
-let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
-let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
-let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
-lastCandleTime = Date.now();
-drawCandlestickChart();
+if(document.getElementById('chartModal').style.display === 'block') {
+fetchRealCandleData();
+}
 }
 if(e.target.classList && e.target.classList.contains('indicator-btn')) {
 document.querySelectorAll('.indicator-btn').forEach(btn => btn.classList.remove('active'));
