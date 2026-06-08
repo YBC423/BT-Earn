@@ -878,6 +878,7 @@ let botLastSessionOutcome = {};
 let selectedDepositAsset = 'USDT';
 let currentPaymentQr = null;
 let currentTxId = null;
+let lastSyncedBalance = 0;
 
 const FALLBACK_PRICES = {};
 top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = coin.symbol === 'BTC' ? 73786 : (coin.symbol === 'ETH' ? 2022 : (coin.symbol === 'USDT' ? 1 : (coin.symbol === 'BNB' ? 580 : (coin.symbol === 'SOL' ? 145 : 10 + Math.random() * 100)))); FALLBACK_PRICES[coin.id+'Change'] = (Math.random() - 0.5) * 8; });
@@ -1089,12 +1090,62 @@ deposits = [];
 currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
 }
 
+// Auto-detect and create deposit records for balance increases from Firebase Console
+await syncDepositsFromBalance();
+
 hideButtonSpinner(buttonId);
 showCustomModal('Success', 'Logged in successfully!', 'success');
 showDashboard();
 } catch (error) {
 hideButtonSpinner(buttonId);
 showCustomModal('Login Failed', 'Invalid email or password.', 'error');
+}
+}
+
+// AUTO-DEPOSIT DETECTION FUNCTION
+async function syncDepositsFromBalance() {
+if (!currentUser || !currentUser.uid) return;
+
+try {
+const db = window.firebaseDb;
+const userRef = window.doc(db, 'users', currentUser.uid);
+const userDoc = await window.getDoc(userRef);
+
+if (userDoc.exists()) {
+const userData = userDoc.data();
+const currentBalance = userData.holdings?.usdt || 0;
+const existingDeposits = userData.deposits || [];
+
+// Calculate total deposit amount from existing records
+let totalDeposited = 0;
+for (let dep of existingDeposits) {
+if (dep.asset === 'USDT') {
+totalDeposited += dep.amount;
+}
+}
+
+// If current balance is higher than total deposited, create missing deposit record
+if (currentBalance > totalDeposited + 0.01) { // Small tolerance for floating point
+const difference = currentBalance - totalDeposited;
+
+const newDeposit = {
+id: Date.now(),
+amount: difference,
+asset: 'USDT',
+address: 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj',
+network: 'TRC20',
+status: 'Completed',
+dateTime: new Date().toLocaleString(),
+txId: 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
+};
+
+await saveDepositToFirestore(newDeposit);
+deposits.push(newDeposit);
+console.log(`Auto-created deposit record for $${difference.toFixed(2)} USDT`);
+}
+}
+} catch(e) {
+console.log("Error syncing deposits:", e);
 }
 }
 
@@ -1141,6 +1192,7 @@ withdrawals = [];
 deposits = [];
 currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
 }
+await syncDepositsFromBalance();
 showDashboard();
 } catch(e) {
 console.log("Error loading user data:", e);
@@ -1722,7 +1774,7 @@ document.onmousemove = null;
 let chatWidget = document.getElementById('chatWidget');
 if(chatWidget) makeDraggable(chatWidget);
 
-// ============ REAL COINGECKO CHART FUNCTIONS ============
+// ============ REAL COINGECKO CHART WITH SIMULATED LIVE MOVEMENT ============
 
 async function fetchRealCandleData() {
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
@@ -1746,7 +1798,7 @@ let intervalMap = {
 };
 let minuteInterval = intervalMap[currentInterval] || '60';
 
-let url = `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}&interval=${minuteInterval === '1' ? '1m' : 'hourly'}`;
+let url = `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`;
 try {
 let res = await fetch(url);
 if(!res.ok) throw new Error('API error');
@@ -1761,53 +1813,74 @@ close: candle[4]
 }));
 drawCandlestickChart();
 updateChartStats();
+startLiveSimulation();
 }
 } catch(e) {
 console.log("Error fetching candle data:", e);
 let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
 candleData = generateInitialCandleData(currentPrice, 30, currentInterval);
 drawCandlestickChart();
+startLiveSimulation();
 }
 }
 
-async function fetchRealTimePrice() {
+let liveSimulationInterval = null;
+let lastCandleTime = null;
+
+function startLiveSimulation() {
+if(liveSimulationInterval) clearInterval(liveSimulationInterval);
+lastCandleTime = Date.now();
+liveSimulationInterval = setInterval(() => {
+updateLivePrice();
+let now = Date.now();
+let intervalMs = getIntervalMilliseconds(currentInterval);
+if(now - lastCandleTime >= intervalMs) {
+addNewLiveCandle();
+lastCandleTime = now;
+}
+}, 3000);
+}
+
+function updateLivePrice() {
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
 if(!coinData) return;
 let coinId = coinData.id;
-try {
-let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`);
-if(!res.ok) throw new Error('API error');
-let data = await res.json();
-if(data[coinId]) {
-let newPrice = data[coinId].usd;
-let newChange = data[coinId].usd_24h_change || 0;
+let currentPrice = currentPrices[coinId] || (candleData.length > 0 ? candleData[candleData.length-1].close : 50000);
+let change = (Math.random() - 0.5) * 0.0008 * currentPrice;
+let newPrice = Math.max(currentPrice + change, currentPrice * 0.98);
 currentPrices[coinId] = newPrice;
-currentPrices[coinId+'Change'] = newChange;
 if(document.getElementById('tradePage').style.display === 'block') {
 updateTradePriceDisplay();
 }
-if(document.getElementById('chartModal').style.display === 'block') {
 if(candleData.length > 0) {
 let lastCandle = candleData[candleData.length - 1];
-if(lastCandle) {
 lastCandle.close = newPrice;
 lastCandle.high = Math.max(lastCandle.high, newPrice);
 lastCandle.low = Math.min(lastCandle.low, newPrice);
 drawCandlestickChart();
 }
-}
 updateChartStats();
 }
-}
-} catch(e) { console.log("Error fetching real time price:", e); }
-}
 
-function startRealTimeChart() {
-if(chartRealTimeInterval) clearInterval(chartRealTimeInterval);
-fetchRealCandleData();
-chartRealTimeInterval = setInterval(() => {
-fetchRealTimePrice();
-}, 10000);
+function addNewLiveCandle() {
+let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
+if(!coinData) return;
+let coinId = coinData.id;
+let currentPrice = currentPrices[coinId] || (candleData.length > 0 ? candleData[candleData.length-1].close : 50000);
+let newOpen = currentPrice;
+let newClose = newOpen * (1 + (Math.random() - 0.5) * 0.002);
+let newHigh = Math.max(newOpen, newClose) * (1 + Math.random() * 0.001);
+let newLow = Math.min(newOpen, newClose) * (1 - Math.random() * 0.001);
+let newCandle = {
+time: Date.now(),
+open: newOpen,
+high: newHigh,
+low: newLow,
+close: newClose
+};
+candleData.push(newCandle);
+if(candleData.length > 50) candleData.shift();
+drawCandlestickChart();
 }
 
 function getIntervalMilliseconds(interval) {
@@ -1833,9 +1906,8 @@ let change = (Math.random() - 0.5) * 0.002 * currentPrice;
 let close = currentPrice + change;
 let high = Math.max(open, close) + (Math.random() * 0.0015 * currentPrice);
 let low = Math.min(open, close) - (Math.random() * 0.0015 * currentPrice);
-let volume = Math.random() * 100 + 20;
 let time = now - (i * intervalMs);
-candles.push({ time, open, high, low, close, volume });
+candles.push({ time, open, high, low, close });
 currentPrice = close;
 }
 return candles;
@@ -1890,7 +1962,7 @@ ctx.fillRect(x + (candleWidth - bodyWidth)/2, bodyTop, bodyWidth, Math.max(1, bo
 }
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
 let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
-let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+let currentPrice = currentPrices[coinId] || (candleData.length > 0 ? candleData[candleData.length-1].close : 0);
 let currentY = 40 + ((maxPrice - currentPrice) / priceRange) * (height - 80);
 ctx.beginPath();
 ctx.moveTo(60, currentY);
@@ -1909,7 +1981,7 @@ async function updateChartStats() {
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
 if(!coinData) return;
 let coinId = coinData.id;
-let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
+let currentPrice = currentPrices[coinId] || 0;
 let change = currentPrices[coinId+'Change'] || 0;
 let high = currentPrice * (1 + Math.abs(change)/100 + 0.005);
 let low = currentPrice * (1 - Math.abs(change)/100 - 0.005);
@@ -1950,10 +2022,6 @@ if(!modal) {
 showCustomModal('Error', 'Chart modal not available', 'error');
 return;
 }
-let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
-let coinId = coinData ? coinData.id : currentTradeCoin.toLowerCase();
-let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
-candleData = [];
 let titleElement = document.getElementById('chartCoinTitle');
 if(titleElement) titleElement.innerHTML = `${currentTradeCoin}/USDT Chart`;
 let orderBookSymbol = document.getElementById('orderBookCoinSymbol');
@@ -1969,26 +2037,26 @@ fetchRealCandleData();
 }
 updateChartStats();
 });
-startRealTimeChart();
 }
 
 function closeChartModal() {
 let modal = document.getElementById('chartModal');
 if(modal) modal.style.display = 'none';
-if(chartRealTimeInterval) {
-clearInterval(chartRealTimeInterval);
-chartRealTimeInterval = null;
+if(liveSimulationInterval) {
+clearInterval(liveSimulationInterval);
+liveSimulationInterval = null;
 }
 }
 
-// ============ DEPOSIT HISTORY FUNCTIONS ============
+// ============ DEPOSIT HISTORY FUNCTIONS (Newest first) ============
 
 function renderDepositHistory() {
 let tbody = document.getElementById('depositHistoryBody');
 if(!tbody) return;
 if(!deposits || deposits.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No deposits yet</td></tr>'; return; }
+let sortedDeposits = [...deposits].sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
 let html = '';
-for(let d of deposits) {
+for(let d of sortedDeposits) {
 let truncatedAddress = d.address.length > 15 ? d.address.substring(0,12)+'...' : d.address;
 let statusClass = d.status === 'Pending' ? 'status-pending' : 'status-approved';
 html += `<tr onclick="showDepositTransactionDetails(${d.id})"><td>$${d.amount.toFixed(2)}</td><td>${d.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${d.status}</td></tr>`;
@@ -2017,36 +2085,92 @@ document.getElementById('txAmountReceived').innerHTML = `$${amountReceived.toFix
 document.getElementById('txId').innerHTML = tx.txId;
 }
 
-// Admin function to add deposit manually in Firebase
-async function addDepositToUser(amount, asset) {
-if(!currentUser || !currentUser.uid) return;
-let address = '';
-if(asset === 'USDT') address = 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj';
-else if(asset === 'BTC') address = '1HpuFKWciiek3QxLtSY8D2oX2npLc8jZ5T';
-let deposit = {
-id: Date.now(),
-amount: amount,
-asset: asset,
-address: address,
-network: asset === 'BTC' ? 'BTC Network' : 'TRC20',
-status: 'Completed',
-dateTime: new Date().toLocaleString(),
-txId: 'DEP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
-};
-deposits.push(deposit);
-if(asset === 'USDT') holdings.usdt += amount;
-else if(asset === 'BTC') {
-let btcPrice = currentPrices.bitcoin || 73786;
-let usdtValue = amount * btcPrice;
-holdings.usdt += usdtValue;
+// ============ WITHDRAWAL HISTORY FUNCTIONS (Newest first) ============
+
+function renderWithdrawalHistory() {
+let tbody = document.getElementById('withdrawalHistoryBody');
+if(!tbody) return;
+if(!withdrawals || withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>'; return; }
+let sortedWithdrawals = [...withdrawals].sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+let html = '';
+for(let w of sortedWithdrawals) {
+let truncatedAddress = w.address.length > 15 ? w.address.substring(0,12)+'...' : w.address;
+let statusClass = w.status === 'Pending' ? 'status-pending' : 'status-approved';
+html += `<tr onclick="showTransactionDetails(${w.id})"><td>$${w.amount.toFixed(2)}</td><td>${w.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${w.status}</td></tr>`;
 }
-await saveDepositToFirestore(deposit);
+tbody.innerHTML = html;
+}
+
+function generateTxId() { return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase(); }
+
+async function submitWithdrawalWithSpinner() {
+const buttonId = 'withdrawBtn';
+showButtonSpinner(buttonId, 'Withdraw');
+await delay(2000);
+let amount = parseFloat(document.getElementById('withdrawAmount').value);
+let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
+let address = document.getElementById('walletAddress').value;
+if(isNaN(amount) || amount < 10) { hideButtonSpinner(buttonId); showCustomModal('Invalid Amount', 'Minimum withdrawal is $10', 'error'); return; }
+if(!address || address.length < 10) { hideButtonSpinner(buttonId); showCustomModal('Invalid Address', 'Valid address required', 'error'); return; }
+if(amount > holdings.usdt) { hideButtonSpinner(buttonId); showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)}`, 'error'); return; }
+
+let txId = generateTxId();
+let fee = 1.00;
+let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'TRC20', fee: fee, txId, status: 'Pending', dateTime: new Date().toLocaleString() };
+
+withdrawals.push(withdrawal);
+holdings.usdt -= amount;
+
+await saveWithdrawalToFirestore(withdrawal);
 await saveUserHoldingsToFirestore();
-renderDepositHistory();
-updatePortfolioTotal();
-renderCrypto();
-renderMarketsCrypto();
+
+renderWithdrawalHistory();
+document.getElementById('withdrawAmount').value = '';
+document.getElementById('walletAddress').value = '';
+if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
+hideButtonSpinner(buttonId);
+showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted.`, 'success');
+
+setTimeout(async () => {
+let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
+if(idx !== -1 && withdrawals[idx].status === 'Pending') {
+withdrawals[idx].status = 'Approved';
+const db = window.firebaseDb;
+const userRef = window.doc(db, 'users', currentUser.uid);
+const userDoc = await window.getDoc(userRef);
+if(userDoc.exists()) {
+const currentWithdrawals = userDoc.data().withdrawals || [];
+const updatedWithdrawals = currentWithdrawals.map(w => w.id === withdrawal.id ? {...w, status: 'Approved'} : w);
+await window.updateDoc(userRef, { withdrawals: updatedWithdrawals });
 }
+renderWithdrawalHistory();
+if(document.getElementById('txDetailModal').style.display === 'block' && currentTxId === withdrawal.id) { updateTxModal(withdrawals[idx]); }
+}
+}, 30000);
+}
+
+function showTransactionDetails(id) {
+let tx = withdrawals.find(w => w.id === id);
+if(!tx) return;
+currentTxId = tx.id;
+updateTxModal(tx);
+document.getElementById('txDetailModal').style.display = 'block';
+}
+
+function updateTxModal(tx) {
+let amountReceived = tx.amount - tx.fee;
+document.getElementById('txAmount').innerHTML = `$${tx.amount.toFixed(2)}`;
+document.getElementById('txAsset').innerHTML = tx.asset;
+document.getElementById('txAddress').innerHTML = tx.address;
+document.getElementById('txStatus').innerHTML = tx.status;
+document.getElementById('txDateTime').innerHTML = tx.dateTime;
+document.getElementById('txNetwork').innerHTML = tx.network;
+document.getElementById('txFee').innerHTML = `$${tx.fee.toFixed(2)}`;
+document.getElementById('txAmountReceived').innerHTML = `$${amountReceived.toFixed(2)}`;
+document.getElementById('txId').innerHTML = tx.txId;
+}
+
+function closeTxModal() { document.getElementById('txDetailModal').style.display = 'none'; currentTxId = null; }
 
 // ============ BOT FUNCTIONS ============
 async function loadSavedBotConfigs() {
@@ -2402,90 +2526,6 @@ button.innerHTML = originalText;
 button.disabled = false;
 showBotDetail(botName);
 }
-
-function renderWithdrawalHistory() {
-let tbody = document.getElementById('withdrawalHistoryBody');
-if(!tbody) return;
-if(!withdrawals || withdrawals.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr>'; return; }
-let html = '';
-for(let w of withdrawals) {
-let truncatedAddress = w.address.length > 15 ? w.address.substring(0,12)+'...' : w.address;
-let statusClass = w.status === 'Pending' ? 'status-pending' : 'status-approved';
-html += `<tr onclick="showTransactionDetails(${w.id})"><td>$${w.amount.toFixed(2)}</td><td>${w.asset}</td><td class="address-truncated">${truncatedAddress}</td><td class="${statusClass}">${w.status}</td></tr>`;
-}
-tbody.innerHTML = html;
-}
-
-function generateTxId() { return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase(); }
-
-async function submitWithdrawalWithSpinner() {
-const buttonId = 'withdrawBtn';
-showButtonSpinner(buttonId, 'Withdraw');
-await delay(2000);
-let amount = parseFloat(document.getElementById('withdrawAmount').value);
-let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
-let address = document.getElementById('walletAddress').value;
-if(isNaN(amount) || amount < 10) { hideButtonSpinner(buttonId); showCustomModal('Invalid Amount', 'Minimum withdrawal is $10', 'error'); return; }
-if(!address || address.length < 10) { hideButtonSpinner(buttonId); showCustomModal('Invalid Address', 'Valid address required', 'error'); return; }
-if(amount > holdings.usdt) { hideButtonSpinner(buttonId); showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)}`, 'error'); return; }
-
-let txId = generateTxId();
-let fee = 1.00;
-let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'TRC20', fee: fee, txId, status: 'Pending', dateTime: new Date().toLocaleString() };
-
-withdrawals.push(withdrawal);
-holdings.usdt -= amount;
-
-await saveWithdrawalToFirestore(withdrawal);
-await saveUserHoldingsToFirestore();
-
-renderWithdrawalHistory();
-document.getElementById('withdrawAmount').value = '';
-document.getElementById('walletAddress').value = '';
-if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
-hideButtonSpinner(buttonId);
-showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted.`, 'success');
-
-setTimeout(async () => {
-let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
-if(idx !== -1 && withdrawals[idx].status === 'Pending') {
-withdrawals[idx].status = 'Approved';
-const db = window.firebaseDb;
-const userRef = window.doc(db, 'users', currentUser.uid);
-const userDoc = await window.getDoc(userRef);
-if(userDoc.exists()) {
-const currentWithdrawals = userDoc.data().withdrawals || [];
-const updatedWithdrawals = currentWithdrawals.map(w => w.id === withdrawal.id ? {...w, status: 'Approved'} : w);
-await window.updateDoc(userRef, { withdrawals: updatedWithdrawals });
-}
-renderWithdrawalHistory();
-if(document.getElementById('txDetailModal').style.display === 'block' && currentTxId === withdrawal.id) { updateTxModal(withdrawals[idx]); }
-}
-}, 30000);
-}
-
-function showTransactionDetails(id) {
-let tx = withdrawals.find(w => w.id === id);
-if(!tx) return;
-currentTxId = tx.id;
-updateTxModal(tx);
-document.getElementById('txDetailModal').style.display = 'block';
-}
-
-function updateTxModal(tx) {
-let amountReceived = tx.amount - tx.fee;
-document.getElementById('txAmount').innerHTML = `$${tx.amount.toFixed(2)}`;
-document.getElementById('txAsset').innerHTML = tx.asset;
-document.getElementById('txAddress').innerHTML = tx.address;
-document.getElementById('txStatus').innerHTML = tx.status;
-document.getElementById('txDateTime').innerHTML = tx.dateTime;
-document.getElementById('txNetwork').innerHTML = tx.network;
-document.getElementById('txFee').innerHTML = `$${tx.fee.toFixed(2)}`;
-document.getElementById('txAmountReceived').innerHTML = `$${amountReceived.toFixed(2)}`;
-document.getElementById('txId').innerHTML = tx.txId;
-}
-
-function closeTxModal() { document.getElementById('txDetailModal').style.display = 'none'; currentTxId = null; }
 
 // Event listeners
 document.addEventListener('click', function(e) {
