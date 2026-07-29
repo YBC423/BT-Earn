@@ -587,7 +587,7 @@ border-radius: 4px;
 
 <div id="tradePage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="chart-icon-btn" onclick="showTrade(currentTradeCoin)" style="padding: 8px 12px;"><div class="chart-icon"><span></span><span></span><span></span></div></div><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="trade-container" id="tradeContainer"><div class="trade-header"><select id="tradeCoinSelect" class="coin-selector" onchange="changeTradeCoin()"></select><div class="chart-icon-btn" onclick="openChartModal()"><div class="chart-icon"><span></span><span></span><span></span></div><span style="font-size:12px;">Chart</span></div></div><div class="trade-price-card"><div class="trade-price" id="tradePrice">$0.00</div><div class="trade-change" id="tradeChange">+0.00%</div></div><div class="trade-tabs"><div class="trade-tab buy active" onclick="setTradeMode('buy')">Buy</div><div class="trade-tab sell" onclick="setTradeMode('sell')">Sell</div></div><div class="trade-input-section"><div class="input-row"><label>Price (USDT)</label><input type="number" id="tradePriceInput" placeholder="0.00" oninput="calculateTotal()"></div><div class="input-row"><label>Quantity (<span id="tradeCoinSymbol">BTC</span>)</label><input type="number" id="tradeQuantityInput" placeholder="0.00" oninput="calculateTotal()"></div><div class="balance-info" id="tradeBalanceInfo">Available: 0.0000 BTC</div><div class="total-value">Total: <span id="tradeTotalValue">$0.00</span></div><button class="confirm-btn" id="tradeConfirmBtn" onclick="executeTrade()">Buy BTC</button></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="orders">Orders</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
-<div id="botsPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="chart-icon-btn" onclick="showTrade(currentTradeCoin)" style="padding: 8px 12px;"><div class="chart-icon"><span></span><span></span><span></span></div></div><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="bots-container"><div class="bots-header"><h1>Automated Trading</h1><p>Create and manage algorithmic trading strategies</p></div><div class="bots-stats"><div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Total Bots</div></div><div class="stat-card"><div class="stat-value">2</div><div class="stat-label">Active</div></div><div class="stat-card"><div class="stat-value">+4.8%</div><div class="stat-label">Weekly Return</div><div class="stat-sub">↑ +2.1%</div></div></div><button class="create-bot-btn" onclick="showCustomModal('Create Bot', 'Create new bot feature coming soon!', 'info')">+ Create New Bot</button><div class="dca-section"><h3>Dollar-Cost Averaging Bots</h3><button class="create-dca-btn" onclick="showCustomModal('Create DCA Bot', 'Create DCA bot feature coming soon!', 'info')">+ Create DCA Bot</button></div><div class="bots-grid"><div class="bot-card"><div class="bot-status" id="botStatusBitcoin">Not Configured</div><div class="bot-title">Bitcoin Accumulation</div><div class="bot-type">Weekly • DCA</div><div class="bot-description">Dollar-cost averaging into Bitcoin on a weekly basis</div><div class="bot-risk">Risk: <span class="risk-value">Low</span></div><div class="bot-performance" id="botPerfBitcoin">Performance: --</div><div class="bot-buttons"><button class="bot-config-btn" id="configBtnBitcoin" onclick="openConfigModal('Bitcoin Accumulation')">Configure</button><button class="bot-start-btn" id="startBotBitcoinBtn" onclick="startBotWithSpinner('Bitcoin Accumulation')">Start BA Bot</button></div></div><div class="bot-card"><div class="bot-status" id="botStatusETH">Not Configured</div><div class="bot-title">ETH DCA Pro</div><div class="bot-type">Daily • DCA</div><div class="bot-description">Dynamic DCA based on RSI and volume indicators</div><div class="bot-risk">Risk: <span class="risk-value">Medium</span></div><div class="bot-performance" id="botPerfETH">Performance: --</div><div class="bot-buttons"><button class="bot-config-btn" id="configBtnETH" onclick="openConfigModal('ETH DCA Pro')">Configure</button><button class="bot-start-btn" id="startBotETHBtn" onclick="startBotWithSpinner('ETH DCA Pro')">Start DCA Pro</button></div></div></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="orders">Orders</div><div class="nav-item" data-nav="bots" style="color: #667eea;">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
+<div id="botsPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="chart-icon-btn" onclick="showTrade(currentTradeCoin)" style="padding: 8px 12px;"><div class="chart-icon"><span></span><span></span><span></span></div></div><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="bots-container"><div class="bots-header"><h1>Automated Trading</h1><p>Create and manage algorithmic trading strategies</p></div><div class="bots-stats"><div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Total Bots</div></div><div class="stat-card"><div class="stat-value">2</div><div class="stat-label">Active</div></div><div class="stat-card"><div class="stat-value">+4.8%</div><div class="stat-label">Weekly Return</div><div class="stat-sub">↑ +2.1%</div></div></div><button class="create-bot-btn" onclick="showCustomModal('Create Bot', 'Create new bot feature coming soon!', 'info')">+ Create New Bot</button><div class="dca-section"><h3>Dollar-Cost Averaging Bots</h3><button class="create-dca-btn" onclick="showCustomModal('Create DCA Bot', 'Create DCA bot feature coming soon!', 'info')">+ Create DCA Bot</button></div><div class="bots-grid"><div class="bot-card"><div class="bot-status" id="botStatusBitcoin">Not Configured</div><div class="bot-title">Bitcoin Accumulation</div><div class="bot-type">Weekly • DCA</div><div class="bot-description">Dollar-cost averaging into Bitcoin on a weekly basis</div><div class="bot-risk">Risk: <span class="risk-value">Low</span></div><div class="bot-performance" id="botPerfBitcoin">Performance: --</div><div class="bot-buttons"><button class="bot-config-btn" id="configBtnBitcoin" onclick="openConfigModal('Bitcoin Accumulation')">Configure</button><button class="bot-start-btn" id="startBotBitcoinBtn" onclick="startBotWithSpinner('Bitcoin Accumulation')" disabled>Start BA Bot</button></div></div><div class="bot-card"><div class="bot-status" id="botStatusETH">Not Configured</div><div class="bot-title">ETH DCA Pro</div><div class="bot-type">Daily • DCA</div><div class="bot-description">Dynamic DCA based on RSI and volume indicators</div><div class="bot-risk">Risk: <span class="risk-value">Medium</span></div><div class="bot-performance" id="botPerfETH">Performance: --</div><div class="bot-buttons"><button class="bot-config-btn" id="configBtnETH" onclick="openConfigModal('ETH DCA Pro')">Configure</button><button class="bot-start-btn" id="startBotETHBtn" onclick="startBotWithSpinner('ETH DCA Pro')" disabled>Start DCA Pro</button></div></div></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="orders">Orders</div><div class="nav-item" data-nav="bots" style="color: #667eea;">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
 <div id="botDetailPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="chart-icon-btn" onclick="showTrade(currentTradeCoin)" style="padding: 8px 12px;"><div class="chart-icon"><span></span><span></span><span></span></div></div><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="bot-detail-container"><div class="bot-detail-header"><h1 id="botDetailTitle">Bitcoin Accumulation Bot</h1><div class="bot-id">Bot ID: dca-1 • Account: Real</div><div id="botDetailStatus" class="bot-status-badge stopped">Stopped</div></div><div class="bot-control-buttons"><button id="startBotBtn" class="bot-control-btn start" onclick="controlBotAction('start')">Start Bot</button><button id="pauseBotBtn" class="bot-control-btn pause" onclick="controlBotAction('pause')" disabled>Pause Bot</button><button id="stopBotBtn" class="bot-control-btn stop" onclick="controlBotAction('stop')" disabled>Stop Bot</button></div><div class="bot-stats-grid"><div class="bot-stat-card"><div class="stat-label">Total P/L</div><div class="stat-value" id="botPL">+$0.00</div></div><div class="bot-stat-card"><div class="stat-label">Total Runs</div><div class="stat-value" id="botRuns">0</div></div><div class="bot-stat-card"><div class="stat-label">Total Trades</div><div class="stat-value" id="botTrades">0</div></div><div class="bot-stat-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="botWinRate">0.0%</div></div><div class="bot-stat-card"><div class="stat-label">Balance</div><div class="stat-value" id="botBalance">$0.00</div></div></div><div class="bot-logs-section"><h3>Bot Logs <span id="logCount">0</span> entries</h3><div class="logs-container" id="botLogs"><div class="log-entry info"><span class="time">[--:--:--.--]</span> Waiting for bot to start...</div></div></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="orders">Orders</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
@@ -699,18 +699,17 @@ border-radius: 4px;
 <table class="orders-table">
 <thead>
 <tr>
+<th>Bot Name</th>
 <th>Asset</th>
-<th>Type</th>
-<th>Price</th>
-<th>Quantity</th>
-<th>Total</th>
+<th>Total Trades</th>
+<th>Total P/L</th>
 <th>Status</th>
 <th>Date/Time</th>
 <th>Action</th>
 </tr>
 </thead>
 <tbody id="currentOrdersBody">
-<tr><td colspan="8" style="text-align:center; color:#a0a0c0; padding:30px;">No current orders</td></tr>
+<tr><td colspan="7" style="text-align:center; color:#a0a0c0; padding:30px;">No current orders</td></tr>
 </tbody>
 </table>
 </div>
@@ -723,18 +722,16 @@ border-radius: 4px;
 <table class="orders-table">
 <thead>
 <tr>
+<th>Bot Name</th>
 <th>Asset</th>
-<th>Type</th>
-<th>Price</th>
-<th>Quantity</th>
-<th>Total</th>
-<th>Profit/Loss</th>
+<th>Total Trades</th>
+<th>Total P/L</th>
 <th>Status</th>
 <th>Date/Time</th>
 </tr>
 </thead>
 <tbody id="closedOrdersBody">
-<tr><td colspan="8" style="text-align:center; color:#a0a0c0; padding:30px;">No closed orders</td></tr>
+<tr><td colspan="6" style="text-align:center; color:#a0a0c0; padding:30px;">No closed orders</td></tr>
 </tbody>
 </table>
 </div>
@@ -963,17 +960,17 @@ let candleData = [];
 let currentConfigBot = null;
 let withdrawals = [];
 let deposits = [];
-let activeBot = null;
-let botInterval = null;
-let lastTradeResult = null;
-let botStats = { botName: '', asset: '', amountPerTrade: 100, totalPL: 0, totalRuns: 0, totalTrades: 0, wins: 0, botBalance: 0, isRunning: false, isPaused: false, logs: [] };
-let botLastSessionOutcome = {};
+let allOrders = [];
+let orderIdCounter = 0;
+let activeBots = {}; // Stores bot intervals keyed by botName
+let botStatsMap = {}; // Stores bot stats keyed by botName
 let selectedDepositAsset = 'USDT';
 let currentPaymentQr = null;
 let currentTxId = null;
 let lastSyncedBalance = 0;
-let allOrders = [];
-let orderIdCounter = 0;
+
+// Bot configs stored in memory
+let botConfigs = {};
 
 const FALLBACK_PRICES = {};
 top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = coin.symbol === 'BTC' ? 73786 : (coin.symbol === 'ETH' ? 2022 : (coin.symbol === 'USDT' ? 1 : (coin.symbol === 'BNB' ? 580 : (coin.symbol === 'SOL' ? 145 : 10 + Math.random() * 100)))); FALLBACK_PRICES[coin.id+'Change'] = (Math.random() - 0.5) * 8; });
@@ -1837,10 +1834,6 @@ updatePortfolioTotal();
 renderCrypto();
 renderMarketsCrypto();
 updateLastUpdatedText();
-if(activeBot && botStats) {
-botStats.botBalance = holdings.usdt;
-updateBotStatsDisplay();
-}
 await saveUserHoldingsToFirestore();
 lastSyncedBalance = holdings.usdt;
 }
@@ -2325,8 +2318,8 @@ const currentBody = document.getElementById('currentOrdersBody');
 const closedBody = document.getElementById('closedOrdersBody');
 
 if (!allOrders || allOrders.length === 0) {
-if (currentBody) currentBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#a0a0c0; padding:30px;">No current orders</td></tr>';
-if (closedBody) closedBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#a0a0c0; padding:30px;">No closed orders</td></tr>';
+if (currentBody) currentBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#a0a0c0; padding:30px;">No current orders</td></tr>';
+if (closedBody) closedBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#a0a0c0; padding:30px;">No closed orders</td></tr>';
 return;
 }
 
@@ -2335,17 +2328,16 @@ let closedOrders = allOrders.filter(o => o.status === 'Closed' || o.status === '
 
 // Current Orders
 if (currentOrders.length === 0) {
-if (currentBody) currentBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#a0a0c0; padding:30px;">No current orders</td></tr>';
+if (currentBody) currentBody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#a0a0c0; padding:30px;">No current orders</td></tr>';
 } else {
 let html = '';
 for (let order of currentOrders) {
 let botName = order.botName || 'Unknown Bot';
 html += `<tr>
+<td>${botName}</td>
 <td>${order.asset}</td>
-<td>${order.type}</td>
-<td>$${order.price.toFixed(2)}</td>
-<td>${order.quantity.toFixed(4)}</td>
-<td>$${order.total.toFixed(2)}</td>
+<td>${order.totalTrades || 0}</td>
+<td class="${(order.totalPL || 0) >= 0 ? 'profit-positive' : 'profit-negative'}">${(order.totalPL || 0) >= 0 ? '+' : ''}$${(order.totalPL || 0).toFixed(2)}</td>
 <td class="order-status-open">${order.status}</td>
 <td>${order.dateTime}</td>
 <td><button class="view-bot-btn" onclick="viewBotFromOrder('${botName}')">View Bot</button></td>
@@ -2356,20 +2348,16 @@ if (currentBody) currentBody.innerHTML = html;
 
 // Closed Orders
 if (closedOrders.length === 0) {
-if (closedBody) closedBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#a0a0c0; padding:30px;">No closed orders</td></tr>';
+if (closedBody) closedBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#a0a0c0; padding:30px;">No closed orders</td></tr>';
 } else {
 let html = '';
 for (let order of closedOrders) {
-let pl = order.profitLoss || 0;
-let plClass = pl >= 0 ? 'profit-positive' : 'profit-negative';
-let plDisplay = (pl >= 0 ? '+' : '') + '$' + pl.toFixed(2);
+let botName = order.botName || 'Unknown Bot';
 html += `<tr>
+<td>${botName}</td>
 <td>${order.asset}</td>
-<td>${order.type}</td>
-<td>$${order.price.toFixed(2)}</td>
-<td>${order.quantity.toFixed(4)}</td>
-<td>$${order.total.toFixed(2)}</td>
-<td class="${plClass}">${plDisplay}</td>
+<td>${order.totalTrades || 0}</td>
+<td class="${(order.totalPL || 0) >= 0 ? 'profit-positive' : 'profit-negative'}">${(order.totalPL || 0) >= 0 ? '+' : ''}$${(order.totalPL || 0).toFixed(2)}</td>
 <td class="order-status-closed">${order.status}</td>
 <td>${order.dateTime}</td>
 </tr>`;
@@ -2380,24 +2368,24 @@ if (closedBody) closedBody.innerHTML = html;
 
 function viewBotFromOrder(botName) {
 if (botName === 'Bitcoin Accumulation' || botName === 'ETH DCA Pro') {
+// Show the bot detail page for this specific bot
 showBotDetail(botName);
 } else {
 showCustomModal('Bot Not Found', 'The bot associated with this order could not be found.', 'error');
 }
 }
 
-function addOrder(asset, type, price, quantity, total, botName = null) {
+function createOrder(botName, asset, configAmount) {
 let order = {
 id: ++orderIdCounter,
+botName: botName,
 asset: asset,
-type: type,
-price: price,
-quantity: quantity,
-total: total,
+totalTrades: 0,
+totalPL: 0,
 status: 'Open',
 dateTime: new Date().toLocaleString(),
-botName: botName,
-profitLoss: null
+configAmount: configAmount,
+isRunning: true
 };
 allOrders.push(order);
 saveOrdersToFirestore();
@@ -2405,11 +2393,20 @@ renderOrders();
 return order;
 }
 
-function closeOrder(orderId, profitLoss = 0) {
-let order = allOrders.find(o => o.id === orderId);
+function updateOrderPL(botName, pl) {
+let order = allOrders.find(o => o.botName === botName && (o.status === 'Open' || o.status === 'Pending'));
+if (order) {
+order.totalTrades = (order.totalTrades || 0) + 1;
+order.totalPL = (order.totalPL || 0) + pl;
+saveOrdersToFirestore();
+renderOrders();
+}
+}
+
+function closeOrderByBotName(botName) {
+let order = allOrders.find(o => o.botName === botName && (o.status === 'Open' || o.status === 'Pending'));
 if (order) {
 order.status = 'Closed';
-order.profitLoss = profitLoss;
 saveOrdersToFirestore();
 renderOrders();
 }
@@ -2425,14 +2422,25 @@ await window.updateDoc(userRef, { orders: allOrders });
 }
 
 // ============ BOT FUNCTIONS ============
+function getBotConfig(botName) {
+return botConfigs[botName] || null;
+}
+
+function setBotConfig(botName, config) {
+botConfigs[botName] = config;
+}
+
 async function loadSavedBotConfigs() {
 let botNames = ['Bitcoin Accumulation', 'ETH DCA Pro'];
 for(let botName of botNames) {
 let config = await loadBotConfigFromFirestore(botName);
+if (config) {
+setBotConfig(botName, config);
+}
 let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
 let botStatusSpan = document.getElementById(`botStatus${botKey}`);
 let botPerfSpan = document.getElementById(`botPerf${botKey}`);
-let configBtn = document.getElementById(`configBtn${botKey}`);
+let startBtn = document.getElementById(`startBot${botKey}Btn`);
 
 if(config && botStatusSpan && botPerfSpan) {
 botStatusSpan.innerHTML = 'Configured';
@@ -2440,119 +2448,174 @@ botStatusSpan.style.background = 'rgba(72,187,120,0.2)';
 botStatusSpan.style.color = '#48bb78';
 botPerfSpan.innerHTML = `Performance: $${config.amount} per trade (${config.asset})`;
 botPerfSpan.style.color = '#48bb78';
+if (startBtn) {
+startBtn.disabled = false;
+startBtn.classList.remove('disabled');
 }
-
-// Check if there's an open order for this bot
-let hasOpenOrder = allOrders.some(o => o.botName === botName && (o.status === 'Open' || o.status === 'Pending'));
-
-if (hasOpenOrder && configBtn) {
-configBtn.classList.add('disabled');
-configBtn.title = 'Cannot configure while bot has open orders';
-} else if (configBtn) {
-configBtn.classList.remove('disabled');
-configBtn.title = '';
+} else {
+if (startBtn) {
+startBtn.disabled = true;
+startBtn.classList.add('disabled');
+}
 }
 }
 }
 
 function showBotDetail(botName) {
-loadBotConfigFromFirestore(botName).then(async (savedConfig) => {
-if(!savedConfig) {
+let config = getBotConfig(botName);
+if(!config) {
 showCustomModal('Bot Not Configured','Please configure the bot first before starting','error');
 return;
 }
-let config = savedConfig;
+
+let existingOrder = allOrders.find(o => o.botName === botName && (o.status === 'Open' || o.status === 'Pending'));
+
+if (existingOrder) {
+// Bot already has an open order - show its detail page
+activeBot = botName;
+document.getElementById('botDetailTitle').innerHTML = botName;
+document.getElementById('botBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
+// Show current status from activeBots
+if (activeBots[botName]) {
+document.getElementById('botDetailStatus').className = 'bot-status-badge running';
+document.getElementById('botDetailStatus').innerHTML = 'Running';
+document.getElementById('startBotBtn').disabled = true;
+document.getElementById('pauseBotBtn').disabled = false;
+document.getElementById('stopBotBtn').disabled = false;
+} else {
+document.getElementById('botDetailStatus').className = 'bot-status-badge stopped';
+document.getElementById('botDetailStatus').innerHTML = 'Stopped';
+document.getElementById('startBotBtn').disabled = false;
+document.getElementById('pauseBotBtn').disabled = true;
+document.getElementById('stopBotBtn').disabled = true;
+}
+// Load stats from botStatsMap
+if (botStatsMap[botName]) {
+let stats = botStatsMap[botName];
+document.getElementById('botPL').innerHTML = `${stats.totalPL >= 0 ? '+' : ''}$${Math.abs(stats.totalPL).toFixed(2)}`;
+document.getElementById('botRuns').innerHTML = stats.totalRuns || 0;
+document.getElementById('botTrades').innerHTML = stats.totalTrades || 0;
+let winRate = stats.totalTrades > 0 ? (stats.wins / stats.totalTrades * 100) : 0;
+document.getElementById('botWinRate').innerHTML = `${winRate.toFixed(1)}%`;
+document.getElementById('botBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
+// Update logs
+let logsContainer = document.getElementById('botLogs');
+if (stats.logs && stats.logs.length > 0) {
+logsContainer.innerHTML = '';
+for(let log of stats.logs) {
+let logDiv = document.createElement('div');
+logDiv.className = 'log-entry ' + (log.type || 'info');
+logDiv.innerHTML = `<span class="time">[${log.time}]</span> ${log.message}`;
+logsContainer.appendChild(logDiv);
+}
+}
+}
+document.getElementById('botsPage').style.display = 'none';
+document.getElementById('botDetailPage').style.display = 'block';
+updateBotStatsDisplay(botName);
+return;
+}
+
+// No existing order - user wants to start a new one
+if(!currentUser) { showAuthPage(); return; }
 
 if(config.amount > holdings.usdt) {
 showCustomModal('Insufficient Balance', `You need $${config.amount} USDT to run this bot. Your balance: $${holdings.usdt.toFixed(2)}`, 'error');
 return;
 }
 
+// Create order and start bot
 activeBot = botName;
 let isMediumRisk = (botName === 'ETH DCA Pro');
-lastTradeResult = null;
-botStats = {
-botName,
-asset:config.asset,
-amountPerTrade:parseFloat(config.amount),
-totalPL:0,
-totalRuns:0,
-totalTrades:0,
-wins:0,
-botBalance:holdings.usdt,
-isRunning:false,
-isPaused:false,
-logs:[]
+
+// Initialize stats for this bot
+botStatsMap[botName] = {
+botName: botName,
+asset: config.asset,
+amountPerTrade: parseFloat(config.amount),
+totalPL: 0,
+totalRuns: 0,
+totalTrades: 0,
+wins: 0,
+botBalance: holdings.usdt,
+isRunning: false,
+isPaused: false,
+logs: []
 };
-addBotLog('High-Frequency Trading System loaded','info');
-addBotLog(`Account Balance: $${holdings.usdt.toFixed(2)}`,'info');
-addBotLog('STANDARD Tier Active - Optimized for consistent small profits','info');
-addBotLog(`Target profit per trade: 0.1%-0.4% | Win rate: 60% (random distribution)`,'info');
-document.getElementById('botDetailTitle').innerHTML = botName==='Bitcoin Accumulation' ? 'Bitcoin Accumulation Bot' : 'ETH DCA Pro Bot';
+
+let stats = botStatsMap[botName];
+stats.logs.unshift({time: new Date().toLocaleTimeString(), message: 'Bot configured and ready to start', type: 'info'});
+
+// Create the order
+let order = createOrder(botName, config.asset, config.amount);
+
+// Start the bot
+startBotTrading(botName);
+
+document.getElementById('botDetailTitle').innerHTML = botName;
 document.getElementById('botBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
-document.getElementById('botDetailStatus').className = 'bot-status-badge stopped';
-document.getElementById('botDetailStatus').innerHTML = 'Stopped';
-document.getElementById('startBotBtn').disabled = false;
-document.getElementById('pauseBotBtn').disabled = true;
-document.getElementById('stopBotBtn').disabled = true;
-let plElement = document.getElementById('botPL');
-if(plElement) plElement.className = 'stat-value';
+document.getElementById('botDetailStatus').className = 'bot-status-badge running';
+document.getElementById('botDetailStatus').innerHTML = 'Running';
+document.getElementById('startBotBtn').disabled = true;
+document.getElementById('pauseBotBtn').disabled = false;
+document.getElementById('stopBotBtn').disabled = false;
+
 document.getElementById('botsPage').style.display = 'none';
 document.getElementById('botDetailPage').style.display = 'block';
-updateBotStatsDisplay();
-});
+updateBotStatsDisplay(botName);
 }
 
-function addBotLog(message, type) {
-let time = new Date();
-let timeStr = `${time.getHours().toString().padStart(2,'0')}:${time.getMinutes().toString().padStart(2,'0')}:${time.getSeconds().toString().padStart(2,'0')}.${time.getMilliseconds().toString().padStart(3,'0')}`;
-botStats.logs.unshift({time:timeStr, message, type});
-if(botStats.logs.length>100) botStats.logs.pop();
-updateLogsDisplay();
+function addBotLog(botName, message, type) {
+if (!botStatsMap[botName]) return;
+let stats = botStatsMap[botName];
+let time = new Date().toLocaleTimeString();
+stats.logs.unshift({time: time, message: message, type: type || 'info'});
+if(stats.logs.length > 100) stats.logs.pop();
+updateBotStatsDisplay(botName);
 }
 
-function updateLogsDisplay() {
-let logsContainer = document.getElementById('botLogs');
-let logCount = document.getElementById('logCount');
-if(logsContainer) {
-logsContainer.innerHTML = '';
-for(let log of botStats.logs) {
-let logDiv = document.createElement('div');
-logDiv.className = 'log-entry '+log.type;
-logDiv.innerHTML = `<span class="time">[${log.time}]</span> ${log.message}`;
-logsContainer.appendChild(logDiv);
-}
-if(logCount) logCount.innerHTML = botStats.logs.length;
-}
-}
+function updateBotStatsDisplay(botName) {
+if (!botStatsMap[botName]) return;
+let stats = botStatsMap[botName];
 
-function updateBotStatsDisplay() {
 let plElement = document.getElementById('botPL');
 if(plElement) {
-let plValue = botStats.totalPL;
+let plValue = stats.totalPL;
 plElement.innerHTML = `${plValue>=0?'+':''}$${Math.abs(plValue).toFixed(2)}`;
-if(lastTradeResult==='win') plElement.className = 'stat-value positive';
-else if(lastTradeResult==='loss') plElement.className = 'stat-value negative';
+if(stats.lastTradeResult==='win') plElement.className = 'stat-value positive';
+else if(stats.lastTradeResult==='loss') plElement.className = 'stat-value negative';
 else plElement.className = 'stat-value';
 }
 let runsElement = document.getElementById('botRuns');
-if(runsElement) runsElement.innerHTML = botStats.totalRuns;
+if(runsElement) runsElement.innerHTML = stats.totalRuns;
 let tradesElement = document.getElementById('botTrades');
-if(tradesElement) tradesElement.innerHTML = botStats.totalTrades;
-let winRate = botStats.totalTrades>0 ? (botStats.wins/botStats.totalTrades*100) : 0;
+if(tradesElement) tradesElement.innerHTML = stats.totalTrades;
+let winRate = stats.totalTrades>0 ? (stats.wins/stats.totalTrades*100) : 0;
 let winRateElement = document.getElementById('botWinRate');
 if(winRateElement) {
 winRateElement.innerHTML = `${winRate.toFixed(1)}%`;
-if(lastTradeResult === 'win') {
+if(stats.lastTradeResult === 'win') {
 winRateElement.className = 'stat-value win-rate-positive';
-} else if(lastTradeResult === 'loss') {
+} else if(stats.lastTradeResult === 'loss') {
 winRateElement.className = 'stat-value win-rate-negative';
 } else {
 winRateElement.className = 'stat-value';
 }
 }
 let balanceElement = document.getElementById('botBalance');
-if(balanceElement) balanceElement.innerHTML = `$${botStats.botBalance.toFixed(2)}`;
+if(balanceElement) balanceElement.innerHTML = `$${holdings.usdt.toFixed(2)}`;
+
+// Update logs
+let logsContainer = document.getElementById('botLogs');
+if (logsContainer && stats.logs) {
+logsContainer.innerHTML = '';
+for(let log of stats.logs) {
+let logDiv = document.createElement('div');
+logDiv.className = 'log-entry ' + (log.type || 'info');
+logDiv.innerHTML = `<span class="time">[${log.time}]</span> ${log.message}`;
+logsContainer.appendChild(logDiv);
+}
+}
 }
 
 function calculateProfitLossLow(amount) {
@@ -2594,17 +2657,18 @@ return { profit: -loss, isWin: false, percent: lossPercent };
 }
 }
 
-async function executeBotTrade() {
-if(!botStats.isRunning || botStats.isPaused) return;
-let amount = botStats.amountPerTrade;
+function executeBotTrade(botName) {
+let stats = botStatsMap[botName];
+if (!stats || !stats.isRunning || stats.isPaused) return;
+let amount = stats.amountPerTrade;
 
 if(holdings.usdt < amount) {
-addBotLog(`Insufficient balance! Need $${amount} USDT. Stopping bot.`,'error');
-stopBotTrading();
+addBotLog(botName, `Insufficient balance! Need $${amount} USDT. Stopping bot.`, 'error');
+stopBotTrading(botName);
 return;
 }
 
-let isMediumRisk = (activeBot === 'ETH DCA Pro');
+let isMediumRisk = (botName === 'ETH DCA Pro');
 let result;
 if(isMediumRisk) {
 result = calculateProfitLossMedium(amount);
@@ -2613,133 +2677,132 @@ result = calculateProfitLossLow(amount);
 }
 let profit = result.profit;
 let isWin = result.isWin;
-lastTradeResult = isWin ? 'win' : 'loss';
+stats.lastTradeResult = isWin ? 'win' : 'loss';
 
-let coinId = botStats.asset.toLowerCase();
+let coinId = stats.asset.toLowerCase();
 let price = currentPrices[coinId] || 100;
-let quantity = amount / price;
-let total = amount;
 
-// Add order to orders list
-let order = addOrder(
-botStats.asset,
-isWin ? 'Sell' : 'Buy',
-price,
-quantity,
-total,
-activeBot
-);
+addBotLog(botName, `BUY ORDER: ${stats.asset}/USDT - Amount: $${amount.toFixed(2)}`, 'buy');
+if(profit>=0) addBotLog(botName, `SELL ORDER: +$${profit.toFixed(2)} profit (${result.percent.toFixed(2)}%)`, 'sell-profit');
+else addBotLog(botName, `SELL ORDER: -$${Math.abs(profit).toFixed(2)} loss (${result.percent.toFixed(2)}%)`, 'sell-loss');
 
-addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${amount.toFixed(2)}`,'buy');
-if(profit>=0) addBotLog(`SELL ORDER: +$${profit.toFixed(2)} profit (${result.percent.toFixed(2)}%)`,'sell-profit');
-else addBotLog(`SELL ORDER: -$${Math.abs(profit).toFixed(2)} loss (${result.percent.toFixed(2)}%)`,'sell-loss');
-
-if(isWin) botStats.wins++;
-botStats.totalPL += profit;
-botStats.botBalance += profit;
-botStats.totalTrades++;
-botStats.totalRuns++;
+if(isWin) stats.wins++;
+stats.totalPL += profit;
+stats.botBalance += profit;
+stats.totalTrades++;
+stats.totalRuns++;
 holdings.usdt += profit;
 lastSyncedBalance = holdings.usdt;
+
+// Update the order
+updateOrderPL(botName, profit);
+
 updatePortfolioTotal();
 renderCrypto();
 renderMarketsCrypto();
-await saveUserHoldingsToFirestore();
-addBotLog(`New Balance: $${holdings.usdt.toFixed(2)}`,'info');
-updateBotStatsDisplay();
-
-// Close the order after trade is complete
-if (order) {
-closeOrder(order.id, profit);
-}
+saveUserHoldingsToFirestore();
+addBotLog(botName, `New Balance: $${holdings.usdt.toFixed(2)}`, 'info');
+updateBotStatsDisplay(botName);
 }
 
-function startBotTrading() {
-if(botInterval) clearInterval(botInterval);
-botStats.isRunning = true;
-botStats.isPaused = false;
+function startBotTrading(botName) {
+if (activeBots[botName]) {
+clearInterval(activeBots[botName]);
+delete activeBots[botName];
+}
+let stats = botStatsMap[botName];
+if (!stats) return;
+stats.isRunning = true;
+stats.isPaused = false;
+activeBots[botName] = setInterval(() => { executeBotTrade(botName); }, 4000);
+addBotLog(botName, `Bot started - Trading ${stats.asset}/USDT`, 'info');
+addBotLog(botName, `Investment amount: $${stats.amountPerTrade.toFixed(2)} per trade`, 'info');
+addBotLog(botName, `Trading interval: 4 seconds`, 'info');
 document.getElementById('botDetailStatus').className = 'bot-status-badge running';
 document.getElementById('botDetailStatus').innerHTML = 'Running';
 document.getElementById('startBotBtn').disabled = true;
 document.getElementById('pauseBotBtn').disabled = false;
 document.getElementById('stopBotBtn').disabled = false;
-addBotLog(`Bot started - Trading ${botStats.asset}/USDT`,'info');
-addBotLog(`Investment amount: $${botStats.amountPerTrade.toFixed(2)} per trade`,'info');
-addBotLog(`Trading interval: 4 seconds`,'info');
-botInterval = setInterval(() => { executeBotTrade(); }, 4000);
 }
 
-function pauseBotTrading() {
-if(botStats.isRunning && !botStats.isPaused) {
-botStats.isPaused = true;
+function pauseBotTrading(botName) {
+let stats = botStatsMap[botName];
+if (stats && stats.isRunning && !stats.isPaused) {
+stats.isPaused = true;
+addBotLog(botName, `Bot paused - Trading stopped temporarily`, 'info');
 document.getElementById('botDetailStatus').className = 'bot-status-badge paused';
 document.getElementById('botDetailStatus').innerHTML = 'Paused';
 document.getElementById('startBotBtn').disabled = false;
 document.getElementById('pauseBotBtn').disabled = true;
 document.getElementById('stopBotBtn').disabled = false;
-addBotLog(`Bot paused - Trading stopped temporarily`,'info');
 }
 }
 
-function resumeBotTrading() {
-if(botStats.isRunning && botStats.isPaused) {
-botStats.isPaused = false;
+function resumeBotTrading(botName) {
+let stats = botStatsMap[botName];
+if (stats && stats.isRunning && stats.isPaused) {
+stats.isPaused = false;
+addBotLog(botName, `Bot resumed - Trading active`, 'info');
 document.getElementById('botDetailStatus').className = 'bot-status-badge running';
 document.getElementById('botDetailStatus').innerHTML = 'Running';
 document.getElementById('startBotBtn').disabled = true;
 document.getElementById('pauseBotBtn').disabled = false;
 document.getElementById('stopBotBtn').disabled = false;
-addBotLog(`Bot resumed - Trading active`,'info');
 }
 }
 
-function stopBotTrading() {
-if(botInterval) {
-clearInterval(botInterval);
-botInterval = null;
+function stopBotTrading(botName) {
+if (activeBots[botName]) {
+clearInterval(activeBots[botName]);
+delete activeBots[botName];
 }
-botStats.isRunning = false;
-botStats.isPaused = false;
+let stats = botStatsMap[botName];
+if (stats) {
+stats.isRunning = false;
+stats.isPaused = false;
+addBotLog(botName, `Bot stopped - Final P/L: ${stats.totalPL>=0?'+':''}$${Math.abs(stats.totalPL).toFixed(2)}`, 'info');
+// Close the order
+closeOrderByBotName(botName);
+}
 document.getElementById('botDetailStatus').className = 'bot-status-badge stopped';
 document.getElementById('botDetailStatus').innerHTML = 'Stopped';
 document.getElementById('startBotBtn').disabled = false;
 document.getElementById('pauseBotBtn').disabled = true;
 document.getElementById('stopBotBtn').disabled = true;
-addBotLog(`Bot stopped - Final P/L: ${botStats.totalPL>=0?'+':''}$${Math.abs(botStats.totalPL).toFixed(2)}`,'info');
-let botKey = activeBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
+
+// Update bot card status
+let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
 let botStatusSpan = document.getElementById(`botStatus${botKey}`);
 let botPerfSpan = document.getElementById(`botPerf${botKey}`);
-let configBtn = document.getElementById(`configBtn${botKey}`);
 if(botStatusSpan) {
-botStatusSpan.innerHTML = 'Not Configured';
-botStatusSpan.style.background = 'rgba(229,62,62,0.2)';
-botStatusSpan.style.color = '#e53e3e';
+botStatusSpan.innerHTML = 'Configured';
+botStatusSpan.style.background = 'rgba(72,187,120,0.2)';
+botStatusSpan.style.color = '#48bb78';
 }
-if(botPerfSpan) {
-botPerfSpan.innerHTML = 'Performance: --';
-botPerfSpan.style.color = '#a0a0c0';
-}
-if(configBtn) {
-configBtn.classList.remove('disabled');
-configBtn.title = '';
-}
-activeBot = null;
-lastTradeResult = null;
 }
 
 function controlBotAction(action) {
-if(action === 'start') {
-if(botStats.isPaused) resumeBotTrading();
-else startBotTrading();
-} else if(action === 'pause') pauseBotTrading();
-else if(action === 'stop') stopBotTrading();
+if (action === 'start') {
+if (activeBot) {
+let stats = botStatsMap[activeBot];
+if (stats && stats.isPaused) {
+resumeBotTrading(activeBot);
+} else if (!stats || !stats.isRunning) {
+startBotTrading(activeBot);
+}
+}
+} else if (action === 'pause') {
+if (activeBot) pauseBotTrading(activeBot);
+} else if (action === 'stop') {
+if (activeBot) stopBotTrading(activeBot);
+}
 }
 
 function openConfigModal(botName) {
-// Check if bot has open orders
-let hasOpenOrder = allOrders.some(o => o.botName === botName && (o.status === 'Open' || o.status === 'Pending'));
-if (hasOpenOrder) {
-showCustomModal('Cannot Configure', 'This bot has open orders. Please stop the bot first before reconfiguring.', 'error');
+// Check if there's an existing open order for this bot
+let existingOrder = allOrders.find(o => o.botName === botName && (o.status === 'Open' || o.status === 'Pending'));
+if (existingOrder) {
+showCustomModal('Cannot Configure', 'This bot has an open order. Please stop the bot first before reconfiguring.', 'error');
 return;
 }
 
@@ -2761,14 +2824,13 @@ if(helperText) helperText.innerHTML = 'Minimum: $2 · Maximum: $10,000';
 if(amountInput) amountInput.min = 2; amountInput.max = 10000;
 } else { title.innerHTML = 'Configure Bot'; }
 
-loadBotConfigFromFirestore(botName).then(config => {
+let config = getBotConfig(botName);
 if(config) {
 if(assetSelect) assetSelect.value = config.asset;
 if(amountInput) amountInput.value = config.amount;
 } else {
 if(amountInput) amountInput.value = 100;
 }
-});
 
 if(modal) modal.style.display = 'block';
 }
@@ -2799,13 +2861,19 @@ return;
 }
 
 let config = { asset, amount, configured: true, configuredAt: new Date().toISOString() };
+setBotConfig(currentConfigBot, config);
 await saveBotConfigToFirestore(currentConfigBot, config);
 
 let botKey = currentConfigBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
 let botStatusSpan = document.getElementById(`botStatus${botKey}`);
 let botPerfSpan = document.getElementById(`botPerf${botKey}`);
+let startBtn = document.getElementById(`startBot${botKey}Btn`);
 if(botStatusSpan) { botStatusSpan.innerHTML = 'Configured'; botStatusSpan.style.background = 'rgba(72,187,120,0.2)'; botStatusSpan.style.color = '#48bb78'; }
 if(botPerfSpan) { botPerfSpan.innerHTML = `Performance: $${amount} per trade (${asset})`; botPerfSpan.style.color = '#48bb78'; }
+if(startBtn) {
+startBtn.disabled = false;
+startBtn.classList.remove('disabled');
+}
 hideButtonSpinner(buttonId);
 showCustomModal('Success', `${currentConfigBot} configured!\nAsset: ${asset}\nInvestment: $${amount} per trade`, 'success');
 closeConfigModal();
@@ -2815,12 +2883,28 @@ async function startBotWithSpinner(botName) {
 let buttonId = botName === 'Bitcoin Accumulation' ? 'startBotBitcoinBtn' : 'startBotETHBtn';
 const button = document.getElementById(buttonId);
 if(!button) return;
+
+// Check if bot is configured
+let config = getBotConfig(botName);
+if(!config) {
+showCustomModal('Bot Not Configured', 'Please configure the bot first before starting.', 'error');
+return;
+}
+
+// Check if there's already an open order
+let existingOrder = allOrders.find(o => o.botName === botName && (o.status === 'Open' || o.status === 'Pending'));
+if (existingOrder) {
+showCustomModal('Order Already Open', 'This bot already has an open order. Please view the order from the Orders page.', 'info');
+return;
+}
+
 const originalText = button.innerHTML;
 button.innerHTML = getLogoSpinner();
 button.disabled = true;
 await delay(2000);
 button.innerHTML = originalText;
 button.disabled = false;
+
 showBotDetail(botName);
 }
 
