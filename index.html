@@ -114,8 +114,9 @@ display: none;
 .header-buttons a { color: white; text-decoration: none; font-size: 16px; cursor: pointer; }
 .login-link { color: #a0a0c0; }
 .signup-link { background: linear-gradient(135deg, #667eea, #764ba2); padding: 8px 20px; border-radius: 20px; }
-.hamburger { cursor: pointer; display: flex; flex-direction: column; gap: 5px; z-index: 1002; position: relative; }
+.hamburger { cursor: pointer; display: flex; flex-direction: column; gap: 5px; z-index: 1002; position: relative; padding: 5px; }
 .hamburger span { width: 25px; height: 2px; background: white; transition: 0.3s; border-radius: 2px; }
+.hamburger:hover span { background: #667eea; }
 .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: #0d1129; border-left: 1px solid rgba(255,255,255,0.08); z-index: 2000; transition: 0.3s ease; padding: 80px 20px 20px; display: flex; flex-direction: column; }
 .sidebar.open { right: 0; }
 .sidebar-close { position: absolute; top: 20px; right: 20px; font-size: 28px; cursor: pointer; color: #a0a0c0; background: rgba(255,255,255,0.05); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -895,15 +896,36 @@ function handleChartIconClick() {
     if (botStats && botStats.isRunning) {
         // Bot is active - open Bot Detail page
         if (botStats.botName) {
-            // If we're already on the bot detail page with this bot, just refresh
             showBotDetail(botStats.botName);
         } else {
-            // If bot is running but name isn't set, default to Bitcoin
             showBotDetail('Bitcoin Accumulation');
         }
     } else {
         // No active bot - open Bots configuration page
         showBots();
+    }
+}
+
+// ============ TOGGLE SIDEBAR - FIXED ============
+function toggleSidebar() {
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+    }
+    if (overlay) {
+        overlay.classList.toggle('active');
+    }
+}
+
+function closeSidebar() {
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    if (sidebar) {
+        sidebar.classList.remove('open');
+    }
+    if (overlay) {
+        overlay.classList.remove('active');
     }
 }
 
@@ -2370,7 +2392,6 @@ document.getElementById('stopBotBtn').disabled = false;
 addBotLog(`Bot started - Trading ${botStats.asset}/USDT`,'info');
 addBotLog(`Investment amount: $${botStats.amountPerTrade.toFixed(2)} per trade`,'info');
 addBotLog(`Trading interval: 4 seconds`,'info');
-// Bot interval runs independently in background - will continue even if user navigates away
 botInterval = setInterval(() => { executeBotTrade(); }, 4000);
 }
 
@@ -2425,8 +2446,6 @@ botPerfSpan.style.color = '#a0a0c0';
 }
 activeBot = null;
 lastTradeResult = null;
-// Don't auto-navigate - user can stay on detail page or go elsewhere
-// Bot is stopped but page remains visible so user can start again
 }
 
 function controlBotAction(action) {
