@@ -26,7 +26,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDjv41yKM3ViDPbf9TQmiVKgXKkQn88uZE",
@@ -52,6 +52,8 @@ window.setDoc = setDoc;
 window.getDoc = getDoc;
 window.updateDoc = updateDoc;
 window.arrayUnion = arrayUnion;
+window.collection = collection;
+window.addDoc = addDoc;
 </script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -994,28 +996,18 @@ deposits: window.arrayUnion(deposit)
 } catch(e) { console.log("Error saving deposit:", e); }
 }
 
-async function saveBotConfigToFirestore(botName, config) {
+// ============ NEW: Save bot trade to subcollection ============
+async function saveBotTradeToFirestore(tradeData) {
 if (!currentUser || !currentUser.uid) return;
 try {
 const db = window.firebaseDb;
 const userRef = window.doc(db, 'users', currentUser.uid);
-const fieldName = `botConfig_${botName.replace(/ /g, '_')}`;
-await window.updateDoc(userRef, { [fieldName]: config });
-} catch(e) { console.log("Error saving bot config:", e); }
-}
-
-async function loadBotConfigFromFirestore(botName) {
-if (!currentUser || !currentUser.uid) return null;
-try {
-const db = window.firebaseDb;
-const userRef = window.doc(db, 'users', currentUser.uid);
-const userDoc = await window.getDoc(userRef);
-if (userDoc.exists()) {
-const fieldName = `botConfig_${botName.replace(/ /g, '_')}`;
-return userDoc.data()[fieldName] || null;
-}
-return null;
-} catch(e) { console.log("Error loading bot config:", e); return null; }
+const botTradesRef = window.collection(userRef, 'botTrades');
+await window.addDoc(botTradesRef, {
+...tradeData,
+timestamp: new Date().toISOString()
+});
+} catch(e) { console.log("Error saving bot trade to subcollection:", e); }
 }
 
 async function setPersistence() {
@@ -2210,10 +2202,28 @@ document.getElementById('txId').innerHTML = tx.txId;
 function closeTxModal() { document.getElementById('txDetailModal').style.display = 'none'; currentTxId = null; }
 
 // ============ BOT FUNCTIONS ============
+// Removed bot config save/load functions (no longer using Firestore for bot configs)
+// Bot configs are now stored in localStorage
+
+function getLocalBotConfig(botName) {
+try {
+const key = `botConfig_${botName.replace(/ /g, '_')}`;
+const data = localStorage.getItem(key);
+return data ? JSON.parse(data) : null;
+} catch(e) { return null; }
+}
+
+function setLocalBotConfig(botName, config) {
+try {
+const key = `botConfig_${botName.replace(/ /g, '_')}`;
+localStorage.setItem(key, JSON.stringify(config));
+} catch(e) { console.log("Error saving bot config to localStorage:", e); }
+}
+
 async function loadSavedBotConfigs() {
 let botNames = ['Bitcoin Accumulation', 'ETH DCA Pro'];
 for(let botName of botNames) {
-let config = await loadBotConfigFromFirestore(botName);
+let config = getLocalBotConfig(botName);
 let botKey = botName === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
 let botStatusSpan = document.getElementById(`botStatus${botKey}`);
 let botPerfSpan = document.getElementById(`botPerf${botKey}`);
@@ -2228,7 +2238,7 @@ botPerfSpan.style.color = '#48bb78';
 }
 
 function showBotDetail(botName) {
-loadBotConfigFromFirestore(botName).then(async (savedConfig) => {
+let savedConfig = getLocalBotConfig(botName);
 if(!savedConfig) {
 showCustomModal('Bot Not Configured','Please configure the bot first before starting','error');
 return;
@@ -2272,7 +2282,6 @@ if(plElement) plElement.className = 'stat-value';
 document.getElementById('botsPage').style.display = 'none';
 document.getElementById('botDetailPage').style.display = 'block';
 updateBotStatsDisplay();
-});
 }
 
 function addBotLog(message, type) {
@@ -2400,6 +2409,18 @@ updatePortfolioTotal();
 renderCrypto();
 renderMarketsCrypto();
 await saveUserHoldingsToFirestore();
+
+// ============ NEW: Save trade to Firestore subcollection ============
+await saveBotTradeToFirestore({
+botName: botStats.botName,
+asset: botStats.asset,
+amount: amount,
+profit: profit,
+isWin: isWin,
+profitPercent: result.percent,
+balanceAfter: holdings.usdt
+});
+
 addBotLog(`New Balance: $${holdings.usdt.toFixed(2)}`,'info');
 updateBotStatsDisplay();
 }
@@ -2502,14 +2523,13 @@ if(helperText) helperText.innerHTML = 'Minimum: $2 · Maximum: $10,000';
 if(amountInput) amountInput.min = 2; amountInput.max = 10000;
 } else { title.innerHTML = 'Configure Bot'; }
 
-loadBotConfigFromFirestore(botName).then(config => {
+let config = getLocalBotConfig(botName);
 if(config) {
 if(assetSelect) assetSelect.value = config.asset;
 if(amountInput) amountInput.value = config.amount;
 } else {
 if(amountInput) amountInput.value = 100;
 }
-});
 
 if(modal) modal.style.display = 'block';
 }
@@ -2540,7 +2560,7 @@ return;
 }
 
 let config = { asset, amount, configured: true, configuredAt: new Date().toISOString() };
-await saveBotConfigToFirestore(currentConfigBot, config);
+setLocalBotConfig(currentConfigBot, config);
 
 let botKey = currentConfigBot === 'Bitcoin Accumulation' ? 'Bitcoin' : 'ETH';
 let botStatusSpan = document.getElementById(`botStatus${botKey}`);
