@@ -105,7 +105,7 @@ display: inline-block;
 }
 
 /* Hide all pages initially to prevent flash */
-#homepage, #aboutPage, #authPage, #dashboard, #profilePage, #marketsPage, #tradePage, #botsPage, #botDetailPage, #withdrawalPage, #depositPage, #depositPaymentPage {
+#homepage, #aboutPage, #authPage, #dashboard, #profilePage, #marketsPage, #tradePage, #botsPage, #botDetailPage, #withdrawalPage, #depositPage, #depositPaymentPage, #termsPage {
 display: none;
 }
 
@@ -199,6 +199,7 @@ display: none;
 .input-group input, .input-group select { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-size: 14px; }
 .input-group input:focus, .input-group select:focus { outline: none; border-color: #667eea; }
 .auth-btn { width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 30px; color: white; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .forgot-btn { background: none; border: none; color: #667eea; cursor: pointer; font-size: 14px; margin-top: 15px; text-align: center; width: 100%; }
 .forgot-btn:hover { text-decoration: underline; }
 .custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; }
@@ -229,6 +230,24 @@ display: none;
 
 .btn-loading { opacity: 0.8; cursor: wait !important; pointer-events: none; }
 
+/* Terms Checkbox */
+.terms-checkbox-row { display: flex; align-items: center; gap: 10px; margin-top: 5px; margin-bottom: 15px; }
+.terms-checkbox-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #667eea; cursor: pointer; flex-shrink: 0; }
+.terms-checkbox-row label { font-size: 14px; color: #a0a0c0; cursor: pointer; }
+.terms-checkbox-row a { color: #667eea; text-decoration: underline; cursor: pointer; }
+.terms-checkbox-row a:hover { color: #764ba2; }
+
+/* Terms Page */
+.terms-container { padding: 120px 40px 80px; max-width: 900px; margin: 0 auto; }
+.terms-container h1 { font-size: 36px; margin-bottom: 10px; background: linear-gradient(135deg, #fff, #667eea); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.terms-container .terms-date { color: #a0a0c0; font-size: 14px; margin-bottom: 30px; }
+.terms-container h2 { font-size: 22px; margin-top: 30px; margin-bottom: 10px; color: #667eea; }
+.terms-container p { font-size: 15px; color: #c0c0d0; line-height: 1.7; margin-bottom: 15px; }
+.terms-container ul { padding-left: 25px; margin-bottom: 15px; }
+.terms-container ul li { font-size: 15px; color: #c0c0d0; line-height: 1.7; margin-bottom: 8px; }
+.terms-back-btn { background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 12px 35px; font-size: 16px; font-weight: bold; border-radius: 30px; color: white; cursor: pointer; margin-top: 30px; transition: 0.3s; }
+.terms-back-btn:hover { transform: scale(1.05); }
+
 .dashboard-container { padding: 100px 20px 80px; max-width: 1200px; margin: 0 auto; }
 .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; }
 .date-time { text-align: right; }
@@ -246,7 +265,8 @@ display: none;
 .crypto-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; cursor: pointer; transition: 0.3s; }
 .crypto-item:hover { background: rgba(255,255,255,0.08); transform: translateX(5px); }
 .trade-btn { background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 8px 20px; border-radius: 20px; color: white; cursor: pointer; font-size: 12px; }
-.refresh-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; color: white; cursor: pointer; }
+.refresh-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; color: white; cursor: pointer; transition: 0.3s; }
+.refresh-btn:hover { background: rgba(255,255,255,0.1); }
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1129; display: flex; justify-content: space-around; padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.08); z-index: 1000; }
 .nav-item { text-align: center; cursor: pointer; color: #a0a0c0; font-size: 18px; font-weight: bold; }
 .nav-item.active { color: #667eea; }
@@ -499,6 +519,31 @@ border-radius: 4px;
 .tx-detail-row:last-child { border-bottom: none; }
 .tx-detail-label { color: #a0a0c0; font-size: 14px; font-weight: 500; }
 .tx-detail-value { color: white; font-size: 15px; font-weight: 500; text-align: right; word-break: break-all; max-width: 60%; }
+
+/* View More Button */
+.view-more-box { 
+background: rgba(255,255,255,0.03); 
+border: 1px dashed rgba(102,126,234,0.4); 
+border-radius: 12px; 
+padding: 20px; 
+display: flex; 
+justify-content: center; 
+align-items: center; 
+cursor: pointer; 
+transition: 0.3s; 
+text-align: center; 
+}
+.view-more-box:hover { 
+background: rgba(102,126,234,0.1); 
+border-color: #667eea; 
+transform: translateX(5px); 
+}
+.view-more-box span { 
+color: #667eea; 
+font-size: 16px; 
+font-weight: bold; 
+}
+
 @media (max-width: 768px) {
 .header { padding: 15px 20px; }
 .features-section, .watchlist-section, .why-section, .security-section, .products-section, .faq-section, .footer { padding: 30px 20px; }
@@ -524,6 +569,8 @@ border-radius: 4px;
 .loading-logo { font-size: 40px; }
 .history-table td { font-size: 14px; padding: 14px 8px; }
 .coin-selector { font-size: 14px; padding: 8px 12px; max-width: 180px; }
+.terms-container { padding: 100px 20px 60px; }
+.terms-container h1 { font-size: 28px; }
 }
 </style>
 </head>
@@ -559,7 +606,66 @@ border-radius: 4px;
 <!-- ABOUT PAGE (same content as homepage) -->
 <div id="aboutPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="chart-icon-btn" onclick="handleChartIconClick()" style="padding: 8px 12px;"><div class="chart-icon"><span></span><span></span><span></span></div></div><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="hero"><h1>About BT-EARN</h1><p>Learn more about our AI trading platform</p></div><div class="features-section"><div class="features-grid"><div class="feature-box"><h3>AI Algorithm</h3><p>Analyzes the market in milliseconds</p></div><div class="feature-box"><h3>Custom Settings</h3><p>Adjust risk level, strategies, and more</p></div><div class="feature-box"><h3>Multiple Trading Pairs</h3><p>Supports 200+ trading pairs</p></div><div class="feature-box"><h3>Never misses a trading opportunity</h3><p>24/7 automated trading</p></div></div></div><div class="why-section"><h2>Why BT-EARN?</h2><div class="why-grid"><div class="why-item"><h4>Meet and Copy Trading</h4><p>Copy successful traders automatically</p></div><div class="why-item"><h4>Hold to Maximize Your Asset</h4><p>Earn rewards by holding assets</p></div><div class="why-item"><h4>BT-EARN Staking</h4><p>Stake and earn passive income</p></div></div></div><div class="security-section"><div class="security-grid"><div class="feature-box"><h3>Reliable Security</h3><p>Protect user funds with Fireblocks' security and Chainalysis' real-time monitoring.</p></div><div class="feature-box"><h3>Derivatives Trading</h3><p>Enjoy spots, copy trading, earnings, and API access—all in one platform.</p></div><div class="feature-box"><h3>Stable and Seamless</h3><p>Experience ultra-low latency, fast processing, and stable systems for smooth trading.</p></div><div class="feature-box"><h3>High Performance</h3><p>Benefit from deep liquidity and powerful tools for efficient trade execution.</p></div><div class="feature-box"><h3>Minimum commissions</h3><p>0% deposit fees, low trading commissions, and extra discounts for active traders.</p></div><div class="feature-box"><h3>Smart Trading Tools</h3><p>Deep analytics and charts. Automated trading and AI bots. API support for PRO traders.</p></div></div></div><div class="products-section"><h2>Trading Products</h2><div class="products-grid"><div class="product-card"><h4>Spot</h4><p>Over 200+ coins available. Buy and sell quickly with automatic calculation of average cost and PnL.</p><a href="#" class="learn-more">Learn More →</a></div><div class="product-card"><h4>Futures</h4><p>Supports long/short positions with leverage and profit of up to 125x from market volatilities.</p><a href="#" class="learn-more">Learn More →</a></div><div class="product-card"><h4>Grid Trading</h4><p>Create your personal trading strategy and profit 24/7 with spot grid and futures grid trading.</p><a href="#" class="learn-more">Learn More →</a></div></div></div><div class="faq-section"><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">What products does BT-EARN offer? <span class="plus">+</span></div><div class="faq-answer">BT-EARN offers Spot trading, Futures trading (up to 125x leverage), Grid trading, Copy trading, and Staking services.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How Secure is BT-EARN? <span class="plus">+</span></div><div class="faq-answer">98% of assets are stored in cold wallets. We use multi-level security system, KYC and two-factor authentication (2FA).</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to Buy Bitcoin and Other Cryptocurrencies on BT-EARN? <span class="plus">+</span></div><div class="faq-answer">You can buy crypto via SEPA Transfer, Card Payment, or P2P trading. Go to "Buy Crypto" section to get started.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to Trade Cryptocurrency on BT-EARN? <span class="plus">+</span></div><div class="faq-answer">Deposit funds, go to Spot/Futures market, choose your trading pair, and place your order.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">How to trade using AI Trading? <span class="plus">+</span></div><div class="faq-answer">Enable AI Trading in settings, set your risk level, and let the bot trade automatically for you.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">Registration and Security <span class="plus">+</span></div><div class="faq-answer">Sign up with email, verify identity, enable 2FA for maximum security.</div></div><div class="faq-item"><div class="faq-question" onclick="toggleFAQ(this)">Trading and Fees <span class="plus">+</span></div><div class="faq-answer">0% deposit fees, low trading commissions. Active traders get extra discounts.</div></div></div><div class="footer"><div class="footer-links"><a href="#">About</a><a href="#">Products</a><a href="#">Trade</a><a href="#">Support</a><a href="#">Contact support</a></div><div class="copyright">© 2026 BT-EARN. All rights reserved.</div></div></div>
 
-<div id="authPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div></div><div class="auth-container"><div class="auth-card"><button class="back-btn" onclick="showHomepage()">← Back</button><div class="auth-tabs"><div class="auth-tab active" data-tab="login" id="loginTabBtn">Login</div><div class="auth-tab" data-tab="signup" id="signupTabBtn">Sign Up</div></div><div id="loginForm" class="auth-form active"><h2>Welcome back</h2><p>Enter your credentials to access your account</p><div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div><div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div><button class="auth-btn" id="loginBtn" onclick="handleLoginWithSpinner()">Login</button><button class="forgot-btn" onclick="showCustomModal('Password Reset', 'Password reset link has been sent to your email address.', 'info')">Forgot Password?</button></div><div id="signupForm" class="auth-form"><h2>Create an account</h2><p>Enter your details to create a new account</p><div class="input-group"><label>Full Name</label><input type="text" id="signupName" placeholder="John Doe"></div><div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div><div class="input-group"><label>Country</label><select id="signupCountry"></select></div><div class="input-group"><label>Password</label><input type="password" id="signupPassword" placeholder="Enter your password (min 8 characters)"></div><div class="input-group"><label>Confirm Password</label><input type="password" id="signupConfirmPassword" placeholder="Confirm your password"></div><button class="auth-btn" id="signupBtn" onclick="handleSignupWithSpinner()">Create Account</button></div></div></div></div>
+<!-- TERMS PAGE -->
+<div id="termsPage" style="display:none;">
+<div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div></div>
+<div class="terms-container">
+<h1>Terms and Conditions</h1>
+<p class="terms-date">Last Updated: August 11, 2026</p>
+
+<h2>1. Acceptance of Terms</h2>
+<p>By using BT-EARN ("Platform", "we", "us", "our"), you agree to be bound by these Terms and Conditions. If you do not agree, please do not use our services.</p>
+
+<h2>2. Eligibility</h2>
+<p>You must be at least 18 years old and legally capable of entering into binding contracts to use this Platform. By registering, you confirm that you meet these requirements.</p>
+
+<h2>3. Account Registration</h2>
+<p>You are responsible for maintaining the confidentiality of your account credentials. You agree to provide accurate information during registration and update it as necessary. You are solely responsible for all activities under your account.</p>
+
+<h2>4. Trading and Investments</h2>
+<p>All trading and investment activities carry risk. You acknowledge that past performance does not guarantee future results. You are solely responsible for your trading decisions and any losses incurred.</p>
+
+<h2>5. Deposits and Withdrawals</h2>
+<p>Deposits and withdrawals are processed according to our policies. Minimum deposit is $2. Minimum withdrawal is $3. Withdrawals are subject to review and may be delayed based on security checks.</p>
+
+<h2>6. Fees and Commissions</h2>
+<p>We charge 0% deposit fees and low trading commissions. Active traders may receive additional discounts. All fees are disclosed on our Platform and subject to change with notice.</p>
+
+<h2>7. Intellectual Property</h2>
+<p>All content, logos, trademarks, and software on this Platform are the property of BT-EARN. You may not copy, modify, or distribute any content without our prior written consent.</p>
+
+<h2>8. Privacy and Data Protection</h2>
+<p>We collect and process personal data in accordance with our Privacy Policy. By using this Platform, you consent to such collection and processing.</p>
+
+<h2>9. Prohibited Activities</h2>
+<p>You agree not to engage in any illegal, fraudulent, or harmful activities on the Platform, including but not limited to money laundering, hacking, or market manipulation.</p>
+
+<h2>10. Limitation of Liability</h2>
+<p>BT-EARN is provided "as is" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from the use of our Platform.</p>
+
+<h2>11. Termination</h2>
+<p>We reserve the right to suspend or terminate your account at our discretion, with or without notice, for violation of these Terms or for any other reason.</p>
+
+<h2>12. Changes to Terms</h2>
+<p>We may update these Terms at any time. Continued use of the Platform constitutes acceptance of the revised Terms. Please check this page regularly.</p>
+
+<h2>13. Governing Law</h2>
+<p>These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which BT-EARN operates.</p>
+
+<h2>14. Contact Us</h2>
+<p>If you have any questions about these Terms, please contact us at <a href="mailto:support.bt.earn@gmail.com" style="color:#667eea;">support.bt.earn@gmail.com</a>.</p>
+
+<button class="terms-back-btn" onclick="showAuthPage()">← Back to Sign Up</button>
+</div>
+</div>
+
+<div id="authPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div></div><div class="auth-container"><div class="auth-card"><button class="back-btn" onclick="showHomepage()">← Back</button><div class="auth-tabs"><div class="auth-tab active" data-tab="login" id="loginTabBtn">Login</div><div class="auth-tab" data-tab="signup" id="signupTabBtn">Sign Up</div></div><div id="loginForm" class="auth-form active"><h2>Welcome back</h2><p>Enter your credentials to access your account</p><div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div><div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div><button class="auth-btn" id="loginBtn" onclick="handleLoginWithSpinner()">Login</button><button class="forgot-btn" onclick="showCustomModal('Password Reset', 'Password reset link has been sent to your email address.', 'info')">Forgot Password?</button></div><div id="signupForm" class="auth-form"><h2>Create an account</h2><p>Enter your details to create a new account</p><div class="input-group"><label>Full Name</label><input type="text" id="signupName" placeholder="John Doe"></div><div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div><div class="input-group"><label>Country</label><select id="signupCountry"></select></div><div class="input-group"><label>Password</label><input type="password" id="signupPassword" placeholder="Enter your password (min 8 characters)"></div><div class="input-group"><label>Confirm Password</label><input type="password" id="signupConfirmPassword" placeholder="Confirm your password"></div>
+<!-- Terms Checkbox -->
+<div class="terms-checkbox-row">
+<input type="checkbox" id="termsCheckbox" onchange="toggleSignupButton()">
+<label for="termsCheckbox">I agree to the <a onclick="showTermsPage()">Terms and Conditions</a></label>
+</div>
+<button class="auth-btn" id="signupBtn" onclick="handleSignupWithSpinner()" disabled>Create Account</button></div></div></div></div>
 
 <div id="dashboard" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="chart-icon-btn" onclick="handleChartIconClick()" style="padding: 8px 12px;"><div class="chart-icon"><span></span><span></span><span></span></div></div><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="dashboard-container"><div class="dashboard-header"><h1>Dashboard</h1><div class="date-time" id="dateTimeDisplay"><div class="time">--:--:--</div><div class="date">---</div></div></div><div class="portfolio-card"><h3>REAL PORTFOLIO</h3><div class="portfolio-balance" id="portfolioBalance">$0.00</div><div class="portfolio-change" id="portfolioChange">+0.00%</div><div class="portfolio-buttons"><button class="deposit-btn" onclick="showDepositPage()">Deposit</button><button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button></div></div><div class="section-title">Your Crypto <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div><div id="cryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist</div><div id="watchlistContainer" class="watchlist-scroll"></div><div id="lastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
@@ -891,6 +997,18 @@ const FALLBACK_PRICES = {};
 top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = coin.symbol === 'BTC' ? 73786 : (coin.symbol === 'ETH' ? 2022 : (coin.symbol === 'USDT' ? 1 : (coin.symbol === 'BNB' ? 580 : (coin.symbol === 'SOL' ? 145 : 10 + Math.random() * 100)))); FALLBACK_PRICES[coin.id+'Change'] = (Math.random() - 0.5) * 8; });
 currentPrices = { ...FALLBACK_PRICES };
 
+// ============ TERMS PAGE FUNCTIONS ============
+function showTermsPage() {
+document.getElementById('authPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'block';
+}
+
+function toggleSignupButton() {
+const checkbox = document.getElementById('termsCheckbox');
+const signupBtn = document.getElementById('signupBtn');
+signupBtn.disabled = !checkbox.checked;
+}
+
 // ============ NEW: CHART ICON CLICK HANDLER ============
 function handleChartIconClick() {
     // Check if there's an active bot running (either running or paused)
@@ -942,6 +1060,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 }
 
 function showChatSupportModal() {
@@ -1035,6 +1154,14 @@ if(!name || !email || !country) { hideButtonSpinner(buttonId); showCustomModal('
 if(!email.includes('@')) { hideButtonSpinner(buttonId); showCustomModal('Invalid Email', 'Email must contain @', 'error'); return; }
 if(password.length < 8) { hideButtonSpinner(buttonId); showCustomModal('Invalid Password', 'Min 8 characters', 'error'); return; }
 if(password !== confirm) { hideButtonSpinner(buttonId); showCustomModal('Password Mismatch', 'Passwords do not match', 'error'); return; }
+
+// Check Terms checkbox
+const termsCheckbox = document.getElementById('termsCheckbox');
+if (!termsCheckbox.checked) {
+hideButtonSpinner(buttonId);
+showCustomModal('Terms Required', 'Please agree to the Terms and Conditions to create an account.', 'error');
+return;
+}
 
 try {
 const auth = window.firebaseAuth;
@@ -1151,7 +1278,8 @@ await saveDepositToFirestore(newDeposit);
 deposits.push(newDeposit);
 renderDepositHistory();
 
-showCustomModal('Deposit Detected', `$${difference.toFixed(2)} USDT has been added to your balance.`, 'success');
+// CHANGED: "Deposit Detected" → "Deposit Successfully"
+showCustomModal('Deposit Successfully', `$${difference.toFixed(2)} USDT has been added to your balance.`, 'success');
 
 holdings.usdt = currentFirestoreBalance;
 lastSyncedBalance = currentFirestoreBalance;
@@ -1371,6 +1499,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 }
 
 function showAuthPage() {
@@ -1386,6 +1515,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 populateCountries();
 document.getElementById('signupName').value = '';
 document.getElementById('signupEmail').value = '';
@@ -1393,6 +1523,8 @@ document.getElementById('signupPassword').value = '';
 document.getElementById('signupConfirmPassword').value = '';
 document.getElementById('loginEmail').value = '';
 document.getElementById('loginPassword').value = '';
+document.getElementById('termsCheckbox').checked = false;
+document.getElementById('signupBtn').disabled = true;
 }
 
 function showDashboard() {
@@ -1409,6 +1541,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 loadDashboard();
 }
 
@@ -1426,6 +1559,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 renderProfile();
 }
 
@@ -1443,6 +1577,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 loadMarketsPage();
 }
 
@@ -1461,6 +1596,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 loadTradePage();
 }
 
@@ -1478,6 +1614,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 loadSavedBotConfigs();
 }
 
@@ -1494,6 +1631,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'block';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 selectDepositAsset('USDT');
 document.getElementById('depositAmount').value = '';
 renderDepositHistory();
@@ -1513,6 +1651,7 @@ document.getElementById('botDetailPage').style.display = 'none';
 document.getElementById('withdrawalPage').style.display = 'block';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
 if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
 renderWithdrawalHistory();
 }
@@ -1542,14 +1681,20 @@ updatePortfolioTotal();
 updateLastUpdatedText();
 }
 
+// ============ UPDATED WATCHLIST: Only BTC, ETH, BNB, SOL ============
 function renderWatchlist() {
+const watchlistSymbols = ['BTC', 'ETH', 'BNB', 'SOL'];
 let html = '';
-for(let coin of top200Coins) {
+for(let symbol of watchlistSymbols) {
+let coin = top200Coins.find(c => c.symbol === symbol);
+if(!coin) continue;
 let price = currentPrices[coin.id] || FALLBACK_PRICES[coin.id];
 let change = currentPrices[coin.id+'Change'] || FALLBACK_PRICES[coin.id+'Change'];
 let changeClass = change >= 0 ? 'positive' : 'negative';
 html += `<div class="watchlist-item clickable" onclick="showTrade('${coin.symbol}')"><div class="coin-info"><h4>${coin.symbol}</h4><p>${coin.name}</p></div><div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div></div>`;
 }
+// Add View More button
+html += `<div class="view-more-box" onclick="showMarkets()"><span>View More →</span></div>`;
 let container = document.getElementById('watchlistContainer');
 if(container) container.innerHTML = html;
 }
@@ -1587,6 +1732,7 @@ renderMarketsWatchlist();
 updateMarketsLastUpdatedText();
 }
 
+// ============ MARKETS WATCHLIST: All 200 coins ============
 function renderMarketsWatchlist() {
 let html = '';
 for(let coin of top200Coins) {
