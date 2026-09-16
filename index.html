@@ -26,7 +26,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, arrayUnion, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyDjv41yKM3ViDPbf9TQmiVKgXKkQn88uZE",
@@ -51,6 +51,7 @@ window.doc = doc;
 window.setDoc = setDoc;
 window.getDoc = getDoc;
 window.updateDoc = updateDoc;
+window.deleteDoc = deleteDoc;
 window.arrayUnion = arrayUnion;
 window.collection = collection;
 window.addDoc = addDoc;
@@ -1678,6 +1679,42 @@ withdrawals: [],
 deposits: [],
 createdAt: new Date().toISOString()
 });
+
+// ====== NEW: Register user in MongoDB via backend ======
+try {
+const apiRes = await fetch('https://api.bt-earn.xyz/api/auth/register', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+name: name,
+email: email,
+country: country,
+firebaseUid: user.uid
+})
+});
+
+const apiData = await apiRes.json().catch(() => ({}));
+
+if (!apiRes.ok) {
+// Roll back Firebase user so email isn't orphaned
+try { await user.delete(); } catch (delErr) { console.log('Rollback delete failed:', delErr); }
+try { await window.deleteDoc(userRef); } catch (delErr) { console.log('Firestore rollback failed:', delErr); }
+
+hideButtonSpinner(buttonId);
+showCustomModal('Signup Failed', apiData.message || apiData.error || 'Backend registration failed. Please try again.', 'error');
+return;
+}
+} catch (backendErr) {
+console.error('Backend register error:', backendErr);
+// Roll back Firebase user
+try { await user.delete(); } catch (delErr) { console.log('Rollback delete failed:', delErr); }
+try { await window.deleteDoc(userRef); } catch (delErr) { console.log('Firestore rollback failed:', delErr); }
+
+hideButtonSpinner(buttonId);
+showCustomModal('Signup Failed', 'Could not reach server. Please check your connection and try again.', 'error');
+return;
+}
+// ====== END NEW ======
 
 holdings = { usdt: 0.00 };
 withdrawals = [];
