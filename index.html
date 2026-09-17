@@ -1185,6 +1185,10 @@ font-weight: bold;
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
+// ============ GLOBAL CONFIG ============
+const API_BASE_URL = 'https://api.bt-earn.xyz';
+const USE_MONGODB_PRIMARY = true; // Set to false to revert to Firestore-only mode
+
 // ============ TOP 200 COINS LIST ============
 const top200Coins = [
 { symbol: "BTC", name: "Bitcoin", id: "bitcoin" },
@@ -1477,7 +1481,6 @@ function verifyBotAccess() {
     }
 }
 
-// REPLACE YOUR EXISTING showBots() FUNCTION WITH THIS:
 function showBots() {
     if (!currentUser) { 
         showAuthPage(); 
@@ -1492,7 +1495,6 @@ function showBots() {
     openBotAccessModal();
 }
 
-// NEW FUNCTION: Render the actual bots page content
 function renderBotsPage() {
     document.getElementById('homepage').style.display = 'none';
     document.getElementById('aboutPage').style.display = 'none';
@@ -1682,7 +1684,7 @@ createdAt: new Date().toISOString()
 
 // ====== NEW: Register user in MongoDB via backend ======
 try {
-const apiRes = await fetch('https://api.bt-earn.xyz/api/auth/register', {
+const apiRes = await fetch(`${API_BASE_URL}/api/auth/register`, {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({
@@ -1733,112 +1735,139 @@ showCustomModal('Signup Failed', errorMsg, 'error');
 }
 
 async function handleLoginWithSpinner() {
-const buttonId = 'loginBtn';
-showButtonSpinner(buttonId, 'Login');
-await setPersistence();
-await delay(2000);
+    const buttonId = 'loginBtn';
+    showButtonSpinner(buttonId, 'Login');
+    await setPersistence();
+    await delay(2000);
 
-let email = document.getElementById('loginEmail').value;
-let password = document.getElementById('loginPassword').value;
+    let email = document.getElementById('loginEmail').value;
+    let password = document.getElementById('loginPassword').value;
 
-if(!email.includes('@')) { hideButtonSpinner(buttonId); showCustomModal('Invalid Email', 'Valid email required', 'error'); return; }
-if(password.length < 8) { hideButtonSpinner(buttonId); showCustomModal('Invalid Password', 'Min 8 characters', 'error'); return; }
+    if(!email.includes('@')) { hideButtonSpinner(buttonId); showCustomModal('Invalid Email', 'Valid email required', 'error'); return; }
+    if(password.length < 8) { hideButtonSpinner(buttonId); showCustomModal('Invalid Password', 'Min 8 characters', 'error'); return; }
 
-try {
-const auth = window.firebaseAuth;
-const userCredential = await window.signInWithEmailAndPassword(auth, email, password);
-const user = userCredential.user;
+    try {
+        const auth = window.firebaseAuth;
+        const userCredential = await window.signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-const db = window.firebaseDb;
-const userRef = window.doc(db, 'users', user.uid);
-const userDoc = await window.getDoc(userRef);
+        // === PHASE 2B: Log login to MongoDB ===
+        try {
+            await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ firebaseUid: user.uid, email: user.email })
+            });
+            console.log("📡 Login logged to MongoDB");
+        } catch (backendErr) {
+            console.error('⚠️ Backend login log failed (Firebase still logged in):', backendErr);
+        }
 
-if (userDoc.exists()) {
-const userData = userDoc.data();
-holdings = userData.holdings || { usdt: 0.00 };
-withdrawals = userData.withdrawals || [];
-deposits = userData.deposits || [];
-currentUser = { uid: user.uid, name: userData.name, email: user.email };
-} else {
-holdings = { usdt: 0.00 };
-withdrawals = [];
-deposits = [];
-currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
+        // === PHASE 2A: Fetch fresh data from MongoDB ===
+        const meRes = await fetch(`${API_BASE_URL}/api/auth/me?firebaseUid=${encodeURIComponent(user.uid)}`);
+        const meData = await meRes.json().catch(() => ({}));
+
+        if (meRes.ok && meData && meData.success && meData.user) {
+            console.log("📡 Loaded user data from MongoDB after login");
+            const u = meData.user;
+            holdings = {
+                usdt: (u.wallets && u.wallets.usdt) || u.balance || 0,
+                btc: (u.wallets && u.wallets.btc) || 0,
+                eth: (u.wallets && u.wallets.eth) || 0,
+                ngn: (u.wallets && u.wallets.ngn) || 0
+            };
+            withdrawals = u.withdrawals || [];
+            deposits = u.deposits || [];
+            currentUser = { uid: user.uid, name: u.name || user.email, email: user.email };
+        } else {
+            // Fallback to Firestore
+            const db = window.firebaseDb;
+            const userRef = window.doc(db, 'users', user.uid);
+            const userDoc = await window.getDoc(userRef);
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                holdings = userData.holdings || { usdt: 0.00 };
+                withdrawals = userData.withdrawals || [];
+                deposits = userData.deposits || [];
+                currentUser = { uid: user.uid, name: userData.name, email: user.email };
+            } else {
+                holdings = { usdt: 0.00 };
+                withdrawals = [];
+                deposits = [];
+                currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
+            }
+        }
+
+        lastSyncedBalance = holdings.usdt;
+        hideButtonSpinner(buttonId);
+        showCustomModal('Success', 'Logged in successfully!', 'success');
+        showDashboard();
+    } catch (error) {
+        hideButtonSpinner(buttonId);
+        showCustomModal('Login Failed', 'Invalid email or password.', 'error');
+    }
 }
 
-lastSyncedBalance = holdings.usdt;
-
-hideButtonSpinner(buttonId);
-showCustomModal('Success', 'Logged in successfully!', 'success');
-showDashboard();
-} catch (error) {
-hideButtonSpinner(buttonId);
-showCustomModal('Login Failed', 'Invalid email or password.', 'error');
-}
-}
-
-// ============ AUTO DEPOSIT DETECTION ============
+// ============ PHASE 2A: AUTO DEPOSIT DETECTION VIA MONGODB ============
 async function autoDetectDeposits() {
-if (!currentUser || !currentUser.uid) return;
+    if (!currentUser || !currentUser.uid || !USE_MONGODB_PRIMARY) return;
 
-try {
-const db = window.firebaseDb;
-const userRef = window.doc(db, 'users', currentUser.uid);
-const userDoc = await window.getDoc(userRef);
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/me?firebaseUid=${encodeURIComponent(currentUser.uid)}`);
+        const data = await res.json().catch(() => ({}));
 
-if (userDoc.exists()) {
-const userData = userDoc.data();
-const currentFirestoreBalance = userData.holdings?.usdt || 0;
-const cachedBalance = lastSyncedBalance;
+        if (!res.ok || !data || !data.success || !data.user) return;
 
-if (currentFirestoreBalance > cachedBalance + 0.005) {
-const difference = currentFirestoreBalance - cachedBalance;
-console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentFirestoreBalance.toFixed(2)} (diff: $${difference.toFixed(2)})`);
+        const u = data.user;
+        const currentMongoBalance = (u.wallets && u.wallets.usdt) || u.balance || 0;
+        const cachedBalance = lastSyncedBalance;
 
-const isWholeDollar = difference % 1 === 0;
-const isAtLeastTwo = difference >= 2;
+        // Detect increase in balance
+        if (currentMongoBalance > cachedBalance + 0.01) {
+            const difference = currentMongoBalance - cachedBalance;
+            console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentMongoBalance.toFixed(2)} (diff: $${difference.toFixed(2)})`);
 
-if (isWholeDollar && isAtLeastTwo) {
-const newDeposit = {
-id: Date.now(),
-amount: difference,
-asset: 'USDT',
-address: 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj',
-network: 'TRC20',
-status: 'Completed',
-dateTime: new Date().toLocaleString(),
-txId: 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
-};
+            const isWholeDollar = Math.abs(difference % 1) < 0.01;
+            const isAtLeastTwo = difference >= 2;
 
-await saveDepositToFirestore(newDeposit);
-deposits.push(newDeposit);
-renderDepositHistory();
+            if (isWholeDollar && isAtLeastTwo) {
+                const newDeposit = {
+                    id: Date.now(),
+                    amount: difference,
+                    asset: 'USDT',
+                    address: 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj',
+                    network: 'TRC20',
+                    status: 'Completed',
+                    dateTime: new Date().toLocaleString(),
+                    txId: 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
+                };
 
-showCustomModal('Deposit Successfully', `$${difference.toFixed(2)} USDT has been added to your balance.`, 'success');
+                await saveDepositToFirestore(newDeposit);
+                deposits.push(newDeposit);
+                
+                if (document.getElementById('depositPage').style.display === 'block') {
+                    renderDepositHistory();
+                }
 
-holdings.usdt = currentFirestoreBalance;
-lastSyncedBalance = currentFirestoreBalance;
-} else {
-holdings.usdt = currentFirestoreBalance;
-lastSyncedBalance = currentFirestoreBalance;
-}
-} else if (Math.abs(currentFirestoreBalance - cachedBalance) > 0.01) {
-holdings.usdt = currentFirestoreBalance;
-lastSyncedBalance = currentFirestoreBalance;
-} else {
-if (Math.abs(holdings.usdt - currentFirestoreBalance) > 0.01) {
-holdings.usdt = currentFirestoreBalance;
-lastSyncedBalance = currentFirestoreBalance;
-}
-}
+                showCustomModal('Deposit Successfully', `$${difference.toFixed(2)} USDT has been added to your balance.`, 'success');
+            }
+        }
 
-updatePortfolioTotal();
-renderCrypto();
-renderMarketsCrypto();
-}
-} catch(e) {
-console.log("Error auto-detecting deposit:", e);
-}
+        // Sync local state from MongoDB data
+        holdings.usdt = currentMongoBalance;
+        if (u.wallets) {
+            holdings.btc = u.wallets.btc || 0;
+            holdings.eth = u.wallets.eth || 0;
+            holdings.ngn = u.wallets.ngn || 0;
+        }
+        lastSyncedBalance = currentMongoBalance;
+
+        updatePortfolioTotal();
+        renderCrypto();
+        renderMarketsCrypto();
+    } catch (e) {
+        console.log("Error auto-detecting deposit (API might be down):", e);
+    }
 }
 
 async function logoutWithSpinner() {
@@ -1863,41 +1892,66 @@ async function logoutWithSpinner() {
     showHomepage();
 }
 
+// ============ PHASE 2A: CHECK EXISTING SESSION VIA MONGODB ============
 async function checkExistingSession() {
-const auth = window.firebaseAuth;
-const db = window.firebaseDb;
+    const auth = window.firebaseAuth;
+    const db = window.firebaseDb;
 
-return new Promise((resolve) => {
-window.onAuthStateChanged(auth, async (user) => {
-if (user) {
-try {
-const userRef = window.doc(db, 'users', user.uid);
-const userDoc = await window.getDoc(userRef);
+    return new Promise((resolve) => {
+        window.onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/auth/me?firebaseUid=${encodeURIComponent(user.uid)}`);
+                    const data = await res.json().catch(() => ({}));
 
-if (userDoc.exists()) {
-const userData = userDoc.data();
-holdings = userData.holdings || { usdt: 0.00 };
-withdrawals = userData.withdrawals || [];
-deposits = userData.deposits || [];
-currentUser = { uid: user.uid, name: userData.name, email: user.email };
-} else {
-holdings = { usdt: 0.00 };
-withdrawals = [];
-deposits = [];
-currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
-}
-lastSyncedBalance = holdings.usdt;
-showDashboard();
-} catch(e) {
-console.log("Error loading user data:", e);
-showHomepage();
-}
-} else {
-showHomepage();
-}
-resolve();
-});
-});
+                    if (res.ok && data && data.success && data.user) {
+                        console.log("📡 Loaded user data from MongoDB");
+                        const u = data.user;
+                        holdings = {
+                            usdt: (u.wallets && u.wallets.usdt) || u.balance || 0,
+                            btc: (u.wallets && u.wallets.btc) || 0,
+                            eth: (u.wallets && u.wallets.eth) || 0,
+                            ngn: (u.wallets && u.wallets.ngn) || 0
+                        };
+                        withdrawals = u.withdrawals || [];
+                        deposits = u.deposits || [];
+                        currentUser = { uid: user.uid, name: u.name || user.email, email: user.email };
+                        lastSyncedBalance = holdings.usdt;
+                        showDashboard();
+                        return;
+                    }
+                } catch (mongoError) {
+                    console.warn("⚠️ MongoDB fetch failed, falling back to Firestore:", mongoError);
+                }
+
+                // Fallback to Firestore if MongoDB fails
+                try {
+                    const userRef = window.doc(db, 'users', user.uid);
+                    const userDoc = await window.getDoc(userRef);
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        holdings = userData.holdings || { usdt: 0.00 };
+                        withdrawals = userData.withdrawals || [];
+                        deposits = userData.deposits || [];
+                        currentUser = { uid: user.uid, name: userData.name, email: user.email };
+                    } else {
+                        holdings = { usdt: 0.00 };
+                        withdrawals = [];
+                        deposits = [];
+                        currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
+                    }
+                    lastSyncedBalance = holdings.usdt;
+                    showDashboard();
+                } catch (e) {
+                    console.log("Error loading user data from Firestore:", e);
+                    showHomepage();
+                }
+            } else {
+                showHomepage();
+            }
+            resolve();
+        });
+    });
 }
 
 function selectDepositAsset(asset) {
@@ -1928,88 +1982,96 @@ checkUSDT.innerHTML = '';
 }
 }
 
+// ============ PHASE 2D: RECORD DEPOSIT INTENT IN MONGODB ============
 async function processDepositToPayment() {
-const buttonId = 'depositPayBtn';
-showButtonSpinner(buttonId, 'Pay');
-await delay(2000);
+    const buttonId = 'depositPayBtn';
+    showButtonSpinner(buttonId, 'Pay');
+    await delay(2000);
 
-const amount = parseFloat(document.getElementById('depositAmount').value);
-if (isNaN(amount) || amount < 2) {
-hideButtonSpinner(buttonId);
-showCustomModal('Invalid Amount', 'Minimum deposit is $2', 'error');
-return;
-}
+    const amount = parseFloat(document.getElementById('depositAmount').value);
+    if (isNaN(amount) || amount < 2) {
+        hideButtonSpinner(buttonId);
+        showCustomModal('Invalid Amount', 'Minimum deposit is $2', 'error');
+        return;
+    }
 
-let address = '';
-let title = '';
-let network = '';
+    let address = '';
+    let title = '';
+    let network = '';
 
-if (selectedDepositAsset === 'USDT') {
-address = 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj';
-title = 'Deposit with USDT';
-network = 'Network: TRON (TRC20)';
-} else {
-address = '1HpuFKWciiek3QxLtSY8D2oX2npLc8jZ5T';
-title = 'Deposit with BTC';
-network = 'Network: BTC Network';
-}
+    if (selectedDepositAsset === 'USDT') {
+        address = 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj';
+        title = 'Deposit with USDT';
+        network = 'Network: TRON (TRC20)';
+    } else {
+        address = '1HpuFKWciiek3QxLtSY8D2oX2npLc8jZ5T';
+        title = 'Deposit with BTC';
+        network = 'Network: BTC Network';
+    }
 
-document.getElementById('paymentTitle').innerHTML = title;
-document.getElementById('paymentNetwork').innerHTML = network;
-document.getElementById('paymentWalletAddress').innerHTML = address;
+    // === PHASE 2D: Send deposit intent to MongoDB ===
+    try {
+        await fetch(`${API_BASE_URL}/api/auth/deposit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                firebaseUid: currentUser.uid,
+                amount: amount,
+                asset: selectedDepositAsset,
+                address: address,
+                network: network
+            })
+        });
+        console.log("📡 Deposit intent sent to MongoDB");
+    } catch (backendErr) {
+        console.error('⚠️ Backend deposit log failed:', backendErr);
+    }
 
-const canvas = document.getElementById('paymentQrCanvas');
-const ctx = canvas.getContext('2d');
-ctx.fillStyle = '#ffffff';
-ctx.fillRect(0, 0, 200, 200);
+    document.getElementById('paymentTitle').innerHTML = title;
+    document.getElementById('paymentNetwork').innerHTML = network;
+    document.getElementById('paymentWalletAddress').innerHTML = address;
 
-if (typeof QRCode !== 'undefined') {
-try {
-if (currentPaymentQr) currentPaymentQr.clear();
-currentPaymentQr = new QRCode(canvas, {
-text: address,
-width: 200,
-height: 200,
-colorDark: "#000000",
-colorLight: "#ffffff",
-correctLevel: QRCode.CorrectLevel.H
-});
-} catch(e) {
-ctx.fillStyle = '#fff';
-ctx.fillRect(0, 0, 200, 200);
-ctx.fillStyle = '#000';
-ctx.font = '12px Arial';
-ctx.fillText('QR Code', 70, 100);
-ctx.fillText(address.substring(0, 20)+'...', 20, 140);
-}
-} else {
-ctx.fillStyle = '#fff';
-ctx.fillRect(0, 0, 200, 200);
-ctx.fillStyle = '#000';
-ctx.font = '12px Arial';
-ctx.fillText('QR Code', 70, 100);
-ctx.fillText(address.substring(0, 20)+'...', 20, 140);
-}
+    const canvas = document.getElementById('paymentQrCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 200, 200);
 
-const copyBtn = document.getElementById('paymentCopyBtn');
-const originalText = copyBtn.innerHTML;
-copyBtn.onclick = function() {
-navigator.clipboard.writeText(address).then(() => {
-copyBtn.innerHTML = 'Copied!';
-setTimeout(() => {
-copyBtn.innerHTML = originalText;
-}, 1000);
-}).catch(() => {
-copyBtn.innerHTML = 'Failed!';
-setTimeout(() => {
-copyBtn.innerHTML = originalText;
-}, 1000);
-});
-};
+    if (typeof QRCode !== 'undefined') {
+        try {
+            if (currentPaymentQr) currentPaymentQr.clear();
+            currentPaymentQr = new QRCode(canvas, {
+                text: address,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        } catch(e) {
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, 200, 200);
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('QR Code', 70, 100);
+            ctx.fillText(address.substring(0, 20)+'...', 20, 140);
+        }
+    }
 
-document.getElementById('depositPage').style.display = 'none';
-document.getElementById('depositPaymentPage').style.display = 'block';
-hideButtonSpinner(buttonId);
+    const copyBtn = document.getElementById('paymentCopyBtn');
+    const originalText = copyBtn.innerHTML;
+    copyBtn.onclick = function() {
+        navigator.clipboard.writeText(address).then(() => {
+            copyBtn.innerHTML = 'Copied!';
+            setTimeout(() => { copyBtn.innerHTML = originalText; }, 1000);
+        }).catch(() => {
+            copyBtn.innerHTML = 'Failed!';
+            setTimeout(() => { copyBtn.innerHTML = originalText; }, 1000);
+        });
+    };
+
+    document.getElementById('depositPage').style.display = 'none';
+    document.getElementById('depositPaymentPage').style.display = 'block';
+    hideButtonSpinner(buttonId);
 }
 
 function goBackToDepositPage() {
@@ -2134,37 +2196,6 @@ document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
 loadTradePage();
-}
-
-function showBots() {
-    if (!currentUser) { 
-        showAuthPage(); 
-        return; 
-    }
-    
-    if (botAccessGranted) {
-        renderBotsPage();
-        return;
-    }
-    
-    openBotAccessModal();
-}
-
-function renderBotsPage() {
-    document.getElementById('homepage').style.display = 'none';
-    document.getElementById('aboutPage').style.display = 'none';
-    document.getElementById('authPage').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('profilePage').style.display = 'none';
-    document.getElementById('marketsPage').style.display = 'none';
-    document.getElementById('tradePage').style.display = 'none';
-    document.getElementById('botsPage').style.display = 'block';
-    document.getElementById('botDetailPage').style.display = 'none';
-    document.getElementById('withdrawalPage').style.display = 'none';
-    document.getElementById('depositPage').style.display = 'none';
-    document.getElementById('depositPaymentPage').style.display = 'none';
-    document.getElementById('termsPage').style.display = 'none';
-    loadSavedBotConfigs();
 }
 
 function showDepositPage() {
@@ -2975,58 +3006,79 @@ tbody.innerHTML = html;
 
 function generateTxId() { return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase(); }
 
+// ============ PHASE 2C: RECORD WITHDRAWALS IN MONGODB ============
 async function submitWithdrawalWithSpinner() {
-const buttonId = 'withdrawBtn';
-showButtonSpinner(buttonId, 'Withdraw');
-await delay(2000);
-let amount = parseFloat(document.getElementById('withdrawAmount').value);
-let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
-let address = document.getElementById('walletAddress').value;
-if(isNaN(amount) || amount < 3) { hideButtonSpinner(buttonId); showCustomModal('Invalid Amount', 'Minimum withdrawal is $3', 'error'); return; }
-if(!address || address.length < 10) { hideButtonSpinner(buttonId); showCustomModal('Invalid Address', 'Valid address required', 'error'); return; }
-if(amount > holdings.usdt) { hideButtonSpinner(buttonId); showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)}`, 'error'); return; }
+    const buttonId = 'withdrawBtn';
+    showButtonSpinner(buttonId, 'Withdraw');
+    await delay(2000);
+    let amount = parseFloat(document.getElementById('withdrawAmount').value);
+    let asset = document.querySelector('.asset-option.active').getAttribute('data-asset');
+    let address = document.getElementById('walletAddress').value;
+    if(isNaN(amount) || amount < 3) { hideButtonSpinner(buttonId); showCustomModal('Invalid Amount', 'Minimum withdrawal is $3', 'error'); return; }
+    if(!address || address.length < 10) { hideButtonSpinner(buttonId); showCustomModal('Invalid Address', 'Valid address required', 'error'); return; }
+    if(amount > holdings.usdt) { hideButtonSpinner(buttonId); showCustomModal('Insufficient Balance', `You have $${holdings.usdt.toFixed(2)}`, 'error'); return; }
 
-let txId = generateTxId();
-let fee = 0.20;
-let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'TRC20', fee: fee, txId, status: 'Pending', dateTime: new Date().toLocaleString() };
+    let txId = generateTxId();
+    let fee = 0.20;
+    let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'TRC20', fee: fee, txId, status: 'Pending', dateTime: new Date().toLocaleString() };
 
-withdrawals.push(withdrawal);
-holdings.usdt -= amount;
+    withdrawals.push(withdrawal);
+    holdings.usdt -= amount;
+    lastSyncedBalance = holdings.usdt;
 
-await saveWithdrawalToFirestore(withdrawal);
-await saveUserHoldingsToFirestore();
+    // Save to Firestore (Legacy Backup)
+    await saveWithdrawalToFirestore(withdrawal);
+    await saveUserHoldingsToFirestore();
 
-lastSyncedBalance = holdings.usdt;
+    // === PHASE 2C: Save to MongoDB ===
+    try {
+        await fetch(`${API_BASE_URL}/api/auth/withdraw`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                firebaseUid: currentUser.uid,
+                amount: amount,
+                asset: asset,
+                address: address,
+                network: withdrawal.network,
+                txId: txId,
+                fee: fee
+            })
+        });
+        console.log("📡 Withdrawal sent to MongoDB");
+    } catch (backendErr) {
+        console.error('⚠️ Backend withdrawal log failed:', backendErr);
+    }
 
-renderWithdrawalHistory();
-document.getElementById('withdrawAmount').value = '';
-document.getElementById('walletAddress').value = '';
-if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
-hideButtonSpinner(buttonId);
-showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted. Fee: $0.20`, 'success');
+    renderWithdrawalHistory();
+    document.getElementById('withdrawAmount').value = '';
+    document.getElementById('walletAddress').value = '';
+    if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
+    hideButtonSpinner(buttonId);
+    showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted. Fee: $0.20`, 'success');
 
-setTimeout(async () => {
-try {
-let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
-if(idx !== -1 && withdrawals[idx].status === 'Pending') {
-withdrawals[idx].status = 'Approved';
-const db = window.firebaseDb;
-const userRef = window.doc(db, 'users', currentUser.uid);
-const userDoc = await window.getDoc(userRef);
-if(userDoc.exists()) {
-const currentWithdrawals = userDoc.data().withdrawals || [];
-const updatedWithdrawals = currentWithdrawals.map(w => w.id === withdrawal.id ? {...w, status: 'Approved'} : w);
-await window.updateDoc(userRef, { withdrawals: updatedWithdrawals });
-renderWithdrawalHistory();
-if(document.getElementById('txDetailModal').style.display === 'block' && currentTxId === withdrawal.id) { 
-updateTxModal(withdrawals[idx]); 
-}
-}
-}
-} catch(e) {
-console.log("Error approving withdrawal:", e);
-}
-}, 30000);
+    setTimeout(async () => {
+        try {
+            let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
+            if(idx !== -1 && withdrawals[idx].status === 'Pending') {
+                withdrawals[idx].status = 'Approved';
+                const db = window.firebaseDb;
+                const userRef = window.doc(db, 'users', currentUser.uid);
+                const userDoc = await window.getDoc(userRef);
+                if(userDoc.exists()) {
+                    const currentWithdrawals = userDoc.data().withdrawals || [];
+                    const updatedWithdrawals = currentWithdrawals.map(w => w.id === withdrawal.id ? {...w, status: 'Approved'} : w);
+                    await window.updateDoc(userRef, { withdrawals: updatedWithdrawals });
+                    renderWithdrawalHistory();
+                    if(document.getElementById('txDetailModal').style.display === 'block' && currentTxId === withdrawal.id) { 
+                        updateTxModal(withdrawals[idx]); 
+                    }
+                }
+            }
+        } catch(e) {
+            console.log("Error approving withdrawal:", e);
+        }
+    }, 30000);
 }
 
 function showTransactionDetails(id) {
