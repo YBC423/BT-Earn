@@ -1189,6 +1189,19 @@ font-weight: bold;
 const API_BASE_URL = 'https://api.bt-earn.xyz';
 const USE_MONGODB_PRIMARY = true;
 
+// ============ AUTHENTICATED FETCH HELPER ============
+async function authFetch(url, options = {}) {
+    if (!window.firebaseAuth || !window.firebaseAuth.currentUser) {
+        throw new Error("Not authenticated - no current user");
+    }
+    const token = await window.firebaseAuth.currentUser.getIdToken();
+    const headers = {
+        ...(options.headers || {}),
+        'Authorization': `Bearer ${token}`
+    };
+    return fetch(url, { ...options, headers });
+}
+
 // ============ TOP 200 COINS LIST ============
 const top200Coins = [
 { symbol: "BTC", name: "Bitcoin", id: "bitcoin" },
@@ -1632,15 +1645,14 @@ timestamp: new Date().toISOString()
 } catch(e) { console.log("Error saving bot trade to subcollection:", e); }
 }
 
-// ============ NEW: Save Bot Profit to MongoDB ============
+// ============ Save Bot Profit to MongoDB (AUTHENTICATED) ============
 async function saveBotProfitToMongoDB(profit, botName, asset) {
     if (!currentUser || !currentUser.uid) return;
     try {
-        const res = await fetch(`${API_BASE_URL}/api/auth/bot-trade`, {
+        const res = await authFetch(`${API_BASE_URL}/api/auth/bot-trade`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                firebaseUid: currentUser.uid,
                 botName: botName,
                 asset: asset,
                 profit: profit,
@@ -1650,7 +1662,6 @@ async function saveBotProfitToMongoDB(profit, botName, asset) {
         const data = await res.json().catch(() => ({}));
         if (res.ok && data && data.success) {
             console.log("📡 Bot profit saved to MongoDB:", profit);
-            // Update our local cached balance from the response
             if (data.newBalance !== undefined) {
                 lastSyncedBalance = data.newBalance;
             }
@@ -1712,7 +1723,7 @@ deposits: [],
 createdAt: new Date().toISOString()
 });
 
-// ====== NEW: Register user in MongoDB via backend ======
+// Register user in MongoDB via backend (public endpoint - no token needed)
 try {
 const apiRes = await fetch(`${API_BASE_URL}/api/auth/register`, {
 method: 'POST',
@@ -1744,7 +1755,6 @@ hideButtonSpinner(buttonId);
 showCustomModal('Signup Failed', 'Could not reach server. Please check your connection and try again.', 'error');
 return;
 }
-// ====== END NEW ======
 
 holdings = { usdt: 0.00 };
 withdrawals = [];
@@ -1779,7 +1789,7 @@ async function handleLoginWithSpinner() {
         const userCredential = await window.signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // === PHASE 2B: Log login to MongoDB ===
+        // Log login to MongoDB (public endpoint)
         try {
             await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
@@ -1791,24 +1801,28 @@ async function handleLoginWithSpinner() {
             console.error('⚠️ Backend login log failed (Firebase still logged in):', backendErr);
         }
 
-        // === PHASE 2A: Fetch fresh data from MongoDB ===
-        const meRes = await fetch(`${API_BASE_URL}/api/auth/me?firebaseUid=${encodeURIComponent(user.uid)}`);
-        const meData = await meRes.json().catch(() => ({}));
+        // Fetch fresh data from MongoDB (AUTHENTICATED - no more firebaseUid in query)
+        try {
+            const meRes = await authFetch(`${API_BASE_URL}/api/auth/me`);
+            const meData = await meRes.json().catch(() => ({}));
 
-        if (meRes.ok && meData && meData.success && meData.user) {
-            console.log("📡 Loaded user data from MongoDB after login");
-            const u = meData.user;
-            holdings = {
-                usdt: (u.wallets && u.wallets.usdt) || u.balance || 0,
-                btc: (u.wallets && u.wallets.btc) || 0,
-                eth: (u.wallets && u.wallets.eth) || 0,
-                ngn: (u.wallets && u.wallets.ngn) || 0
-            };
-            withdrawals = u.withdrawals || [];
-            deposits = u.deposits || [];
-            currentUser = { uid: user.uid, name: u.name || user.email, email: user.email };
-        } else {
-            // Fallback to Firestore
+            if (meRes.ok && meData && meData.success && meData.user) {
+                console.log("📡 Loaded user data from MongoDB after login");
+                const u = meData.user;
+                holdings = {
+                    usdt: (u.wallets && u.wallets.usdt) || u.balance || 0,
+                    btc: (u.wallets && u.wallets.btc) || 0,
+                    eth: (u.wallets && u.wallets.eth) || 0,
+                    ngn: (u.wallets && u.wallets.ngn) || 0
+                };
+                withdrawals = u.withdrawals || [];
+                deposits = u.deposits || [];
+                currentUser = { uid: user.uid, name: u.name || user.email, email: user.email };
+            } else {
+                throw new Error("MongoDB /me returned non-OK");
+            }
+        } catch (meErr) {
+            console.warn("⚠️ MongoDB /me failed, using Firestore fallback:", meErr);
             const db = window.firebaseDb;
             const userRef = window.doc(db, 'users', user.uid);
             const userDoc = await window.getDoc(userRef);
@@ -1836,12 +1850,12 @@ async function handleLoginWithSpinner() {
     }
 }
 
-// ============ PHASE 2A: AUTO DEPOSIT DETECTION VIA MONGODB ============
+// ============ AUTO DEPOSIT DETECTION VIA MONGODB (AUTHENTICATED) ============
 async function autoDetectDeposits() {
     if (!currentUser || !currentUser.uid || !USE_MONGODB_PRIMARY) return;
 
     try {
-        const res = await fetch(`${API_BASE_URL}/api/auth/me?firebaseUid=${encodeURIComponent(currentUser.uid)}`);
+        const res = await authFetch(`${API_BASE_URL}/api/auth/me`);
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok || !data || !data.success || !data.user) return;
@@ -1850,7 +1864,6 @@ async function autoDetectDeposits() {
         const currentMongoBalance = (u.wallets && u.wallets.usdt) || u.balance || 0;
         const cachedBalance = lastSyncedBalance;
 
-        // Detect increase in balance (skip small bot-profit fluctuations below $2)
         if (currentMongoBalance > cachedBalance + 0.01) {
             const difference = currentMongoBalance - cachedBalance;
             console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentMongoBalance.toFixed(2)} (diff: $${difference.toFixed(2)})`);
@@ -1881,7 +1894,6 @@ async function autoDetectDeposits() {
             }
         }
 
-        // Sync local state from MongoDB data
         holdings.usdt = currentMongoBalance;
         if (u.wallets) {
             holdings.btc = u.wallets.btc || 0;
@@ -1894,7 +1906,7 @@ async function autoDetectDeposits() {
         renderCrypto();
         renderMarketsCrypto();
     } catch (e) {
-        console.log("Error auto-detecting deposit (API might be down):", e);
+        console.log("Error auto-detecting deposit:", e);
     }
 }
 
@@ -1920,13 +1932,12 @@ async function logoutWithSpinner() {
     showHomepage();
 }
 
-// ============ PHASE 2A: CHECK EXISTING SESSION (WITH FAILSAFE TIMEOUT) ============
+// ============ CHECK EXISTING SESSION (AUTHENTICATED) ============
 async function checkExistingSession() {
     const auth = window.firebaseAuth;
     const db = window.firebaseDb;
 
     return new Promise((resolve) => {
-        // Failsafe: if nothing happens in 8 seconds, force the loading screen to go away
         const failSafe = setTimeout(() => {
             console.warn("⚠️ checkExistingSession timed out - forcing load");
             const loadingScreen = document.getElementById('loadingScreen');
@@ -1941,7 +1952,7 @@ async function checkExistingSession() {
             clearTimeout(failSafe);
             if (user) {
                 try {
-                    const res = await fetch(`${API_BASE_URL}/api/auth/me?firebaseUid=${encodeURIComponent(user.uid)}`);
+                    const res = await authFetch(`${API_BASE_URL}/api/auth/me`);
                     const data = await res.json().catch(() => ({}));
 
                     if (res.ok && data && data.success && data.user) {
@@ -1965,7 +1976,6 @@ async function checkExistingSession() {
                     console.warn("⚠️ MongoDB fetch failed, falling back to Firestore:", mongoError);
                 }
 
-                // Fallback to Firestore
                 try {
                     const userRef = window.doc(db, 'users', user.uid);
                     const userDoc = await window.getDoc(userRef);
@@ -2023,7 +2033,7 @@ checkUSDT.innerHTML = '';
 }
 }
 
-// ============ PHASE 2D: RECORD DEPOSIT INTENT IN MONGODB ============
+// ============ RECORD DEPOSIT INTENT IN MONGODB (AUTHENTICATED) ============
 async function processDepositToPayment() {
     const buttonId = 'depositPayBtn';
     showButtonSpinner(buttonId, 'Pay');
@@ -2050,13 +2060,11 @@ async function processDepositToPayment() {
         network = 'Network: BTC Network';
     }
 
-    // Send deposit intent to MongoDB
     try {
-        await fetch(`${API_BASE_URL}/api/auth/deposit`, {
+        await authFetch(`${API_BASE_URL}/api/auth/deposit`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                firebaseUid: currentUser.uid,
                 amount: amount,
                 asset: selectedDepositAsset,
                 address: address,
@@ -3047,7 +3055,7 @@ tbody.innerHTML = html;
 
 function generateTxId() { return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase(); }
 
-// ============ PHASE 2C: RECORD WITHDRAWALS IN MONGODB ============
+// ============ RECORD WITHDRAWALS IN MONGODB (AUTHENTICATED) ============
 async function submitWithdrawalWithSpinner() {
     const buttonId = 'withdrawBtn';
     showButtonSpinner(buttonId, 'Withdraw');
@@ -3070,13 +3078,11 @@ async function submitWithdrawalWithSpinner() {
     await saveWithdrawalToFirestore(withdrawal);
     await saveUserHoldingsToFirestore();
 
-    // Save to MongoDB
     try {
-        await fetch(`${API_BASE_URL}/api/auth/withdraw`, {
+        await authFetch(`${API_BASE_URL}/api/auth/withdraw`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                firebaseUid: currentUser.uid,
                 amount: amount,
                 asset: asset,
                 address: address,
@@ -3347,7 +3353,6 @@ botStats.totalRuns++;
 holdings.usdt += profit;
 lastSyncedBalance = holdings.usdt;
 
-// Send profit to MongoDB via backend
 await saveBotProfitToMongoDB(profit, botStats.botName, botStats.asset);
 
 updatePortfolioTotal();
@@ -3541,7 +3546,6 @@ if(asset === 'BTC') { networkName.innerHTML = 'BTC Network'; walletLabel.innerHT
 else { networkName.innerHTML = 'TRC20'; walletLabel.innerHTML = 'USDT (TRC20) Wallet Address'; }
 }
 
-// Time interval buttons (right side)
 if(e.target.classList && e.target.classList.contains('time-btn')) {
 const parent = e.target.closest('.time-intervals');
 if(parent) {
@@ -3554,7 +3558,6 @@ fetchRealCandleDataRight();
 }
 }
 
-// Indicator buttons (right side)
 if(e.target.classList && e.target.classList.contains('indicator-btn')) {
 const parent = e.target.closest('.indicators');
 if(parent) {
@@ -3563,7 +3566,6 @@ e.target.classList.add('active');
 }
 }
 
-// Chart tabs (right side)
 if(e.target.classList && e.target.classList.contains('chart-tab')) {
 const parent = e.target.closest('.chart-container-right');
 if(parent) {
@@ -3582,7 +3584,6 @@ if(tradesPanel) tradesPanel.style.display = 'block';
 }
 }
 
-// Bottom nav
 const navItem = e.target.closest('.nav-item');
 if(navItem) {
 const navType = navItem.getAttribute('data-nav');
@@ -3601,13 +3602,12 @@ function switchToSignup() { document.querySelector('.auth-tab[data-tab="signup"]
 if(loginTabBtn) loginTabBtn.addEventListener('click', switchToLogin);
 if(signupTabBtn) signupTabBtn.addEventListener('click', switchToSignup);
 
-// ============ WINDOW LOAD: FAILSAFE + INIT ============
+// ============ WINDOW LOAD ============
 window.addEventListener('load', function() {
     populateCountries();
     updateMarqueePrices();
     setInterval(updateMarqueePrices, 30000);
     
-    // Failsafe: force the loading screen to disappear after 5 seconds max
     setTimeout(() => {
         const loadingScreen = document.getElementById('loadingScreen');
         if (loadingScreen && loadingScreen.style.display !== 'none') {
