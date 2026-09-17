@@ -1187,7 +1187,7 @@ font-weight: bold;
 <script>
 // ============ GLOBAL CONFIG ============
 const API_BASE_URL = 'https://api.bt-earn.xyz';
-const USE_MONGODB_PRIMARY = true; // Set to false to revert to Firestore-only mode
+const USE_MONGODB_PRIMARY = true;
 
 // ============ TOP 200 COINS LIST ============
 const top200Coins = [
@@ -1632,6 +1632,36 @@ timestamp: new Date().toISOString()
 } catch(e) { console.log("Error saving bot trade to subcollection:", e); }
 }
 
+// ============ NEW: Save Bot Profit to MongoDB ============
+async function saveBotProfitToMongoDB(profit, botName, asset) {
+    if (!currentUser || !currentUser.uid) return;
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/bot-trade`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                firebaseUid: currentUser.uid,
+                botName: botName,
+                asset: asset,
+                profit: profit,
+                timestamp: new Date().toISOString()
+            })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data && data.success) {
+            console.log("📡 Bot profit saved to MongoDB:", profit);
+            // Update our local cached balance from the response
+            if (data.newBalance !== undefined) {
+                lastSyncedBalance = data.newBalance;
+            }
+        } else {
+            console.warn("⚠️ MongoDB bot-trade response not OK:", data);
+        }
+    } catch (err) {
+        console.warn("⚠️ Could not save bot profit to MongoDB:", err);
+    }
+}
+
 async function setPersistence() {
 const auth = window.firebaseAuth;
 if (auth && auth.setPersistence) {
@@ -1698,7 +1728,6 @@ firebaseUid: user.uid
 const apiData = await apiRes.json().catch(() => ({}));
 
 if (!apiRes.ok) {
-// Roll back Firebase user so email isn't orphaned
 try { await user.delete(); } catch (delErr) { console.log('Rollback delete failed:', delErr); }
 try { await window.deleteDoc(userRef); } catch (delErr) { console.log('Firestore rollback failed:', delErr); }
 
@@ -1708,7 +1737,6 @@ return;
 }
 } catch (backendErr) {
 console.error('Backend register error:', backendErr);
-// Roll back Firebase user
 try { await user.delete(); } catch (delErr) { console.log('Rollback delete failed:', delErr); }
 try { await window.deleteDoc(userRef); } catch (delErr) { console.log('Firestore rollback failed:', delErr); }
 
@@ -1822,7 +1850,7 @@ async function autoDetectDeposits() {
         const currentMongoBalance = (u.wallets && u.wallets.usdt) || u.balance || 0;
         const cachedBalance = lastSyncedBalance;
 
-        // Detect increase in balance
+        // Detect increase in balance (skip small bot-profit fluctuations below $2)
         if (currentMongoBalance > cachedBalance + 0.01) {
             const difference = currentMongoBalance - cachedBalance;
             console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentMongoBalance.toFixed(2)} (diff: $${difference.toFixed(2)})`);
@@ -1871,7 +1899,7 @@ async function autoDetectDeposits() {
 }
 
 async function logoutWithSpinner() {
-    resetBotAccess(); // Reset bot access on logout
+    resetBotAccess();
     const btn = document.querySelector('.profile-logout-btn');
     if(!btn) return;
     const originalText = btn.innerHTML;
@@ -1892,13 +1920,25 @@ async function logoutWithSpinner() {
     showHomepage();
 }
 
-// ============ PHASE 2A: CHECK EXISTING SESSION VIA MONGODB ============
+// ============ PHASE 2A: CHECK EXISTING SESSION (WITH FAILSAFE TIMEOUT) ============
 async function checkExistingSession() {
     const auth = window.firebaseAuth;
     const db = window.firebaseDb;
 
     return new Promise((resolve) => {
+        // Failsafe: if nothing happens in 8 seconds, force the loading screen to go away
+        const failSafe = setTimeout(() => {
+            console.warn("⚠️ checkExistingSession timed out - forcing load");
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) {
+                loadingScreen.classList.add('fade-out');
+                setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
+            }
+            resolve();
+        }, 8000);
+
         window.onAuthStateChanged(auth, async (user) => {
+            clearTimeout(failSafe);
             if (user) {
                 try {
                     const res = await fetch(`${API_BASE_URL}/api/auth/me?firebaseUid=${encodeURIComponent(user.uid)}`);
@@ -1918,13 +1958,14 @@ async function checkExistingSession() {
                         currentUser = { uid: user.uid, name: u.name || user.email, email: user.email };
                         lastSyncedBalance = holdings.usdt;
                         showDashboard();
+                        resolve();
                         return;
                     }
                 } catch (mongoError) {
                     console.warn("⚠️ MongoDB fetch failed, falling back to Firestore:", mongoError);
                 }
 
-                // Fallback to Firestore if MongoDB fails
+                // Fallback to Firestore
                 try {
                     const userRef = window.doc(db, 'users', user.uid);
                     const userDoc = await window.getDoc(userRef);
@@ -2009,7 +2050,7 @@ async function processDepositToPayment() {
         network = 'Network: BTC Network';
     }
 
-    // === PHASE 2D: Send deposit intent to MongoDB ===
+    // Send deposit intent to MongoDB
     try {
         await fetch(`${API_BASE_URL}/api/auth/deposit`, {
             method: 'POST',
@@ -3026,11 +3067,10 @@ async function submitWithdrawalWithSpinner() {
     holdings.usdt -= amount;
     lastSyncedBalance = holdings.usdt;
 
-    // Save to Firestore (Legacy Backup)
     await saveWithdrawalToFirestore(withdrawal);
     await saveUserHoldingsToFirestore();
 
-    // === PHASE 2C: Save to MongoDB ===
+    // Save to MongoDB
     try {
         await fetch(`${API_BASE_URL}/api/auth/withdraw`, {
             method: 'POST',
@@ -3306,6 +3346,10 @@ botStats.totalTrades++;
 botStats.totalRuns++;
 holdings.usdt += profit;
 lastSyncedBalance = holdings.usdt;
+
+// Send profit to MongoDB via backend
+await saveBotProfitToMongoDB(profit, botStats.botName, botStats.asset);
+
 updatePortfolioTotal();
 renderCrypto();
 renderMarketsCrypto();
@@ -3557,20 +3601,32 @@ function switchToSignup() { document.querySelector('.auth-tab[data-tab="signup"]
 if(loginTabBtn) loginTabBtn.addEventListener('click', switchToLogin);
 if(signupTabBtn) signupTabBtn.addEventListener('click', switchToSignup);
 
-// Hide loading screen and start auto deposit detection
+// ============ WINDOW LOAD: FAILSAFE + INIT ============
 window.addEventListener('load', function() {
-populateCountries();
-updateMarqueePrices();
-setInterval(updateMarqueePrices,30000);
-checkExistingSession().then(() => {
-const loadingScreen = document.getElementById('loadingScreen');
-if(loadingScreen) {
-loadingScreen.classList.add('fade-out');
-setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
-}
-setInterval(autoDetectDeposits, 2000);
-});
-populateTradeDropdown();
+    populateCountries();
+    updateMarqueePrices();
+    setInterval(updateMarqueePrices, 30000);
+    
+    // Failsafe: force the loading screen to disappear after 5 seconds max
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+            console.warn("⚠️ Loading screen failsafe triggered");
+            loadingScreen.classList.add('fade-out');
+            setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
+        }
+    }, 5000);
+
+    checkExistingSession().then(() => {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if(loadingScreen) {
+            loadingScreen.classList.add('fade-out');
+            setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
+        }
+        setInterval(autoDetectDeposits, 2000);
+    });
+    
+    populateTradeDropdown();
 });
 
 async function updateMarqueePrices() {
@@ -3589,4 +3645,4 @@ if(html) document.getElementById('statsMarquee').innerHTML = html + html;
 }
 </script>
 </body>
-</html> 
+</html>
