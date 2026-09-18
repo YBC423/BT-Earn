@@ -1632,47 +1632,6 @@ deposits: window.arrayUnion(deposit)
 } catch(e) { console.log("Error saving deposit:", e); }
 }
 
-async function saveBotTradeToFirestore(tradeData) {
-if (!currentUser || !currentUser.uid) return;
-try {
-const db = window.firebaseDb;
-const userRef = window.doc(db, 'users', currentUser.uid);
-const botTradesRef = window.collection(userRef, 'botTrades');
-await window.addDoc(botTradesRef, {
-...tradeData,
-timestamp: new Date().toISOString()
-});
-} catch(e) { console.log("Error saving bot trade to subcollection:", e); }
-}
-
-// ============ Save Bot Profit to MongoDB (AUTHENTICATED) ============
-async function saveBotProfitToMongoDB(profit, botName, asset) {
-    if (!currentUser || !currentUser.uid) return;
-    try {
-        const res = await authFetch(`${API_BASE_URL}/api/auth/bot-trade`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                botName: botName,
-                asset: asset,
-                profit: profit,
-                timestamp: new Date().toISOString()
-            })
-        });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && data && data.success) {
-            console.log("📡 Bot profit saved to MongoDB:", profit);
-            if (data.newBalance !== undefined) {
-                lastSyncedBalance = data.newBalance;
-            }
-        } else {
-            console.warn("⚠️ MongoDB bot-trade response not OK:", data);
-        }
-    } catch (err) {
-        console.warn("⚠️ Could not save bot profit to MongoDB:", err);
-    }
-}
-
 async function setPersistence() {
 const auth = window.firebaseAuth;
 if (auth && auth.setPersistence) {
@@ -1798,10 +1757,10 @@ async function handleLoginWithSpinner() {
             });
             console.log("📡 Login logged to MongoDB");
         } catch (backendErr) {
-            console.error('⚠️ Backend login log failed (Firebase still logged in):', backendErr);
+            console.error('⚠️ Backend login log failed:', backendErr);
         }
 
-        // Fetch fresh data from MongoDB (AUTHENTICATED - no more firebaseUid in query)
+        // Fetch fresh data from MongoDB (AUTHENTICATED)
         try {
             const meRes = await authFetch(`${API_BASE_URL}/api/auth/me`);
             const meData = await meRes.json().catch(() => ({}));
@@ -1866,7 +1825,7 @@ async function autoDetectDeposits() {
 
         if (currentMongoBalance > cachedBalance + 0.01) {
             const difference = currentMongoBalance - cachedBalance;
-            console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentMongoBalance.toFixed(2)} (diff: $${difference.toFixed(2)})`);
+            console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentMongoBalance.toFixed(2)}`);
 
             const isWholeDollar = Math.abs(difference % 1) < 0.01;
             const isAtLeastTwo = difference >= 2;
@@ -3283,95 +3242,69 @@ let balanceElement = document.getElementById('botBalance');
 if(balanceElement) balanceElement.innerHTML = `$${botStats.botBalance.toFixed(2)}`;
 }
 
-function calculateProfitLossLow(amount) {
-let isWin = Math.random() * 100 <= 60;
-if(isWin) {
-let profitPercent = 0.1 + (Math.random() * 0.3);
-let profit = amount * (profitPercent / 100);
-if(profit < 0.03 && amount >= 10) profit = 0.03;
-return { profit, isWin: true, percent: profitPercent };
-} else {
-let lossPercent = 0.05 + (Math.random() * 0.15);
-let loss = amount * (lossPercent / 100);
-if(loss < 0.02 && amount >= 10) loss = 0.02;
-return { profit: -loss, isWin: false, percent: lossPercent };
-}
-}
-
-function calculateProfitLossMedium(amount) {
-let mode = Math.random() * 100 <= 60 ? 'highProfit' : 'highLoss';
-let isWin;
-let profitPercent, lossPercent;
-if(mode === 'highProfit') {
-isWin = Math.random() * 100 <= 60;
-profitPercent = 0.3 + (Math.random() * 0.9);
-lossPercent = 0.15 + (Math.random() * 0.45);
-} else {
-isWin = Math.random() * 100 <= 40;
-profitPercent = 0.15 + (Math.random() * 0.45);
-lossPercent = 0.3 + (Math.random() * 0.9);
-}
-if(isWin) {
-let profit = amount * (profitPercent / 100);
-if(profit < 0.1 && amount >= 10) profit = 0.1;
-return { profit, isWin: true, percent: profitPercent };
-} else {
-let loss = amount * (lossPercent / 100);
-if(loss < 0.08 && amount >= 10) loss = 0.08;
-return { profit: -loss, isWin: false, percent: lossPercent };
-}
-}
-
+// ============ PHASE 4: Server-side bot run (secure) ============
 async function executeBotTrade() {
-if(!botStats.isRunning || botStats.isPaused) return;
-let amount = botStats.amountPerTrade;
+    if (!botStats.isRunning || botStats.isPaused) return;
 
-if(holdings.usdt < amount) {
-addBotLog(`Insufficient balance! Need $${amount} USDT. Stopping bot.`,'error');
-stopBotTrading();
-return;
-}
+    const amount = botStats.amountPerTrade;
 
-let isMediumRisk = (activeBot === 'ETH DCA Pro');
-let result;
-if(isMediumRisk) {
-result = calculateProfitLossMedium(amount);
-} else {
-result = calculateProfitLossLow(amount);
-}
-let profit = result.profit;
-let isWin = result.isWin;
-lastTradeResult = isWin ? 'win' : 'loss';
-addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${amount.toFixed(2)}`,'buy');
-if(profit>=0) addBotLog(`SELL ORDER: +$${profit.toFixed(2)} profit (${result.percent.toFixed(2)}%)`,'sell-profit');
-else addBotLog(`SELL ORDER: -$${Math.abs(profit).toFixed(2)} loss (${result.percent.toFixed(2)}%)`,'sell-loss');
-if(isWin) botStats.wins++;
-botStats.totalPL += profit;
-botStats.botBalance += profit;
-botStats.totalTrades++;
-botStats.totalRuns++;
-holdings.usdt += profit;
-lastSyncedBalance = holdings.usdt;
+    if (holdings.usdt < amount) {
+        addBotLog(`Insufficient balance! Need $${amount} USDT. Stopping bot.`, 'error');
+        stopBotTrading();
+        return;
+    }
 
-await saveBotProfitToMongoDB(profit, botStats.botName, botStats.asset);
+    try {
+        // Ask the backend to run one bot trade. The backend calculates
+        // the profit server-side, saves it, and returns the new balance.
+        const res = await authFetch(`${API_BASE_URL}/api/auth/bot-run`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                botName: botStats.botName,
+                asset: botStats.asset,
+                amountPerTrade: amount,
+            }),
+        });
 
-updatePortfolioTotal();
-renderCrypto();
-renderMarketsCrypto();
-await saveUserHoldingsToFirestore();
+        const data = await res.json().catch(() => ({}));
 
-await saveBotTradeToFirestore({
-botName: botStats.botName,
-asset: botStats.asset,
-amount: amount,
-profit: profit,
-isWin: isWin,
-profitPercent: result.percent,
-balanceAfter: holdings.usdt
-});
+        if (!res.ok || !data.success) {
+            addBotLog(`Bot run failed: ${data.message || res.status}`, 'error');
+            return;
+        }
 
-addBotLog(`New Balance: $${holdings.usdt.toFixed(2)}`,'info');
-updateBotStatsDisplay();
+        const profit = data.trade.profit;
+        const isWin = data.isWin;
+        lastTradeResult = isWin ? 'win' : 'loss';
+
+        addBotLog(`BUY ORDER: ${botStats.asset}/USDT - Amount: $${amount.toFixed(2)}`, 'buy');
+        if (profit >= 0) {
+            addBotLog(`SELL ORDER: +$${profit.toFixed(2)} profit (${data.percent}%)`, 'sell-profit');
+        } else {
+            addBotLog(`SELL ORDER: -$${Math.abs(profit).toFixed(2)} loss (${data.percent}%)`, 'sell-loss');
+        }
+
+        if (isWin) botStats.wins++;
+        botStats.totalPL += profit;
+        botStats.botBalance = data.newBalance;
+        botStats.totalTrades++;
+        botStats.totalRuns++;
+
+        holdings.usdt = data.newBalance;
+        lastSyncedBalance = data.newBalance;
+
+        updatePortfolioTotal();
+        renderCrypto();
+        renderMarketsCrypto();
+
+        addBotLog(`New Balance: $${data.newBalance.toFixed(2)}`, 'info');
+        updateBotStatsDisplay();
+
+    } catch (err) {
+        console.warn("⚠️ Bot run request failed:", err);
+        addBotLog(`Bot run error: ${err.message}`, 'error');
+    }
 }
 
 function startBotTrading() {
