@@ -877,6 +877,40 @@ font-weight: bold;
 </div>
 
 <div id="customModal" class="custom-modal"><div class="custom-modal-content"><div class="custom-modal-icon" id="modalIcon">ℹ️</div><div class="custom-modal-title" id="modalTitle">Notice</div><div class="custom-modal-message" id="modalMessage">Message here</div><button class="custom-modal-btn" onclick="closeCustomModal()">OK</button></div></div>
+
+<!-- ============ PASSWORD RESET MODAL (BT-EARN STYLED) ============ -->
+<div id="passwordResetModal" class="custom-modal">
+    <div class="custom-modal-content" style="max-width: 400px;">
+        <div class="custom-modal-icon info">🔑</div>
+        <div class="custom-modal-title">Reset Password</div>
+        <div class="custom-modal-message" style="margin-bottom: 20px;">
+            Enter your account email and we'll send you a reset link.
+        </div>
+        <div style="margin-bottom: 20px;">
+            <input type="email" id="passwordResetEmail" 
+                   placeholder="Enter your email" 
+                   style="width: 100%; padding: 14px; background: rgba(255,255,255,0.05); 
+                          border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; 
+                          color: white; font-size: 16px; text-align: center;"
+                   onkeydown="if(event.key === 'Enter') submitPasswordReset()">
+            <div id="passwordResetError" style="color: #e53e3e; font-size: 13px; margin-top: 10px; display: none;">
+                Please enter a valid email address.
+            </div>
+            <div id="passwordResetSuccess" style="color: #48bb78; font-size: 13px; margin-top: 10px; display: none;">
+                Reset link sent! Check your inbox.
+            </div>
+        </div>
+        <button class="custom-modal-btn" id="passwordResetSubmitBtn" onclick="submitPasswordReset()" style="width: 100%;">
+            Send Reset Link
+        </button>
+        <button onclick="closePasswordResetModal()" style="width: 100%; margin-top: 10px; 
+                 background: transparent; border: 1px solid rgba(255,255,255,0.1); 
+                 padding: 12px; border-radius: 30px; color: #a0a0c0; cursor: pointer; font-size: 14px;">
+            Cancel
+        </button>
+    </div>
+</div>
+
 <div class="overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div class="sidebar" id="sidebar"><div class="sidebar-close" onclick="closeSidebar()">×</div><ul class="sidebar-menu">
 <li data-nav="home" onclick="navigateTo('home')"><span class="menu-icon"><svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg></span> Home</li>
@@ -1676,9 +1710,12 @@ const originalText = btn.textContent;
 btn.textContent = 'Sending...';
 btn.disabled = true;
 try {
-    const user = window.firebaseAuth.currentUser;
-    if (!user) throw new Error("Not logged in");
-    await window.sendEmailVerification(user);
+    const storedEmail = sessionStorage.getItem('pendingVerifyEmail');
+    const storedPassword = sessionStorage.getItem('pendingVerifyPassword');
+    if (!storedEmail || !storedPassword) throw new Error("Session expired. Please log in again.");
+    const cred = await window.signInWithEmailAndPassword(window.firebaseAuth, storedEmail, storedPassword);
+    await window.sendEmailVerification(cred.user);
+    await window.firebaseSignOut(window.firebaseAuth);
     showCustomModal('Email Sent', 'A new verification link has been sent to your email.', 'success');
 } catch (err) {
     console.error('Resend verification error:', err);
@@ -1690,15 +1727,61 @@ btn.disabled = false;
 
 async function checkVerificationStatus() {
 try {
-    const user = window.firebaseAuth.currentUser;
-    if (!user) throw new Error("Not logged in");
+    const storedEmail = sessionStorage.getItem('pendingVerifyEmail');
+    const storedPassword = sessionStorage.getItem('pendingVerifyPassword');
+    if (!storedEmail || !storedPassword) throw new Error("Session expired. Please log in again.");
+
+    const cred = await window.signInWithEmailAndPassword(window.firebaseAuth, storedEmail, storedPassword);
+    const user = cred.user;
     await window.reloadUser(user);
-    if (user.emailVerified) {
-        showCustomModal('Verified!', 'Your email is now verified. Loading your dashboard...', 'success');
-        await loadUserSession(user);
-    } else {
+
+    if (!user.emailVerified) {
+        await window.firebaseSignOut(window.firebaseAuth);
         showCustomModal('Not Verified Yet', 'We could not detect verification. Please click the link in your email first, then try again.', 'warning');
+        return;
     }
+
+    const db = window.firebaseDb;
+    const userRef = window.doc(db, 'users', user.uid);
+    const storedName = sessionStorage.getItem('pendingVerifyName') || (user.email ? user.email.split('@')[0] : 'User');
+    const storedCountry = sessionStorage.getItem('pendingVerifyCountry') || '';
+
+    await window.setDoc(userRef, {
+        name: storedName,
+        email: user.email,
+        country: storedCountry,
+        holdings: { usdt: 0.00 },
+        withdrawals: [],
+        deposits: [],
+        createdAt: new Date().toISOString()
+    }, { merge: true });
+
+    try {
+        const apiRes = await fetch(`${API_BASE_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: storedName,
+                email: user.email,
+                country: storedCountry,
+                firebaseUid: user.uid
+            })
+        });
+        const apiData = await apiRes.json().catch(() => ({}));
+        if (!apiRes.ok && apiRes.status !== 409) {
+            console.warn('Backend register on verify:', apiData);
+        }
+    } catch (backendErr) {
+        console.error('Backend register error on verify:', backendErr);
+    }
+
+    sessionStorage.removeItem('pendingVerifyEmail');
+    sessionStorage.removeItem('pendingVerifyPassword');
+    sessionStorage.removeItem('pendingVerifyName');
+    sessionStorage.removeItem('pendingVerifyCountry');
+
+    showCustomModal('Verified!', 'Your email is now verified. Loading your dashboard...', 'success');
+    await loadUserSession(user);
 } catch (err) {
     console.error('Check verification error:', err);
     showCustomModal('Error', err.message || 'Could not check verification status.', 'error');
@@ -1747,20 +1830,58 @@ await auth.setPersistence('local');
 }
 
 // ============ PASSWORD RESET ============
-async function handlePasswordReset() {
-    const email = prompt('Enter your account email to receive a password reset link:');
-    if (!email) return;
-    if (!email.includes('@')) {
-        showCustomModal('Invalid Email', 'Please enter a valid email address.', 'error');
+function handlePasswordReset() {
+    const modal = document.getElementById('passwordResetModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.getElementById('passwordResetEmail').value = '';
+        document.getElementById('passwordResetError').style.display = 'none';
+        document.getElementById('passwordResetSuccess').style.display = 'none';
+        setTimeout(function() {
+            document.getElementById('passwordResetEmail').focus();
+        }, 300);
+    }
+}
+
+function closePasswordResetModal() {
+    const modal = document.getElementById('passwordResetModal');
+    if (modal) modal.classList.remove('active');
+}
+
+async function submitPasswordReset() {
+    const emailInput = document.getElementById('passwordResetEmail');
+    const errorEl = document.getElementById('passwordResetError');
+    const successEl = document.getElementById('passwordResetSuccess');
+    const submitBtn = document.getElementById('passwordResetSubmitBtn');
+    const email = emailInput.value.trim();
+
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+
+    if (!email || !email.includes('@')) {
+        errorEl.textContent = 'Please enter a valid email address.';
+        errorEl.style.display = 'block';
         return;
     }
+
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = 'Sending...';
+    submitBtn.disabled = true;
+
     try {
-        await window.sendPasswordResetEmail(window.firebaseAuth, email.trim());
-        showCustomModal('Reset Email Sent', `If an account exists for ${email}, you'll receive a password reset link shortly. Check your spam folder too.`, 'success');
+        await window.sendPasswordResetEmail(window.firebaseAuth, email);
     } catch (err) {
         console.warn('Password reset error:', err);
-        showCustomModal('Reset Email Sent', `If an account exists for ${email}, you'll receive a password reset link shortly.`, 'success');
     }
+
+    successEl.textContent = 'Reset link sent! Check your inbox.';
+    successEl.style.display = 'block';
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+
+    setTimeout(function() {
+        closePasswordResetModal();
+    }, 2000);
 }
 
 // ============ LOAD USER SESSION ============
@@ -1842,46 +1963,6 @@ const auth = window.firebaseAuth;
 const userCredential = await window.createUserWithEmailAndPassword(auth, email, password);
 const user = userCredential.user;
 
-const db = window.firebaseDb;
-const userRef = window.doc(db, 'users', user.uid);
-await window.setDoc(userRef, {
-name: name,
-email: email,
-country: country,
-holdings: { usdt: 0.00 },
-withdrawals: [],
-deposits: [],
-createdAt: new Date().toISOString()
-});
-
-try {
-const apiRes = await fetch(`${API_BASE_URL}/api/auth/register`, {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({
-name: name,
-email: email,
-country: country,
-firebaseUid: user.uid
-})
-});
-const apiData = await apiRes.json().catch(() => ({}));
-if (!apiRes.ok) {
-try { await user.delete(); } catch (delErr) {}
-try { await window.deleteDoc(userRef); } catch (delErr) {}
-hideButtonSpinner(buttonId);
-showCustomModal('Signup Failed', apiData.message || apiData.error || 'Backend registration failed.', 'error');
-return;
-}
-} catch (backendErr) {
-console.error('Backend register error:', backendErr);
-try { await user.delete(); } catch (delErr) {}
-try { await window.deleteDoc(userRef); } catch (delErr) {}
-hideButtonSpinner(buttonId);
-showCustomModal('Signup Failed', 'Could not reach server. Please try again.', 'error');
-return;
-}
-
 try {
     await window.sendEmailVerification(user);
     console.log("📧 Verification email sent");
@@ -1889,16 +1970,18 @@ try {
     console.warn("Could not send verification email:", verifyErr);
 }
 
-holdings = { usdt: 0.00 };
-withdrawals = [];
-deposits = [];
-currentUser = { uid: user.uid, name: name, email: email };
+sessionStorage.setItem('pendingVerifyEmail', email);
+sessionStorage.setItem('pendingVerifyPassword', password);
+sessionStorage.setItem('pendingVerifyName', name);
+sessionStorage.setItem('pendingVerifyCountry', country);
+
+await window.firebaseSignOut(window.firebaseAuth);
 
 hideButtonSpinner(buttonId);
 showCustomModal('Account Created!', 'We sent a verification link to your email. Please verify to continue.', 'success');
 
 setTimeout(() => {
-    showVerifyEmailPage(user.email);
+    showVerifyEmailPage(email);
 }, 1200);
 
 } catch (error) {
@@ -1932,6 +2015,8 @@ async function handleLoginWithSpinner() {
         await window.reloadUser(user);
         if (!user.emailVerified) {
             hideButtonSpinner(buttonId);
+            sessionStorage.setItem('pendingVerifyEmail', email);
+            sessionStorage.setItem('pendingVerifyPassword', password);
             showVerifyEmailPage(user.email);
             return;
         }
@@ -2136,6 +2221,11 @@ async function logoutWithSpinner() {
     try {
         await window.firebaseSignOut(window.firebaseAuth);
     } catch(e) {}
+
+    sessionStorage.removeItem('pendingVerifyEmail');
+    sessionStorage.removeItem('pendingVerifyPassword');
+    sessionStorage.removeItem('pendingVerifyName');
+    sessionStorage.removeItem('pendingVerifyCountry');
 
     currentUser = null;
     holdings = { usdt: 0.00 };
