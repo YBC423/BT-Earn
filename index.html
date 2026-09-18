@@ -112,14 +112,12 @@ display: inline-block;
 50% { opacity: 0.3; transform: scale(0.85); }
 }
 
-/* Shake animation for access code */
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-10px); }
     75% { transform: translateX(10px); }
 }
 
-/* Hide all pages initially to prevent flash */
 #homepage, #aboutPage, #authPage, #dashboard, #profilePage, #marketsPage, #tradePage, #botsPage, #botDetailPage, #withdrawalPage, #depositPage, #depositPaymentPage, #termsPage, #verifyEmailPage {
 display: none;
 }
@@ -218,7 +216,6 @@ display: none;
 .forgot-btn { background: none; border: none; color: #667eea; cursor: pointer; font-size: 14px; margin-top: 15px; text-align: center; width: 100%; }
 .forgot-btn:hover { text-decoration: underline; }
 
-/* Social Login Buttons */
 .social-divider { display: flex; align-items: center; gap: 15px; margin: 25px 0 20px; color: #a0a0c0; font-size: 12px; }
 .social-divider::before, .social-divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
 .social-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: white; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-bottom: 12px; font-family: inherit; }
@@ -229,7 +226,6 @@ display: none;
 .social-btn.apple { background: rgba(255,255,255,0.1); }
 .social-btn.apple:hover { background: rgba(255,255,255,0.18); }
 
-/* Verify Email Page */
 .verify-email-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 100px 20px; background: #0a0e27; }
 .verify-email-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 40px; max-width: 500px; width: 100%; text-align: center; }
 .verify-email-icon { width: 90px; height: 90px; margin: 0 auto 25px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; }
@@ -333,7 +329,6 @@ display: none;
 .markets-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; }
 .markets-header h1 { font-size: 32px; }
 
-/* ============ TRADE PAGE DESKTOP LAYOUT ============ */
 .trade-page-desktop {
     display: flex;
     gap: 20px;
@@ -1468,7 +1463,6 @@ let selectedDepositAsset = 'USDT';
 let currentPaymentQr = null;
 let currentTxId = null;
 let lastSyncedBalance = 0;
-let pendingVerifyUser = null;
 
 let chartUpdateIntervalRight = null;
 let chartRealTimeIntervalRight = null;
@@ -1769,7 +1763,7 @@ async function handlePasswordReset() {
     }
 }
 
-// ============ LOAD USER SESSION (shared) ============
+// ============ LOAD USER SESSION ============
 async function loadUserSession(user) {
     try {
         const meRes = await authFetch(`${API_BASE_URL}/api/auth/me`);
@@ -1794,7 +1788,6 @@ async function loadUserSession(user) {
     } catch (e) {
         console.warn("⚠️ MongoDB /me failed, trying Firestore:", e);
     }
-    // Firestore fallback
     try {
         const db = window.firebaseDb;
         const userRef = window.doc(db, 'users', user.uid);
@@ -1861,7 +1854,6 @@ deposits: [],
 createdAt: new Date().toISOString()
 });
 
-// Register in MongoDB via backend
 try {
 const apiRes = await fetch(`${API_BASE_URL}/api/auth/register`, {
 method: 'POST',
@@ -1890,7 +1882,6 @@ showCustomModal('Signup Failed', 'Could not reach server. Please try again.', 'e
 return;
 }
 
-// Send verification email
 try {
     await window.sendEmailVerification(user);
     console.log("📧 Verification email sent");
@@ -1913,7 +1904,9 @@ setTimeout(() => {
 } catch (error) {
 hideButtonSpinner(buttonId);
 let errorMsg = error.message;
-if (errorMsg.includes('email-already-in-use')) errorMsg = 'Email already registered. Please login.';
+if (errorMsg.includes('email-already-in-use')) {
+    errorMsg = 'This email is already registered. If you signed up with Google or Apple, please use that button to sign in.';
+}
 showCustomModal('Signup Failed', errorMsg, 'error');
 }
 }
@@ -1936,7 +1929,6 @@ async function handleLoginWithSpinner() {
         const userCredential = await window.signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Check email verification
         await window.reloadUser(user);
         if (!user.emailVerified) {
             hideButtonSpinner(buttonId);
@@ -1944,7 +1936,6 @@ async function handleLoginWithSpinner() {
             return;
         }
 
-        // Log login to MongoDB
         try {
             await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
@@ -1965,7 +1956,7 @@ async function handleLoginWithSpinner() {
     }
 }
 
-// ============ GOOGLE SIGN-IN ============
+// ============ GOOGLE SIGN-IN (seamless, no prompt) ============
 async function handleGoogleSignIn() {
     try {
         const provider = new window.GoogleAuthProvider();
@@ -1977,15 +1968,11 @@ async function handleGoogleSignIn() {
     } catch (err) {
         console.error('Google sign-in error:', err);
         if (err.code === 'auth/popup-closed-by-user') return;
-        if (err.code === 'auth/account-exists-with-different-credential') {
-            showCustomModal('Account Exists', 'An account already exists with this email using a different sign-in method. Please use that method.', 'error');
-            return;
-        }
         showCustomModal('Google Sign-In Failed', err.message || 'Could not sign in with Google.', 'error');
     }
 }
 
-// ============ APPLE SIGN-IN ============
+// ============ APPLE SIGN-IN (seamless, no prompt) ============
 async function handleAppleSignIn() {
     try {
         const provider = new window.OAuthProvider('apple.com');
@@ -1998,10 +1985,6 @@ async function handleAppleSignIn() {
     } catch (err) {
         console.error('Apple sign-in error:', err);
         if (err.code === 'auth/popup-closed-by-user') return;
-        if (err.code === 'auth/account-exists-with-different-credential') {
-            showCustomModal('Account Exists', 'An account already exists with this email using a different sign-in method. Please use that method.', 'error');
-            return;
-        }
         showCustomModal('Apple Sign-In Failed', err.message || 'Could not sign in with Apple.', 'error');
     }
 }
@@ -2011,7 +1994,7 @@ async function createOrLoadSocialUser(user, provider) {
     try {
         const db = window.firebaseDb;
 
-        // Step 1: Check if MongoDB has the user first
+        // Check if MongoDB already has the user
         let mongoHasUser = false;
         try {
             const meRes = await authFetch(`${API_BASE_URL}/api/auth/me`);
@@ -2021,7 +2004,7 @@ async function createOrLoadSocialUser(user, provider) {
                 console.log("📡 Existing MongoDB user found");
             }
         } catch (e) {
-            // 404 = user doesn't exist yet. That's fine.
+            // 404 = user doesn't exist yet
         }
 
         if (mongoHasUser) {
@@ -2029,11 +2012,10 @@ async function createOrLoadSocialUser(user, provider) {
             return;
         }
 
-        // Step 2: New social user → create records
+        // New social user → create records
         const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
         const userEmail = user.email || '';
 
-        // Firestore doc
         const userRef = window.doc(db, 'users', user.uid);
         await window.setDoc(userRef, {
             name: displayName,
@@ -2046,7 +2028,6 @@ async function createOrLoadSocialUser(user, provider) {
             createdAt: new Date().toISOString()
         }, { merge: true });
 
-        // MongoDB via backend
         try {
             const regRes = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: 'POST',
@@ -2066,7 +2047,6 @@ async function createOrLoadSocialUser(user, provider) {
             console.warn("Backend registration failed:", be);
         }
 
-        // Log the login
         try {
             await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
@@ -2075,7 +2055,6 @@ async function createOrLoadSocialUser(user, provider) {
             });
         } catch (be) {}
 
-        // Now load the session
         holdings = { usdt: 0.00 };
         withdrawals = [];
         deposits = [];
@@ -2184,7 +2163,6 @@ async function checkExistingSession() {
         window.onAuthStateChanged(auth, async (user) => {
             clearTimeout(failSafe);
             if (user) {
-                // Check email verification for email sign-ups
                 const isSocial = user.providerData && user.providerData.some(p => p.providerId === 'google.com' || p.providerId === 'apple.com');
                 if (!isSocial) {
                     try {
@@ -2805,8 +2783,6 @@ document.onmousemove = null;
 }
 let chatWidget = document.getElementById('chatWidget');
 if(chatWidget) makeDraggable(chatWidget);
-
-// ============ CHART FUNCTIONS (Right Side) ============
 
 async function fetchRealCandleDataRight() {
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
