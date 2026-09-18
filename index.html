@@ -25,7 +25,7 @@
 <!-- Firebase SDKs -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, sendEmailVerification, GoogleAuthProvider, OAuthProvider, signInWithPopup, signOut, reload } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, arrayUnion, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -47,6 +47,13 @@ window.firebaseDb = db;
 window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
 window.signInWithEmailAndPassword = signInWithEmailAndPassword;
 window.onAuthStateChanged = onAuthStateChanged;
+window.sendPasswordResetEmail = sendPasswordResetEmail;
+window.sendEmailVerification = sendEmailVerification;
+window.GoogleAuthProvider = GoogleAuthProvider;
+window.OAuthProvider = OAuthProvider;
+window.signInWithPopup = signInWithPopup;
+window.firebaseSignOut = signOut;
+window.reloadUser = reload;
 window.doc = doc;
 window.setDoc = setDoc;
 window.getDoc = getDoc;
@@ -113,7 +120,7 @@ display: inline-block;
 }
 
 /* Hide all pages initially to prevent flash */
-#homepage, #aboutPage, #authPage, #dashboard, #profilePage, #marketsPage, #tradePage, #botsPage, #botDetailPage, #withdrawalPage, #depositPage, #depositPaymentPage, #termsPage {
+#homepage, #aboutPage, #authPage, #dashboard, #profilePage, #marketsPage, #tradePage, #botsPage, #botDetailPage, #withdrawalPage, #depositPage, #depositPaymentPage, #termsPage, #verifyEmailPage {
 display: none;
 }
 
@@ -210,6 +217,32 @@ display: none;
 .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .forgot-btn { background: none; border: none; color: #667eea; cursor: pointer; font-size: 14px; margin-top: 15px; text-align: center; width: 100%; }
 .forgot-btn:hover { text-decoration: underline; }
+
+/* Social Login Buttons */
+.social-divider { display: flex; align-items: center; gap: 15px; margin: 25px 0 20px; color: #a0a0c0; font-size: 12px; }
+.social-divider::before, .social-divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+.social-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: white; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-bottom: 12px; font-family: inherit; }
+.social-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.25); }
+.social-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.social-btn svg { width: 20px; height: 20px; }
+.social-btn.google:hover { background: rgba(66, 133, 244, 0.15); }
+.social-btn.apple { background: rgba(255,255,255,0.1); }
+.social-btn.apple:hover { background: rgba(255,255,255,0.18); }
+
+/* Verify Email Page */
+.verify-email-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 100px 20px; background: #0a0e27; }
+.verify-email-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 40px; max-width: 500px; width: 100%; text-align: center; }
+.verify-email-icon { width: 90px; height: 90px; margin: 0 auto 25px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+.verify-email-card h2 { font-size: 26px; margin-bottom: 15px; }
+.verify-email-card p { color: #a0a0c0; font-size: 15px; line-height: 1.6; margin-bottom: 25px; }
+.verify-email-card .email-highlight { color: #667eea; font-weight: 600; word-break: break-all; }
+.verify-email-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+.verify-email-btn { padding: 14px; border-radius: 30px; border: none; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; font-family: inherit; }
+.verify-email-btn.primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+.verify-email-btn.primary:hover { transform: scale(1.02); }
+.verify-email-btn.secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #a0a0c0; }
+.verify-email-btn.secondary:hover { background: rgba(255,255,255,0.1); color: white; }
+
 .custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; justify-content: center; align-items: center; }
 .custom-modal.active { display: flex; }
 .custom-modal-content { background: #0d1129; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px; max-width: 400px; width: 90%; text-align: center; animation: modalFadeIn 0.3s ease; }
@@ -224,7 +257,6 @@ display: none;
 .custom-modal-btn { background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 12px 30px; border-radius: 30px; color: white; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; }
 .custom-modal-btn:hover { transform: scale(1.02); }
 
-/* BT-EARN Logo Spinner for Buttons */
 .logo-spinner { display: inline-flex; align-items: center; justify-content: center; gap: 3px; }
 .logo-spinner .spinner-letter { font-size: 18px; font-weight: bold; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; color: transparent; animation: spinLetter 0.8s ease-in-out infinite; display: inline-block; }
 .logo-spinner .spinner-letter:nth-child(1) { animation-delay: 0s; }
@@ -238,14 +270,12 @@ display: none;
 
 .btn-loading { opacity: 0.8; cursor: wait !important; pointer-events: none; }
 
-/* Terms Checkbox */
 .terms-checkbox-row { display: flex; align-items: center; gap: 10px; margin-top: 5px; margin-bottom: 15px; }
 .terms-checkbox-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: #667eea; cursor: pointer; flex-shrink: 0; }
 .terms-checkbox-row label { font-size: 14px; color: #a0a0c0; cursor: pointer; }
 .terms-checkbox-row a { color: #667eea; text-decoration: underline; cursor: pointer; }
 .terms-checkbox-row a:hover { color: #764ba2; }
 
-/* Terms Page */
 .terms-container { padding: 120px 40px 80px; max-width: 900px; margin: 0 auto; }
 .terms-container h1 { font-size: 36px; margin-bottom: 10px; background: linear-gradient(135deg, #fff, #667eea); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .terms-container .terms-date { color: #a0a0c0; font-size: 14px; margin-bottom: 30px; }
@@ -527,7 +557,6 @@ display: none;
     border-radius: 4px;
 }
 
-/* Mobile: stack vertically */
 @media (max-width: 992px) {
     .trade-page-desktop {
         flex-direction: column;
@@ -588,7 +617,6 @@ display: none;
 .confirm-btn.buy { background: #48bb78; color: white; }
 .confirm-btn.sell { background: #e53e3e; color: white; }
 
-/* Chart Modal (kept for the chart button) */
 .chart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; overflow-y: auto; }
 .chart-modal-content { background: #0a0e27; margin: 60px auto; width: 95%; max-width: 900px; border-radius: 20px; padding: 20px; position: relative; border: 1px solid rgba(255,255,255,0.1); }
 .close-chart { position: absolute; right: 20px; top: 15px; font-size: 28px; cursor: pointer; color: white; background: rgba(255,255,255,0.1); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
@@ -612,7 +640,6 @@ display: none;
 .chart-tab { cursor: pointer; font-size: 14px; color: #a0a0c0; }
 .chart-tab.active { color: #667eea; border-bottom: 2px solid #667eea; }
 
-/* Professional Trades Table Styles - Bolder Text */
 .order-book-table, .trades-table {
 width: 100%;
 font-size: 13px;
@@ -786,7 +813,6 @@ border-radius: 4px;
 .tx-detail-label { color: #a0a0c0; font-size: 14px; font-weight: 500; }
 .tx-detail-value { color: white; font-size: 15px; font-weight: 500; text-align: right; word-break: break-all; max-width: 60%; }
 
-/* View More Box */
 .view-more-box { 
 background: rgba(255,255,255,0.03); 
 border: 1px dashed rgba(102,126,234,0.4); 
@@ -925,13 +951,50 @@ font-weight: bold;
 </div>
 </div>
 
-<div id="authPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div></div><div class="auth-container"><div class="auth-card"><button class="back-btn" onclick="showHomepage()">← Back</button><div class="auth-tabs"><div class="auth-tab active" data-tab="login" id="loginTabBtn">Login</div><div class="auth-tab" data-tab="signup" id="signupTabBtn">Sign Up</div></div><div id="loginForm" class="auth-form active"><h2>Welcome back</h2><p>Enter your credentials to access your account</p><div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div><div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div><button class="auth-btn" id="loginBtn" onclick="handleLoginWithSpinner()">Login</button><button class="forgot-btn" onclick="showCustomModal('Password Reset', 'Password reset link has been sent to your email address.', 'info')">Forgot Password?</button></div><div id="signupForm" class="auth-form"><h2>Create an account</h2><p>Enter your details to create a new account</p><div class="input-group"><label>Full Name</label><input type="text" id="signupName" placeholder="John Doe"></div><div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div><div class="input-group"><label>Country</label><select id="signupCountry"></select></div><div class="input-group"><label>Password</label><input type="password" id="signupPassword" placeholder="Enter your password (min 8 characters)"></div><div class="input-group"><label>Confirm Password</label><input type="password" id="signupConfirmPassword" placeholder="Confirm your password"></div>
-<!-- Terms Checkbox -->
+<!-- VERIFY EMAIL PAGE -->
+<div id="verifyEmailPage" style="display:none;">
+<div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div></div>
+<div class="verify-email-container">
+<div class="verify-email-card">
+<div class="verify-email-icon">📧</div>
+<h2>Verify Your Email</h2>
+<p>We've sent a verification link to <br><span class="email-highlight" id="verifyEmailAddress">your email</span></p>
+<p>Click the link in your inbox to verify your account. Check your spam folder if you don't see it within 2 minutes.</p>
+<div class="verify-email-actions">
+<button class="verify-email-btn primary" id="resendVerificationBtn" onclick="resendVerification()">Resend Verification Email</button>
+<button class="verify-email-btn primary" onclick="checkVerificationStatus()">I've Verified — Continue</button>
+<button class="verify-email-btn secondary" onclick="logoutWithSpinner()">Logout</button>
+</div>
+</div>
+</div>
+</div>
+
+<div id="authPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div></div><div class="auth-container"><div class="auth-card"><button class="back-btn" onclick="showHomepage()">← Back</button><div class="auth-tabs"><div class="auth-tab active" data-tab="login" id="loginTabBtn">Login</div><div class="auth-tab" data-tab="signup" id="signupTabBtn">Sign Up</div></div><div id="loginForm" class="auth-form active"><h2>Welcome back</h2><p>Enter your credentials to access your account</p><div class="input-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div><div class="input-group"><label>Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div><button class="auth-btn" id="loginBtn" onclick="handleLoginWithSpinner()">Login</button><button class="forgot-btn" onclick="handlePasswordReset()">Forgot Password?</button>
+<div class="social-divider">or continue with</div>
+<button class="social-btn google" id="googleLoginBtn" onclick="handleGoogleSignIn()">
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+Continue with Google
+</button>
+<button class="social-btn apple" id="appleLoginBtn" onclick="handleAppleSignIn()">
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+Continue with Apple
+</button>
+</div><div id="signupForm" class="auth-form"><h2>Create an account</h2><p>Enter your details to create a new account</p><div class="input-group"><label>Full Name</label><input type="text" id="signupName" placeholder="John Doe"></div><div class="input-group"><label>Email</label><input type="email" id="signupEmail" placeholder="your@email.com"></div><div class="input-group"><label>Country</label><select id="signupCountry"></select></div><div class="input-group"><label>Password</label><input type="password" id="signupPassword" placeholder="Enter your password (min 8 characters)"></div><div class="input-group"><label>Confirm Password</label><input type="password" id="signupConfirmPassword" placeholder="Confirm your password"></div>
 <div class="terms-checkbox-row">
 <input type="checkbox" id="termsCheckbox" onchange="toggleSignupButton()">
 <label for="termsCheckbox">I agree to the <a onclick="showTermsPage()">Terms and Conditions</a></label>
 </div>
-<button class="auth-btn" id="signupBtn" onclick="handleSignupWithSpinner()" disabled>Create Account</button></div></div></div></div>
+<button class="auth-btn" id="signupBtn" onclick="handleSignupWithSpinner()" disabled>Create Account</button>
+<div class="social-divider">or continue with</div>
+<button class="social-btn google" id="googleSignupBtn" onclick="handleGoogleSignIn()">
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+Continue with Google
+</button>
+<button class="social-btn apple" id="appleSignupBtn" onclick="handleAppleSignIn()">
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+Continue with Apple
+</button>
+</div></div></div></div>
 
 <div id="dashboard" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="chart-icon-btn" onclick="handleChartIconClick()" style="padding: 8px 12px;"><div class="chart-icon"><span></span><span></span><span></span></div></div><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="dashboard-container"><div class="dashboard-header"><h1>Dashboard</h1><div class="date-time" id="dateTimeDisplay"><div class="time">--:--:--</div><div class="date">---</div></div></div><div class="portfolio-card"><h3>REAL PORTFOLIO</h3><div class="portfolio-balance" id="portfolioBalance">$0.00</div><div class="portfolio-change" id="portfolioChange">+0.00%</div><div class="portfolio-buttons"><button class="deposit-btn" onclick="showDepositPage()">Deposit</button><button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button></div></div><div class="section-title">Your Crypto <button class="refresh-btn" onclick="refreshDashboardPrices()">Refresh Prices</button></div><div id="cryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist</div><div id="watchlistContainer" class="watchlist-scroll"></div><div id="lastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots" onclick="showBots()">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
@@ -939,12 +1002,10 @@ font-weight: bold;
 
 <div id="marketsPage" style="display:none;"><div class="header"><div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div><div class="header-right"><div class="chart-icon-btn" onclick="handleChartIconClick()" style="padding: 8px 12px;"><div class="chart-icon"><span></span><span></span><span></span></div></div><div class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></div></div></div><div class="markets-container"><div class="markets-header"><h1>Markets</h1><button class="refresh-btn" onclick="refreshMarketsPrices()">Refresh Prices</button></div><div class="section-title">Your Crypto</div><div id="marketsCryptoContainer" class="crypto-scroll"></div><div class="section-title">Watchlist</div><div id="marketsWatchlistContainer" class="watchlist-scroll"></div><div id="marketsLastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div><div style="height:80px;"></div></div><div class="bottom-nav"><div class="nav-item" data-nav="home">Home</div><div class="nav-item" data-nav="markets" style="color: #667eea;">Markets</div><div class="nav-item" data-nav="trade">Trade</div><div class="nav-item" data-nav="bots" onclick="showBots()">Bots</div><div class="nav-item" data-nav="profile">Profile</div></div></div>
 
-<!-- ============ UPDATED TRADE PAGE: Trade Form Left | Chart Right ============ -->
 <div id="tradePage" style="display:none;">
 <div class="header">
     <div class="logo" onclick="showHomepage()" style="cursor:pointer;">BT-EARN</div>
     <div class="header-right">
-        <!-- Chart button stays in header - opens full modal -->
         <div class="chart-icon-btn" onclick="openChartModal()" style="padding: 8px 12px;">
             <div class="chart-icon"><span></span><span></span><span></span></div>
             <span style="font-size:12px;">Chart</span>
@@ -953,9 +1014,7 @@ font-weight: bold;
     </div>
 </div>
 
-<!-- DESKTOP LAYOUT: Trade Form Left | Chart Right -->
 <div class="trade-page-desktop">
-    <!-- LEFT: Trade Form -->
     <div class="trade-form-container" id="tradeContainer">
         <div class="trade-header">
             <select id="tradeCoinSelect" class="coin-selector" onchange="changeTradeCoin()"></select>
@@ -983,7 +1042,6 @@ font-weight: bold;
         </div>
     </div>
 
-    <!-- RIGHT: Chart (always visible) -->
     <div class="chart-container-right" id="chartContainerRight">
         <div class="chart-header-right">
             <h3 id="chartCoinTitleRight">BTC/USDT Chart</h3>
@@ -1081,7 +1139,6 @@ font-weight: bold;
 
 <button class="withdraw-submit-btn" id="depositPayBtn" onclick="processDepositToPayment()" style="width: 100%;">Pay</button>
 
-<!-- Deposit History Table -->
 <div class="history-section" style="margin-top: 40px;">
 <h3>Deposit And Trade History</h3>
 <table class="history-table">
@@ -1143,12 +1200,10 @@ font-weight: bold;
 
 <div id="txDetailModal" class="tx-modal"><div class="tx-modal-content"><div class="close-tx" onclick="closeTxModal()">×</div><h2>Transaction Details</h2><div class="tx-detail-row"><span class="tx-detail-label">Amount</span><span class="tx-detail-value" id="txAmount">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Asset</span><span class="tx-detail-value" id="txAsset">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Wallet Address</span><span class="tx-detail-value" id="txAddress">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Status</span><span class="tx-detail-value" id="txStatus">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Date & Time</span><span class="tx-detail-value" id="txDateTime">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Network</span><span class="tx-detail-value" id="txNetwork">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Network Fee</span><span class="tx-detail-value" id="txFee">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Amount Received</span><span class="tx-detail-value" id="txAmountReceived">--</span></div><div class="tx-detail-row"><span class="tx-detail-label">Transaction ID</span><span class="tx-detail-value" id="txId">--</span></div></div></div>
 
-<!-- CHART MODAL (kept for chart button - opens full screen) -->
 <div id="chartModal" class="chart-modal"><div class="chart-modal-content"><div class="close-chart" onclick="closeChartModal()">×</div><div class="chart-header"><h3 id="chartCoinTitle">BTC/USDT Chart</h3><div class="time-intervals" id="timeIntervals"><button class="time-btn" data-interval="1m">1m</button><button class="time-btn" data-interval="5m">5m</button><button class="time-btn" data-interval="15m">15m</button><button class="time-btn" data-interval="30m">30m</button><button class="time-btn active" data-interval="1h">1h</button><button class="time-btn" data-interval="1D">1D</button></div></div><div class="candlestick-chart"><div class="chart-canvas-container"><canvas id="candleCanvas" class="candle-chart-canvas" width="900" height="350"></canvas></div></div><div class="chart-stats" id="chartStats"><div class="stat-item"><div class="stat-label">24h High</div><div class="stat-value" id="statHigh">--</div></div><div class="stat-item"><div class="stat-label">24h Low</div><div class="stat-value" id="statLow">--</div></div><div class="stat-item"><div class="stat-label">24h Volume</div><div class="stat-value" id="statVolume">--</div></div><div class="stat-item"><div class="stat-label">MA7</div><div class="stat-value" id="statMA7">--</div></div><div class="stat-item"><div class="stat-label">MA14</div><div class="stat-value" id="statMA14">--</div></div><div class="stat-item"><div class="stat-label">MA28</div><div class="stat-value" id="statMA28">--</div></div></div><div class="indicators" id="indicators"><button class="indicator-btn active" data-indicator="MA">MA</button><button class="indicator-btn" data-indicator="EMA">EMA</button><button class="indicator-btn" data-indicator="BOLL">BOLL</button><button class="indicator-btn" data-indicator="MACD">MACD</button></div><div class="chart-tabs"><div class="chart-tab active" data-tab="orderbook">Order Book</div><div class="chart-tab" data-tab="trades">Trades</div></div><div id="orderBookPanel"><table class="order-book-table" style="width:100%"><thead><tr><th>Price (USDT)</th><th>Qty (<span id="orderBookCoinSymbol">BTC</span>)</th><th>Total</th></tr></thead><tbody id="orderBookBody"></tbody></table></div><div id="tradesPanel" style="display:none;"><div class="trades-container"><table class="trades-table" style="width:100%"><thead><tr><th>Time</th><th>Price</th><th>Qty</th><th>Type</th></tr></thead><tbody id="tradesBody"></tbody></table></div></div></div></div>
 
 <div id="configModal" class="config-modal"><div class="config-modal-content"><div class="close-config" onclick="closeConfigModal()">×</div><h2 id="configModalTitle">Configure Bot</h2><div class="config-field"><label>Select Asset</label><select id="configAssetSelect"><option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option><option value="USDT">Tether (USDT)</option></select></div><div class="config-field"><label>Investment Amount per Trade (USD)</label><input type="number" id="configAmount" value="100" min="2" max="10000"><div class="helper-text" id="configHelperText">Minimum: $2 · Maximum: $10,000</div><div class="sub-text">Enter the amount you want to invest per trade</div></div><div class="config-buttons"><button class="config-cancel-btn" onclick="closeConfigModal()">Cancel</button><button class="config-save-btn" id="configSaveBtn" onclick="saveConfigWithSpinner()">Save Configuration</button></div></div></div>
 
-<!-- BOT ACCESS CODE MODAL -->
 <div id="botAccessModal" class="custom-modal">
     <div class="custom-modal-content" style="max-width: 400px;">
         <div class="custom-modal-icon info">🔐</div>
@@ -1413,8 +1468,8 @@ let selectedDepositAsset = 'USDT';
 let currentPaymentQr = null;
 let currentTxId = null;
 let lastSyncedBalance = 0;
+let pendingVerifyUser = null;
 
-// Chart right side variables
 let chartUpdateIntervalRight = null;
 let chartRealTimeIntervalRight = null;
 let currentIntervalRight = '1h';
@@ -1522,6 +1577,7 @@ function renderBotsPage() {
     document.getElementById('depositPage').style.display = 'none';
     document.getElementById('depositPaymentPage').style.display = 'none';
     document.getElementById('termsPage').style.display = 'none';
+    document.getElementById('verifyEmailPage').style.display = 'none';
     loadSavedBotConfigs();
 }
 
@@ -1578,6 +1634,7 @@ document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'none';
 }
 
 function showChatSupportModal() {
@@ -1599,6 +1656,60 @@ function getLogoSpinner() { return `<div class="logo-spinner"><span class="spinn
 function showButtonSpinner(buttonId, originalText) { const btn = document.getElementById(buttonId); if(btn) { btn.dataset.originalText = originalText; btn.innerHTML = getLogoSpinner(); btn.disabled = true; btn.classList.add('btn-loading'); } }
 function hideButtonSpinner(buttonId) { const btn = document.getElementById(buttonId); if(btn && btn.dataset.originalText) { btn.innerHTML = btn.dataset.originalText; btn.disabled = false; btn.classList.remove('btn-loading'); } }
 function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+// ============ VERIFY EMAIL PAGE ============
+function showVerifyEmailPage(email) {
+document.getElementById('homepage').style.display = 'none';
+document.getElementById('aboutPage').style.display = 'none';
+document.getElementById('authPage').style.display = 'none';
+document.getElementById('dashboard').style.display = 'none';
+document.getElementById('profilePage').style.display = 'none';
+document.getElementById('marketsPage').style.display = 'none';
+document.getElementById('tradePage').style.display = 'none';
+document.getElementById('botsPage').style.display = 'none';
+document.getElementById('botDetailPage').style.display = 'none';
+document.getElementById('withdrawalPage').style.display = 'none';
+document.getElementById('depositPage').style.display = 'none';
+document.getElementById('depositPaymentPage').style.display = 'none';
+document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'block';
+document.getElementById('verifyEmailAddress').textContent = email;
+}
+
+async function resendVerification() {
+const btn = document.getElementById('resendVerificationBtn');
+const originalText = btn.textContent;
+btn.textContent = 'Sending...';
+btn.disabled = true;
+try {
+    const user = window.firebaseAuth.currentUser;
+    if (!user) throw new Error("Not logged in");
+    await window.sendEmailVerification(user);
+    showCustomModal('Email Sent', 'A new verification link has been sent to your email.', 'success');
+} catch (err) {
+    console.error('Resend verification error:', err);
+    showCustomModal('Failed to Send', err.message || 'Could not send verification email. Please try again later.', 'error');
+}
+btn.textContent = originalText;
+btn.disabled = false;
+}
+
+async function checkVerificationStatus() {
+try {
+    const user = window.firebaseAuth.currentUser;
+    if (!user) throw new Error("Not logged in");
+    await window.reloadUser(user);
+    if (user.emailVerified) {
+        showCustomModal('Verified!', 'Your email is now verified. Loading your dashboard...', 'success');
+        await loadUserSession(user);
+    } else {
+        showCustomModal('Not Verified Yet', 'We could not detect verification. Please click the link in your email first, then try again.', 'warning');
+    }
+} catch (err) {
+    console.error('Check verification error:', err);
+    showCustomModal('Error', err.message || 'Could not check verification status.', 'error');
+}
+}
 
 // ============ FIREBASE HELPER FUNCTIONS ============
 async function saveUserHoldingsToFirestore() {
@@ -1641,6 +1752,74 @@ await auth.setPersistence('local');
 }
 }
 
+// ============ PASSWORD RESET ============
+async function handlePasswordReset() {
+    const email = prompt('Enter your account email to receive a password reset link:');
+    if (!email) return;
+    if (!email.includes('@')) {
+        showCustomModal('Invalid Email', 'Please enter a valid email address.', 'error');
+        return;
+    }
+    try {
+        await window.sendPasswordResetEmail(window.firebaseAuth, email.trim());
+        showCustomModal('Reset Email Sent', `If an account exists for ${email}, you'll receive a password reset link shortly. Check your spam folder too.`, 'success');
+    } catch (err) {
+        console.warn('Password reset error:', err);
+        showCustomModal('Reset Email Sent', `If an account exists for ${email}, you'll receive a password reset link shortly.`, 'success');
+    }
+}
+
+// ============ LOAD USER SESSION (shared) ============
+async function loadUserSession(user) {
+    try {
+        const meRes = await authFetch(`${API_BASE_URL}/api/auth/me`);
+        const meData = await meRes.json().catch(() => ({}));
+
+        if (meRes.ok && meData && meData.success && meData.user) {
+            console.log("📡 Loaded user data from MongoDB");
+            const u = meData.user;
+            holdings = {
+                usdt: (u.wallets && u.wallets.usdt) || u.balance || 0,
+                btc: (u.wallets && u.wallets.btc) || 0,
+                eth: (u.wallets && u.wallets.eth) || 0,
+                ngn: (u.wallets && u.wallets.ngn) || 0
+            };
+            withdrawals = u.withdrawals || [];
+            deposits = u.deposits || [];
+            currentUser = { uid: user.uid, name: u.name || user.email, email: user.email };
+            lastSyncedBalance = holdings.usdt;
+            showDashboard();
+            return;
+        }
+    } catch (e) {
+        console.warn("⚠️ MongoDB /me failed, trying Firestore:", e);
+    }
+    // Firestore fallback
+    try {
+        const db = window.firebaseDb;
+        const userRef = window.doc(db, 'users', user.uid);
+        const userDoc = await window.getDoc(userRef);
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            holdings = userData.holdings || { usdt: 0.00 };
+            withdrawals = userData.withdrawals || [];
+            deposits = userData.deposits || [];
+            currentUser = { uid: user.uid, name: userData.name, email: user.email };
+        } else {
+            holdings = { usdt: 0.00 };
+            withdrawals = [];
+            deposits = [];
+            currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
+        }
+        lastSyncedBalance = holdings.usdt;
+        showDashboard();
+    } catch (e) {
+        console.log("Firestore fallback also failed:", e);
+        showHomepage();
+    }
+}
+
+// ============ EMAIL SIGNUP ============
 async function handleSignupWithSpinner() {
 const buttonId = 'signupBtn';
 showButtonSpinner(buttonId, 'Create Account');
@@ -1682,7 +1861,7 @@ deposits: [],
 createdAt: new Date().toISOString()
 });
 
-// Register user in MongoDB via backend (public endpoint - no token needed)
+// Register in MongoDB via backend
 try {
 const apiRes = await fetch(`${API_BASE_URL}/api/auth/register`, {
 method: 'POST',
@@ -1694,25 +1873,29 @@ country: country,
 firebaseUid: user.uid
 })
 });
-
 const apiData = await apiRes.json().catch(() => ({}));
-
 if (!apiRes.ok) {
-try { await user.delete(); } catch (delErr) { console.log('Rollback delete failed:', delErr); }
-try { await window.deleteDoc(userRef); } catch (delErr) { console.log('Firestore rollback failed:', delErr); }
-
+try { await user.delete(); } catch (delErr) {}
+try { await window.deleteDoc(userRef); } catch (delErr) {}
 hideButtonSpinner(buttonId);
-showCustomModal('Signup Failed', apiData.message || apiData.error || 'Backend registration failed. Please try again.', 'error');
+showCustomModal('Signup Failed', apiData.message || apiData.error || 'Backend registration failed.', 'error');
 return;
 }
 } catch (backendErr) {
 console.error('Backend register error:', backendErr);
-try { await user.delete(); } catch (delErr) { console.log('Rollback delete failed:', delErr); }
-try { await window.deleteDoc(userRef); } catch (delErr) { console.log('Firestore rollback failed:', delErr); }
-
+try { await user.delete(); } catch (delErr) {}
+try { await window.deleteDoc(userRef); } catch (delErr) {}
 hideButtonSpinner(buttonId);
-showCustomModal('Signup Failed', 'Could not reach server. Please check your connection and try again.', 'error');
+showCustomModal('Signup Failed', 'Could not reach server. Please try again.', 'error');
 return;
+}
+
+// Send verification email
+try {
+    await window.sendEmailVerification(user);
+    console.log("📧 Verification email sent");
+} catch (verifyErr) {
+    console.warn("Could not send verification email:", verifyErr);
 }
 
 holdings = { usdt: 0.00 };
@@ -1721,8 +1904,12 @@ deposits = [];
 currentUser = { uid: user.uid, name: name, email: email };
 
 hideButtonSpinner(buttonId);
-showCustomModal('Success!', 'Account created successfully!', 'success');
-showDashboard();
+showCustomModal('Account Created!', 'We sent a verification link to your email. Please verify to continue.', 'success');
+
+setTimeout(() => {
+    showVerifyEmailPage(user.email);
+}, 1200);
+
 } catch (error) {
 hideButtonSpinner(buttonId);
 let errorMsg = error.message;
@@ -1731,6 +1918,7 @@ showCustomModal('Signup Failed', errorMsg, 'error');
 }
 }
 
+// ============ EMAIL LOGIN ============
 async function handleLoginWithSpinner() {
     const buttonId = 'loginBtn';
     showButtonSpinner(buttonId, 'Login');
@@ -1748,7 +1936,15 @@ async function handleLoginWithSpinner() {
         const userCredential = await window.signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Log login to MongoDB (public endpoint)
+        // Check email verification
+        await window.reloadUser(user);
+        if (!user.emailVerified) {
+            hideButtonSpinner(buttonId);
+            showVerifyEmailPage(user.email);
+            return;
+        }
+
+        // Log login to MongoDB
         try {
             await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
@@ -1760,56 +1956,141 @@ async function handleLoginWithSpinner() {
             console.error('⚠️ Backend login log failed:', backendErr);
         }
 
-        // Fetch fresh data from MongoDB (AUTHENTICATED)
-        try {
-            const meRes = await authFetch(`${API_BASE_URL}/api/auth/me`);
-            const meData = await meRes.json().catch(() => ({}));
-
-            if (meRes.ok && meData && meData.success && meData.user) {
-                console.log("📡 Loaded user data from MongoDB after login");
-                const u = meData.user;
-                holdings = {
-                    usdt: (u.wallets && u.wallets.usdt) || u.balance || 0,
-                    btc: (u.wallets && u.wallets.btc) || 0,
-                    eth: (u.wallets && u.wallets.eth) || 0,
-                    ngn: (u.wallets && u.wallets.ngn) || 0
-                };
-                withdrawals = u.withdrawals || [];
-                deposits = u.deposits || [];
-                currentUser = { uid: user.uid, name: u.name || user.email, email: user.email };
-            } else {
-                throw new Error("MongoDB /me returned non-OK");
-            }
-        } catch (meErr) {
-            console.warn("⚠️ MongoDB /me failed, using Firestore fallback:", meErr);
-            const db = window.firebaseDb;
-            const userRef = window.doc(db, 'users', user.uid);
-            const userDoc = await window.getDoc(userRef);
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                holdings = userData.holdings || { usdt: 0.00 };
-                withdrawals = userData.withdrawals || [];
-                deposits = userData.deposits || [];
-                currentUser = { uid: user.uid, name: userData.name, email: user.email };
-            } else {
-                holdings = { usdt: 0.00 };
-                withdrawals = [];
-                deposits = [];
-                currentUser = { uid: user.uid, name: email.split('@')[0], email: user.email };
-            }
-        }
-
-        lastSyncedBalance = holdings.usdt;
+        await loadUserSession(user);
         hideButtonSpinner(buttonId);
         showCustomModal('Success', 'Logged in successfully!', 'success');
-        showDashboard();
     } catch (error) {
         hideButtonSpinner(buttonId);
         showCustomModal('Login Failed', 'Invalid email or password.', 'error');
     }
 }
 
-// ============ AUTO DEPOSIT DETECTION VIA MONGODB (AUTHENTICATED) ============
+// ============ GOOGLE SIGN-IN ============
+async function handleGoogleSignIn() {
+    try {
+        const provider = new window.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const result = await window.signInWithPopup(window.firebaseAuth, provider);
+        const user = result.user;
+        console.log("✅ Google sign-in:", user.email);
+        await createOrLoadSocialUser(user, 'google');
+    } catch (err) {
+        console.error('Google sign-in error:', err);
+        if (err.code === 'auth/popup-closed-by-user') return;
+        if (err.code === 'auth/account-exists-with-different-credential') {
+            showCustomModal('Account Exists', 'An account already exists with this email using a different sign-in method. Please use that method.', 'error');
+            return;
+        }
+        showCustomModal('Google Sign-In Failed', err.message || 'Could not sign in with Google.', 'error');
+    }
+}
+
+// ============ APPLE SIGN-IN ============
+async function handleAppleSignIn() {
+    try {
+        const provider = new window.OAuthProvider('apple.com');
+        provider.addScope('email');
+        provider.addScope('name');
+        const result = await window.signInWithPopup(window.firebaseAuth, provider);
+        const user = result.user;
+        console.log("✅ Apple sign-in:", user.email);
+        await createOrLoadSocialUser(user, 'apple');
+    } catch (err) {
+        console.error('Apple sign-in error:', err);
+        if (err.code === 'auth/popup-closed-by-user') return;
+        if (err.code === 'auth/account-exists-with-different-credential') {
+            showCustomModal('Account Exists', 'An account already exists with this email using a different sign-in method. Please use that method.', 'error');
+            return;
+        }
+        showCustomModal('Apple Sign-In Failed', err.message || 'Could not sign in with Apple.', 'error');
+    }
+}
+
+// ============ SHARED SOCIAL SIGN-IN HANDLER ============
+async function createOrLoadSocialUser(user, provider) {
+    try {
+        const db = window.firebaseDb;
+
+        // Step 1: Check if MongoDB has the user first
+        let mongoHasUser = false;
+        try {
+            const meRes = await authFetch(`${API_BASE_URL}/api/auth/me`);
+            const meData = await meRes.json().catch(() => ({}));
+            if (meRes.ok && meData && meData.success && meData.user) {
+                mongoHasUser = true;
+                console.log("📡 Existing MongoDB user found");
+            }
+        } catch (e) {
+            // 404 = user doesn't exist yet. That's fine.
+        }
+
+        if (mongoHasUser) {
+            await loadUserSession(user);
+            return;
+        }
+
+        // Step 2: New social user → create records
+        const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+        const userEmail = user.email || '';
+
+        // Firestore doc
+        const userRef = window.doc(db, 'users', user.uid);
+        await window.setDoc(userRef, {
+            name: displayName,
+            email: userEmail,
+            country: '',
+            provider: provider,
+            holdings: { usdt: 0.00 },
+            withdrawals: [],
+            deposits: [],
+            createdAt: new Date().toISOString()
+        }, { merge: true });
+
+        // MongoDB via backend
+        try {
+            const regRes = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: displayName,
+                    email: userEmail,
+                    country: '',
+                    firebaseUid: user.uid
+                })
+            });
+            const regData = await regRes.json().catch(() => ({}));
+            if (!regRes.ok && regRes.status !== 200 && regRes.status !== 409) {
+                console.warn("Backend registration returned:", regData);
+            }
+        } catch (be) {
+            console.warn("Backend registration failed:", be);
+        }
+
+        // Log the login
+        try {
+            await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ firebaseUid: user.uid, email: userEmail })
+            });
+        } catch (be) {}
+
+        // Now load the session
+        holdings = { usdt: 0.00 };
+        withdrawals = [];
+        deposits = [];
+        currentUser = { uid: user.uid, name: displayName, email: userEmail };
+        lastSyncedBalance = 0;
+        showDashboard();
+        showCustomModal('Welcome!', `Signed in as ${userEmail}`, 'success');
+
+    } catch (err) {
+        console.error('Social sign-in flow error:', err);
+        showCustomModal('Error', 'Sign-in succeeded but we could not set up your account. Please try again.', 'error');
+    }
+}
+
+// ============ AUTO DEPOSIT DETECTION ============
 async function autoDetectDeposits() {
     if (!currentUser || !currentUser.uid || !USE_MONGODB_PRIMARY) return;
 
@@ -1825,11 +2106,9 @@ async function autoDetectDeposits() {
 
         if (currentMongoBalance > cachedBalance + 0.01) {
             const difference = currentMongoBalance - cachedBalance;
-            console.log(`[Deposit Detect] Balance increased from $${cachedBalance.toFixed(2)} to $${currentMongoBalance.toFixed(2)}`);
-
+            console.log(`[Deposit Detect] Balance increased by $${difference.toFixed(2)}`);
             const isWholeDollar = Math.abs(difference % 1) < 0.01;
             const isAtLeastTwo = difference >= 2;
-
             if (isWholeDollar && isAtLeastTwo) {
                 const newDeposit = {
                     id: Date.now(),
@@ -1841,14 +2120,11 @@ async function autoDetectDeposits() {
                     dateTime: new Date().toLocaleString(),
                     txId: 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
                 };
-
                 await saveDepositToFirestore(newDeposit);
                 deposits.push(newDeposit);
-                
                 if (document.getElementById('depositPage').style.display === 'block') {
                     renderDepositHistory();
                 }
-
                 showCustomModal('Deposit Successfully', `$${difference.toFixed(2)} USDT has been added to your balance.`, 'success');
             }
         }
@@ -1860,7 +2136,6 @@ async function autoDetectDeposits() {
             holdings.ngn = u.wallets.ngn || 0;
         }
         lastSyncedBalance = currentMongoBalance;
-
         updatePortfolioTotal();
         renderCrypto();
         renderMarketsCrypto();
@@ -1872,15 +2147,15 @@ async function autoDetectDeposits() {
 async function logoutWithSpinner() {
     resetBotAccess();
     const btn = document.querySelector('.profile-logout-btn');
-    if(!btn) return;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = getLogoSpinner();
-    btn.disabled = true;
-    await delay(2000);
+    if(btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = getLogoSpinner();
+        btn.disabled = true;
+    }
+    await delay(1500);
 
     try {
-        const auth = window.firebaseAuth;
-        await auth.signOut();
+        await window.firebaseSignOut(window.firebaseAuth);
     } catch(e) {}
 
     currentUser = null;
@@ -1891,14 +2166,13 @@ async function logoutWithSpinner() {
     showHomepage();
 }
 
-// ============ CHECK EXISTING SESSION (AUTHENTICATED) ============
+// ============ CHECK EXISTING SESSION ============
 async function checkExistingSession() {
     const auth = window.firebaseAuth;
-    const db = window.firebaseDb;
 
     return new Promise((resolve) => {
         const failSafe = setTimeout(() => {
-            console.warn("⚠️ checkExistingSession timed out - forcing load");
+            console.warn("⚠️ checkExistingSession timed out");
             const loadingScreen = document.getElementById('loadingScreen');
             if (loadingScreen) {
                 loadingScreen.classList.add('fade-out');
@@ -1910,52 +2184,19 @@ async function checkExistingSession() {
         window.onAuthStateChanged(auth, async (user) => {
             clearTimeout(failSafe);
             if (user) {
-                try {
-                    const res = await authFetch(`${API_BASE_URL}/api/auth/me`);
-                    const data = await res.json().catch(() => ({}));
-
-                    if (res.ok && data && data.success && data.user) {
-                        console.log("📡 Loaded user data from MongoDB");
-                        const u = data.user;
-                        holdings = {
-                            usdt: (u.wallets && u.wallets.usdt) || u.balance || 0,
-                            btc: (u.wallets && u.wallets.btc) || 0,
-                            eth: (u.wallets && u.wallets.eth) || 0,
-                            ngn: (u.wallets && u.wallets.ngn) || 0
-                        };
-                        withdrawals = u.withdrawals || [];
-                        deposits = u.deposits || [];
-                        currentUser = { uid: user.uid, name: u.name || user.email, email: user.email };
-                        lastSyncedBalance = holdings.usdt;
-                        showDashboard();
+                // Check email verification for email sign-ups
+                const isSocial = user.providerData && user.providerData.some(p => p.providerId === 'google.com' || p.providerId === 'apple.com');
+                if (!isSocial) {
+                    try {
+                        await window.reloadUser(user);
+                    } catch (e) {}
+                    if (!user.emailVerified) {
+                        showVerifyEmailPage(user.email);
                         resolve();
                         return;
                     }
-                } catch (mongoError) {
-                    console.warn("⚠️ MongoDB fetch failed, falling back to Firestore:", mongoError);
                 }
-
-                try {
-                    const userRef = window.doc(db, 'users', user.uid);
-                    const userDoc = await window.getDoc(userRef);
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        holdings = userData.holdings || { usdt: 0.00 };
-                        withdrawals = userData.withdrawals || [];
-                        deposits = userData.deposits || [];
-                        currentUser = { uid: user.uid, name: userData.name, email: user.email };
-                    } else {
-                        holdings = { usdt: 0.00 };
-                        withdrawals = [];
-                        deposits = [];
-                        currentUser = { uid: user.uid, name: user.email.split('@')[0], email: user.email };
-                    }
-                    lastSyncedBalance = holdings.usdt;
-                    showDashboard();
-                } catch (e) {
-                    console.log("Error loading user data from Firestore:", e);
-                    showHomepage();
-                }
+                await loadUserSession(user);
             } else {
                 showHomepage();
             }
@@ -1992,7 +2233,7 @@ checkUSDT.innerHTML = '';
 }
 }
 
-// ============ RECORD DEPOSIT INTENT IN MONGODB (AUTHENTICATED) ============
+// ============ RECORD DEPOSIT INTENT ============
 async function processDepositToPayment() {
     const buttonId = 'depositPayBtn';
     showButtonSpinner(buttonId, 'Pay');
@@ -2106,6 +2347,7 @@ document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'none';
 }
 
 function showAuthPage() {
@@ -2122,6 +2364,7 @@ document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'none';
 populateCountries();
 document.getElementById('signupName').value = '';
 document.getElementById('signupEmail').value = '';
@@ -2148,6 +2391,7 @@ document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'none';
 loadDashboard();
 }
 
@@ -2166,6 +2410,7 @@ document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'none';
 renderProfile();
 }
 
@@ -2184,6 +2429,7 @@ document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'none';
 loadMarketsPage();
 }
 
@@ -2203,6 +2449,7 @@ document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'none';
 loadTradePage();
 }
 
@@ -2220,6 +2467,7 @@ document.getElementById('withdrawalPage').style.display = 'none';
 document.getElementById('depositPage').style.display = 'block';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'none';
 selectDepositAsset('USDT');
 document.getElementById('depositAmount').value = '';
 renderDepositHistory();
@@ -2240,6 +2488,7 @@ document.getElementById('withdrawalPage').style.display = 'block';
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'none';
 document.getElementById('termsPage').style.display = 'none';
+document.getElementById('verifyEmailPage').style.display = 'none';
 if(document.getElementById('withdrawBalance')) document.getElementById('withdrawBalance').innerHTML = `$${holdings.usdt.toFixed(2)}`;
 renderWithdrawalHistory();
 }
@@ -2269,7 +2518,6 @@ updatePortfolioTotal();
 updateLastUpdatedText();
 }
 
-// ============ WATCHLIST ============
 function renderWatchlist() {
 const watchlistSymbols = ['BTC', 'ETH', 'BNB', 'SOL'];
 let html = '';
@@ -2360,7 +2608,6 @@ select.appendChild(option);
 }
 }
 
-// ============ TRADE PAGE FUNCTIONS ============
 function loadTradePage() {
 populateTradeDropdown();
 document.getElementById('tradeCoinSelect').value = currentTradeCoin;
@@ -2484,7 +2731,7 @@ lastSyncedBalance = holdings.usdt;
 function renderProfile() {
 if(!currentUser) return;
 const memberSince = new Date().toLocaleString('en-US',{month:'long',year:'numeric'});
-const profileHTML = `<div class="profile-header"><div class="profile-avatar">${currentUser.email ? currentUser.email.charAt(0).toUpperCase() : 'U'}</div><h2>${currentUser.name || currentUser.email || 'User'}</h2><p>Member since ${memberSince}</p></div><div class="profile-section"><h3>Personal Information</h3><div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${currentUser.name || 'Not set'}</span></div><div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span></div><div class="info-row"><span class="info-label">Account Type</span><span class="info-value">Standard</span></div></div><div class="profile-section"><h3>Account Security</h3><div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span></div><div class="info-row"><span class="info-label">Last Login</span><span class="info-value">${new Date().toLocaleString()}</span></div></div><div class="profile-section"><h3>Preferences</h3><div class="preference-row"><span class="preference-label">Theme</span><span class="preference-value">Dark</span></div><div class="preference-row"><span class="preference-label">Language</span><span class="preference-value">English</span></div></div><button class="profile-logout-btn" onclick="logoutWithSpinner()">Logout</button>`;
+const profileHTML = `<div class="profile-header"><div class="profile-avatar">${currentUser.email ? currentUser.email.charAt(0).toUpperCase() : 'U'}</div><h2>${currentUser.name || currentUser.email || 'User'}</h2><p>Member since ${memberSince}</p></div><div class="profile-section"><h3>Personal Information</h3><div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${currentUser.name || 'Not set'}</span></div><div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${currentUser.email || 'Not set'}</span></div><div class="info-row"><span class="info-label">Account Type</span><span class="info-value">Standard</span></div></div><div class="profile-section"><h3>Account Security</h3><div class="info-row"><span class="info-label">Email Verified</span><span class="status-badge">Verified</span></div><div class="info-row"><span class="info-label">Two-Factor Authentication</span><span class="status-badge disabled">Disabled</span></div><div class="info-row"><span class="info-label">Last Login</span><span class="info-value">${new Date().toLocaleString()}</span></div></div><div class="profile-section"><h3>Preferences</h3><div class="preference-row"><span class="preference-label">Theme</span><span class="preference-value">Dark</span></div><div class="preference-row"><span class="preference-label">Language</span><span class="preference-value">English</span></div></div><button class="profile-logout-btn" onclick="logoutWithSpinner()">Logout</button>`;
 document.getElementById('profileContainer').innerHTML = profileHTML;
 }
 
@@ -2805,8 +3052,6 @@ let tradesBody = document.getElementById('tradesBodyRight');
 if(tradesBody) tradesBody.innerHTML = tradesHtml;
 }
 
-// ============ CHART MODAL FUNCTIONS ============
-
 function openChartModal() {
 let modal = document.getElementById('chartModal');
 if(!modal) {
@@ -2959,8 +3204,6 @@ let modal = document.getElementById('chartModal');
 if(modal) modal.style.display = 'none';
 }
 
-// ============ DEPOSIT HISTORY FUNCTIONS ============
-
 function renderDepositHistory() {
 let tbody = document.getElementById('depositHistoryBody');
 if(!tbody) return;
@@ -2996,8 +3239,6 @@ document.getElementById('txAmountReceived').innerHTML = `$${amountReceived.toFix
 document.getElementById('txId').innerHTML = tx.txId;
 }
 
-// ============ WITHDRAWAL HISTORY FUNCTIONS ============
-
 function renderWithdrawalHistory() {
 let tbody = document.getElementById('withdrawalHistoryBody');
 if(!tbody) return;
@@ -3014,7 +3255,6 @@ tbody.innerHTML = html;
 
 function generateTxId() { return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase(); }
 
-// ============ RECORD WITHDRAWALS IN MONGODB (AUTHENTICATED) ============
 async function submitWithdrawalWithSpinner() {
     const buttonId = 'withdrawBtn';
     showButtonSpinner(buttonId, 'Withdraw');
@@ -3109,8 +3349,6 @@ document.getElementById('txId').innerHTML = tx.txId;
 
 function closeTxModal() { document.getElementById('txDetailModal').style.display = 'none'; currentTxId = null; }
 
-// ============ BOT FUNCTIONS ============
-
 function getLocalBotConfig(botName) {
 try {
 const key = `botConfig_${botName.replace(/ /g, '_')}`;
@@ -3157,7 +3395,6 @@ return;
 }
 
 activeBot = botName;
-let isMediumRisk = (botName === 'ETH DCA Pro');
 lastTradeResult = null;
 botStats = {
 botName,
@@ -3242,7 +3479,6 @@ let balanceElement = document.getElementById('botBalance');
 if(balanceElement) balanceElement.innerHTML = `$${botStats.botBalance.toFixed(2)}`;
 }
 
-// ============ PHASE 4: Server-side bot run (secure) ============
 async function executeBotTrade() {
     if (!botStats.isRunning || botStats.isPaused) return;
 
@@ -3255,8 +3491,6 @@ async function executeBotTrade() {
     }
 
     try {
-        // Ask the backend to run one bot trade. The backend calculates
-        // the profit server-side, saves it, and returns the new balance.
         const res = await authFetch(`${API_BASE_URL}/api/auth/bot-run`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3467,7 +3701,6 @@ button.disabled = false;
 showBotDetail(botName);
 }
 
-// ============ EVENT LISTENERS ============
 document.addEventListener('click', function(e) {
 if(e.target.classList && e.target.classList.contains('asset-option')) {
 document.querySelectorAll('.asset-option').forEach(opt => opt.classList.remove('active'));
@@ -3535,7 +3768,6 @@ function switchToSignup() { document.querySelector('.auth-tab[data-tab="signup"]
 if(loginTabBtn) loginTabBtn.addEventListener('click', switchToLogin);
 if(signupTabBtn) signupTabBtn.addEventListener('click', switchToSignup);
 
-// ============ WINDOW LOAD ============
 window.addEventListener('load', function() {
     populateCountries();
     updateMarqueePrices();
