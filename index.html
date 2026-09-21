@@ -2563,15 +2563,17 @@ renderWithdrawalHistory();
 
 async function fetchPrices() {
 try {
-const ids = top200Coins.map(coin => coin.id).join(',');
-const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
-const res = await fetch(url);
+const symbols = top200Coins.map(coin => coin.symbol).join(',');
+const res = await fetch(`${API_BASE_URL}/api/auth/prices?symbols=${symbols}`);
 if(!res.ok) return true;
 const data = await res.json();
+if(data && data.success && data.prices) {
 for(let coin of top200Coins) {
-if(data[coin.id]) {
-currentPrices[coin.id] = data[coin.id].usd || FALLBACK_PRICES[coin.id];
-currentPrices[coin.id+'Change'] = data[coin.id].usd_24h_change || FALLBACK_PRICES[coin.id+'Change'];
+const p = data.prices[coin.symbol];
+if(p) {
+currentPrices[coin.id] = p.usd || FALLBACK_PRICES[coin.id];
+currentPrices[coin.id+'Change'] = p.usd_24h_change || FALLBACK_PRICES[coin.id+'Change'];
+}
 }
 }
 return true;
@@ -2618,7 +2620,7 @@ if(balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`;
 
 function updateLastUpdatedText() {
 let lastUpdatedText = document.getElementById('lastUpdatedText');
-if(lastUpdatedText) lastUpdatedText.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko (200 Coins)`;
+if(lastUpdatedText) lastUpdatedText.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: BT-EARN Live Prices`;
 }
 
 async function refreshDashboardPrices() {
@@ -2657,7 +2659,7 @@ if(container) container.innerHTML = html;
 
 function updateMarketsLastUpdatedText() {
 let lastUpdatedText = document.getElementById('marketsLastUpdatedText');
-if(lastUpdatedText) lastUpdatedText.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: CoinGecko (200 Coins)`;
+if(lastUpdatedText) lastUpdatedText.innerHTML = `Last updated: ${new Date().toLocaleTimeString()}<br>Using: BT-EARN Live Prices`;
 }
 
 function refreshMarketsPrices() {
@@ -3860,14 +3862,17 @@ window.addEventListener('load', function() {
 
 async function updateMarqueePrices() {
 try {
-let ids = top200Coins.slice(0,20).map(c => c.id).join(',');
-let url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
-let res = await fetch(url);
-let data = await res.json();
+const top20 = top200Coins.slice(0,20);
+const symbols = top20.map(c => c.symbol).join(',');
+const res = await fetch(`${API_BASE_URL}/api/auth/prices?symbols=${symbols}`);
+const data = await res.json();
+if(!data || !data.success || !data.prices) return;
 let html = '';
-for(let coin of top200Coins.slice(0,20)) {
-let price = data[coin.id]?.usd;
-if(price) html += `<span>${coin.symbol}: $${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</span>`;
+for(let coin of top20) {
+const p = data.prices[coin.symbol];
+if(p && p.usd) {
+html += `<span>${coin.symbol}: $${p.usd.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</span>`;
+}
 }
 if(html) document.getElementById('statsMarquee').innerHTML = html + html;
 } catch(e) {}
