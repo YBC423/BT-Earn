@@ -2975,24 +2975,8 @@ console.log("Live price fetch failed:", e);
 }
 
 function addNewLiveCandleRight() {
-let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
-if(!coinData) return;
-let coinId = coinData.id;
-let currentPrice = currentPrices[coinId] || (candleDataRight.length > 0 ? candleDataRight[candleDataRight.length-1].close : 50000);
-let newOpen = currentPrice;
-let newClose = newOpen * (1 + (Math.random() - 0.5) * 0.002);
-let newHigh = Math.max(newOpen, newClose) * (1 + Math.random() * 0.001);
-let newLow = Math.min(newOpen, newClose) * (1 - Math.random() * 0.001);
-let newCandle = {
-time: Date.now(),
-open: newOpen,
-high: newHigh,
-low: newLow,
-close: newClose
-};
-candleDataRight.push(newCandle);
-if(candleDataRight.length > 50) candleDataRight.shift();
-drawCandlestickChartRight();
+  // Disabled — no more fake candles. Real candles come from backend on next fetch.
+  return;
 }
 
 function drawCandlestickChartRight() {
