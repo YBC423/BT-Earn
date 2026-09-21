@@ -2877,39 +2877,26 @@ if(chatWidget) makeDraggable(chatWidget);
 async function fetchRealCandleDataRight() {
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
 if(!coinData) return;
-let coinId = coinData.id;
-let days = 1;
-if(currentIntervalRight === '1m') days = 1;
-else if(currentIntervalRight === '5m') days = 1;
-else if(currentIntervalRight === '15m') days = 1;
-else if(currentIntervalRight === '30m') days = 1;
-else if(currentIntervalRight === '1h') days = 1;
-else if(currentIntervalRight === '1D') days = 30;
-
-let url = `https://api.coingecko.com/api/v3/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`;
+let binanceSymbol = currentTradeCoin + 'USDT';
+let interval = currentIntervalRight;
 try {
-let res = await fetch(url);
-if(!res.ok) throw new Error('API error');
+let res = await fetch(`${API_BASE_URL}/api/auth/chart/${binanceSymbol}?interval=${interval}&limit=50`);
 let data = await res.json();
-if(data && data.length > 0) {
-candleDataRight = data.map(candle => ({
-time: candle[0],
-open: candle[1],
-high: candle[2],
-low: candle[3],
-close: candle[4]
-}));
+if(data && data.success && data.candles && data.candles.length > 0) {
+candleDataRight = data.candles;
 drawCandlestickChartRight();
 updateChartStatsRight();
 startLiveSimulationRight();
+return;
 }
 } catch(e) {
-console.log("Error fetching candle data:", e);
+console.log("Error fetching candle data from backend:", e);
+}
+let coinId = coinData.id;
 let currentPrice = currentPrices[coinId] || FALLBACK_PRICES[coinId];
 candleDataRight = generateInitialCandleDataRight(currentPrice, 30, currentIntervalRight);
 drawCandlestickChartRight();
 startLiveSimulationRight();
-}
 }
 
 function generateInitialCandleDataRight(basePrice, count, interval) {
@@ -2956,13 +2943,15 @@ lastCandleTimeRight = now;
 }, 3000);
 }
 
-function updateLivePriceRight() {
+async function updateLivePriceRight() {
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
 if(!coinData) return;
 let coinId = coinData.id;
-let currentPrice = currentPrices[coinId] || (candleDataRight.length > 0 ? candleDataRight[candleDataRight.length-1].close : 50000);
-let change = (Math.random() - 0.5) * 0.0008 * currentPrice;
-let newPrice = Math.max(currentPrice + change, currentPrice * 0.98);
+try {
+let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`);
+let data = await res.json();
+let newPrice = data[coinId]?.usd;
+if(newPrice) {
 currentPrices[coinId] = newPrice;
 if(document.getElementById('tradePage').style.display === 'block') {
 updateTradePriceDisplay();
@@ -2975,6 +2964,10 @@ lastCandle.low = Math.min(lastCandle.low, newPrice);
 drawCandlestickChartRight();
 }
 updateChartStatsRight();
+}
+} catch(e) {
+console.log("Live price fetch failed:", e);
+}
 }
 
 function addNewLiveCandleRight() {
@@ -3068,12 +3061,17 @@ if(!coinData) return;
 let coinId = coinData.id;
 let currentPrice = currentPrices[coinId] || 0;
 let change = currentPrices[coinId+'Change'] || 0;
-let high = currentPrice * (1 + Math.abs(change)/100 + 0.005);
-let low = currentPrice * (1 - Math.abs(change)/100 - 0.005);
+
+let highs = candleDataRight.map(c => c.high);
+let lows = candleDataRight.map(c => c.low);
+let high = highs.length > 0 ? Math.max(...highs) : currentPrice;
+let low = lows.length > 0 ? Math.min(...lows) : currentPrice;
 let volume = (Math.random() * 500 + 100).toFixed(2);
-let ma7 = currentPrice * (1 + (Math.random()-0.5)*0.01);
-let ma14 = currentPrice * (1 + (Math.random()-0.5)*0.008);
-let ma28 = currentPrice * (1 + (Math.random()-0.5)*0.005);
+
+let closes = candleDataRight.map(c => c.close);
+let ma7 = closes.length >= 7 ? (closes.slice(-7).reduce((a,b)=>a+b,0)/7) : currentPrice;
+let ma14 = closes.length >= 14 ? (closes.slice(-14).reduce((a,b)=>a+b,0)/14) : currentPrice;
+let ma28 = closes.length >= 28 ? (closes.slice(-28).reduce((a,b)=>a+b,0)/28) : currentPrice;
 
 let highEl = document.getElementById('statHighRight');
 let lowEl = document.getElementById('statLowRight');
@@ -3094,16 +3092,28 @@ if(orderBookSymbol) orderBookSymbol.innerHTML = currentTradeCoin;
 let titleEl = document.getElementById('chartCoinTitleRight');
 if(titleEl) titleEl.innerHTML = `${currentTradeCoin}/USDT Chart`;
 
-let orderBookHtml = '';
-for(let i=0; i<8; i++) {
-let price = currentPrice * (1 + (Math.random()-0.5)*0.002);
-let qty = (Math.random() * 2).toFixed(4);
-let total = (price * qty).toFixed(2);
-let priceColor = i < 4 ? 'ask-price' : 'bid-price';
-orderBookHtml += `<tr><td class="${priceColor}">$${price.toFixed(2)}</td><td>${qty}</td><td>$${total}</td></tr>`;
+try {
+let obRes = await fetch(`${API_BASE_URL}/api/auth/orderbook/${currentTradeCoin}USDT`);
+let obData = await obRes.json();
+if(obData && obData.success) {
+let bidsHtml = '';
+let asksHtml = '';
+let bids = obData.bids.slice(0, 8);
+let asks = obData.asks.slice(0, 8);
+for(let b of asks.reverse()) {
+let total = (b.price * b.qty).toFixed(2);
+asksHtml += `<tr><td class="ask-price">$${b.price.toFixed(2)}</td><td>${b.qty.toFixed(4)}</td><td>$${total}</td></tr>`;
+}
+for(let b of bids) {
+let total = (b.price * b.qty).toFixed(2);
+bidsHtml += `<tr><td class="bid-price">$${b.price.toFixed(2)}</td><td>${b.qty.toFixed(4)}</td><td>$${total}</td></tr>`;
 }
 let orderBookBody = document.getElementById('orderBookBodyRight');
-if(orderBookBody) orderBookBody.innerHTML = orderBookHtml;
+if(orderBookBody) orderBookBody.innerHTML = asksHtml + bidsHtml;
+}
+} catch(e) {
+console.log("Orderbook fetch failed:", e);
+}
 
 let tradesHtml = '';
 for(let i=0; i<10; i++) {
