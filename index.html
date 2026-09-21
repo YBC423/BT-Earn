@@ -2947,10 +2947,13 @@ async function updateLivePriceRight() {
 let coinData = top200Coins.find(c => c.symbol === currentTradeCoin);
 if(!coinData) return;
 let coinId = coinData.id;
+let binanceSymbol = currentTradeCoin + 'USDT';
 try {
-let res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`);
+let res = await fetch(`${API_BASE_URL}/api/auth/chart/${binanceSymbol}?interval=1m&limit=2`);
 let data = await res.json();
-let newPrice = data[coinId]?.usd;
+if(data && data.success && data.candles && data.candles.length > 0) {
+let latest = data.candles[data.candles.length - 1];
+let newPrice = latest.close;
 if(newPrice) {
 currentPrices[coinId] = newPrice;
 if(document.getElementById('tradePage').style.display === 'block') {
@@ -2964,6 +2967,7 @@ lastCandle.low = Math.min(lastCandle.low, newPrice);
 drawCandlestickChartRight();
 }
 updateChartStatsRight();
+}
 }
 } catch(e) {
 console.log("Live price fetch failed:", e);
