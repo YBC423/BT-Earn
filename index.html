@@ -3698,6 +3698,12 @@ currentConvertFrom = held[0].symbol;
 }
 
 toSelect.innerHTML = '';
+if (fromSelect.value !== 'USDT') {
+const usdtOpt = document.createElement('option');
+usdtOpt.value = 'USDT';
+usdtOpt.textContent = 'USDT - Tether';
+toSelect.appendChild(usdtOpt);
+}
 for (const coin of top200Coins) {
 if (coin.symbol === fromSelect.value) continue;
 const opt = document.createElement('option');
@@ -3726,6 +3732,12 @@ document.getElementById('convertFromBalance').innerHTML = `Available: ${fromBala
 // Rebuild "to" dropdown to exclude current from
 const prevTo = toSelect.value;
 toSelect.innerHTML = '';
+if (fromSymbol !== 'USDT') {
+const usdtOpt = document.createElement('option');
+usdtOpt.value = 'USDT';
+usdtOpt.textContent = 'USDT - Tether';
+toSelect.appendChild(usdtOpt);
+}
 for (const coin of top200Coins) {
 if (coin.symbol === fromSymbol) continue;
 const opt = document.createElement('option');
