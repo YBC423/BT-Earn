@@ -2128,6 +2128,13 @@ sessionStorage.removeItem('pendingVerifyPassword');
 sessionStorage.removeItem('pendingVerifyName');
 sessionStorage.removeItem('pendingVerifyCountry');
 
+try {
+sessionStorage.removeItem('balanceHidden');
+sessionStorage.removeItem('assetsCollapsed');
+} catch(e) {}
+balanceHidden = false;
+assetsCollapsed = false;
+
 currentUser = null;
 holdings = { usdt: 0.00 };
 withdrawals = [];
@@ -2348,6 +2355,10 @@ document.getElementById('verifyEmailPage').style.display = 'none';
 document.getElementById('convertPage').style.display = 'none';
 document.getElementById('activityPage').style.display = 'none';
 loadDashboard();
+if (assetsCollapsed) {
+const cc = document.getElementById('cryptoContainer');
+if (cc) cc.style.display = 'none';
+}
 }
 
 function showProfile() {
@@ -2556,6 +2567,7 @@ balanceElement.innerHTML = `$${total.toFixed(2)}`;
 
 function toggleBalanceVisibility() {
 balanceHidden = !balanceHidden;
+try { sessionStorage.setItem('balanceHidden', balanceHidden ? '1' : '0'); } catch(e) {}
 const eyeSvg = document.getElementById('eyeIconSvg');
 if (eyeSvg) {
 if (balanceHidden) {
@@ -2569,6 +2581,7 @@ updatePortfolioTotal();
 
 function toggleAssetsCollapse() {
 assetsCollapsed = !assetsCollapsed;
+try { sessionStorage.setItem('assetsCollapsed', assetsCollapsed ? '1' : '0'); } catch(e) {}
 const container = document.getElementById('cryptoContainer');
 const heading = document.getElementById('assetsHeading');
 if (container) container.style.display = assetsCollapsed ? 'none' : 'flex';
@@ -3890,6 +3903,23 @@ window.addEventListener('load', function() {
             setTimeout(() => { loadingScreen.style.display = 'none'; }, 500);
         }
     }, 5000);
+
+    try {
+        balanceHidden = sessionStorage.getItem('balanceHidden') === '1';
+        assetsCollapsed = sessionStorage.getItem('assetsCollapsed') === '1';
+
+        const eyeSvg = document.getElementById('eyeIconSvg');
+        if (eyeSvg && balanceHidden) {
+            eyeSvg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+        }
+
+        const assetsHeading = document.getElementById('assetsHeading');
+        const cryptoContainer = document.getElementById('cryptoContainer');
+        if (assetsCollapsed) {
+            if (assetsHeading) assetsHeading.classList.add('collapsed');
+            if (cryptoContainer) cryptoContainer.style.display = 'none';
+        }
+    } catch(e) {}
 
     checkExistingSession().then(() => {
         const loadingScreen = document.getElementById('loadingScreen');
