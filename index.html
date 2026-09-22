@@ -1453,7 +1453,7 @@ let balanceHidden = false;
 let assetsCollapsed = false;
 
 const FALLBACK_PRICES = {};
-top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = coin.symbol === 'BTC' ? 73786 : (coin.symbol === 'ETH' ? 2022 : (coin.symbol === 'USDT' ? 1 : (coin.symbol === 'BNB' ? 580 : (coin.symbol === 'SOL' ? 145 : 10 + Math.random() * 100)))); FALLBACK_PRICES[coin.id+'Change'] = (Math.random() - 0.5) * 8; });
+top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = 0; FALLBACK_PRICES[coin.id+'Change'] = 0; });
 currentPrices = { ...FALLBACK_PRICES };
 
 function showTermsPage() {
