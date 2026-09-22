@@ -283,8 +283,38 @@ font-size: 18px;
 font-weight: bold;
 color: #a0a0c0;
 margin: 30px 0 20px;
-display: block;
+display: flex;
+align-items: center;
+gap: 8px;
+cursor: pointer;
+user-select: none;
 }
+.section-heading.no-click {
+cursor: default;
+}
+.eye-icon-btn {
+background: transparent;
+border: none;
+padding: 0;
+cursor: pointer;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+color: #a0a0c0;
+transition: 0.2s;
+margin-left: 4px;
+}
+.eye-icon-btn:hover { color: white; }
+.eye-icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.toggle-arrow {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+transition: transform 0.25s ease;
+color: #a0a0c0;
+}
+.toggle-arrow svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.section-heading.collapsed .toggle-arrow { transform: rotate(-90deg); }
 
 .crypto-scroll { display: flex; flex-direction: column; gap: 15px; }
 .crypto-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; cursor: pointer; transition: 0.3s; }
@@ -776,14 +806,22 @@ Continue with Apple
 </div>
 <div class="dashboard-container">
 <div class="portfolio-card">
-<h3>Total Assets</h3>
+<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+<h3 style="margin: 0;">Total Assets</h3>
+<button class="eye-icon-btn" id="eyeToggleBtn" onclick="toggleBalanceVisibility()" title="Hide/Show balance">
+<svg id="eyeIconSvg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+</button>
+</div>
 <div class="portfolio-balance" id="portfolioBalance">$0.00</div>
 <div class="portfolio-change" id="portfolioChange">+0.00%</div>
 <div class="portfolio-buttons"><button class="deposit-btn" onclick="showDepositPage()">Deposit</button><button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button></div>
 </div>
-<div class="section-heading">Assets</div>
+<div class="section-heading" id="assetsHeading" onclick="toggleAssetsCollapse()">
+<span>Assets</span>
+<span class="toggle-arrow"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+</div>
 <div id="cryptoContainer" class="crypto-scroll"></div>
-<div class="section-heading">Favorites</div>
+<div class="section-heading no-click">Favorites</div>
 <div id="watchlistContainer" class="watchlist-scroll"></div>
 <div id="lastUpdatedText" style="text-align:center;margin-top:10px;font-size:12px;color:#a0a0c0;"></div>
 <div style="height:80px;"></div>
@@ -1411,6 +1449,8 @@ let currentTxId = null;
 let lastSyncedBalance = 0;
 let currentConvertFrom = 'USDT';
 let cameraStream = null;
+let balanceHidden = false;
+let assetsCollapsed = false;
 
 const FALLBACK_PRICES = {};
 top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = coin.symbol === 'BTC' ? 73786 : (coin.symbol === 'ETH' ? 2022 : (coin.symbol === 'USDT' ? 1 : (coin.symbol === 'BNB' ? 580 : (coin.symbol === 'SOL' ? 145 : 10 + Math.random() * 100)))); FALLBACK_PRICES[coin.id+'Change'] = (Math.random() - 0.5) * 8; });
@@ -1793,6 +1833,15 @@ ngn: (u.wallets && u.wallets.ngn) || 0
 withdrawals = u.withdrawals || [];
 deposits = u.deposits || [];
 converts = u.converts || [];
+if (u.wallets) {
+top200Coins.forEach(coin => {
+if (coin.symbol === 'USDT') return;
+const key = coin.symbol.toLowerCase();
+if (u.wallets[key] !== undefined && u.wallets[key] > 0) {
+holdings[coin.id] = u.wallets[key];
+}
+});
+}
 currentUser = { uid: user.uid, name: u.name || user.email, email: user.email };
 lastSyncedBalance = holdings.usdt;
 showDashboard();
@@ -2496,7 +2545,37 @@ total += amt * price;
 }
 });
 let balanceElement = document.getElementById('portfolioBalance');
-if(balanceElement) balanceElement.innerHTML = `$${total.toFixed(2)}`;
+if(balanceElement) {
+if (balanceHidden) {
+balanceElement.innerHTML = `****`;
+} else {
+balanceElement.innerHTML = `$${total.toFixed(2)}`;
+}
+}
+}
+
+function toggleBalanceVisibility() {
+balanceHidden = !balanceHidden;
+const eyeSvg = document.getElementById('eyeIconSvg');
+if (eyeSvg) {
+if (balanceHidden) {
+eyeSvg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+} else {
+eyeSvg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+}
+}
+updatePortfolioTotal();
+}
+
+function toggleAssetsCollapse() {
+assetsCollapsed = !assetsCollapsed;
+const container = document.getElementById('cryptoContainer');
+const heading = document.getElementById('assetsHeading');
+if (container) container.style.display = assetsCollapsed ? 'none' : 'flex';
+if (heading) {
+if (assetsCollapsed) heading.classList.add('collapsed');
+else heading.classList.remove('collapsed');
+}
 }
 
 function updateLastUpdatedText() {
@@ -3615,64 +3694,65 @@ showCustomModal('Invalid Amount', 'Minimum convert is $3', 'error');
 return;
 }
 
-const fromCoinData = top200Coins.find(c => c.symbol === fromSymbol) || { symbol: 'USDT', id: 'usdt' };
-const toCoinData = top200Coins.find(c => c.symbol === toSymbol);
-const fromCoinId = fromSymbol === 'USDT' ? 'usdt' : fromCoinData.id;
-const toCoinId = toSymbol === 'USDT' ? 'usdt' : (toCoinData ? toCoinData.id : '');
+try {
+const res = await authFetch(`${API_BASE_URL}/api/auth/convert`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+fromSymbol: fromSymbol,
+toSymbol: toSymbol,
+usdAmount: usdAmount
+})
+});
 
-const fromPrice = fromSymbol === 'USDT' ? 1 : (currentPrices[fromCoinId] || FALLBACK_PRICES[fromCoinId] || 0);
-const toPrice = toSymbol === 'USDT' ? 1 : (currentPrices[toCoinId] || FALLBACK_PRICES[toCoinId] || 0);
+const data = await res.json().catch(() => ({}));
 
-if (!fromPrice || !toPrice) {
+if (!res.ok || !data.success) {
 hideButtonSpinner(buttonId);
-showCustomModal('Error', 'Price unavailable for one of the coins', 'error');
+showCustomModal('Convert Failed', data.message || 'Could not complete conversion.', 'error');
 return;
 }
 
-const fromAmount = usdAmount / fromPrice;
-const fromBalance = fromSymbol === 'USDT' ? holdings.usdt : (holdings[fromCoinId] || 0);
-
-if (fromBalance < fromAmount) {
-hideButtonSpinner(buttonId);
-showCustomModal('Insufficient Balance', `You have ${fromBalance.toFixed(6)} ${fromSymbol}`, 'error');
-return;
+if (data.wallets) {
+holdings.usdt = data.wallets.usdt || 0;
+top200Coins.forEach(coin => {
+if (coin.symbol === 'USDT') return;
+const key = coin.symbol.toLowerCase();
+if (data.wallets[key] !== undefined) {
+holdings[coin.id] = data.wallets[key];
 }
-
-const feeUsd = 0.05;
-const usableUsd = usdAmount - feeUsd;
-const toAmount = usableUsd / toPrice;
-
-// Deduct
-if (fromSymbol === 'USDT') holdings.usdt -= fromAmount;
-else holdings[fromCoinId] = (holdings[fromCoinId] || 0) - fromAmount;
-
-// Add
-if (toSymbol === 'USDT') holdings.usdt = (holdings.usdt || 0) + toAmount;
-else holdings[toCoinId] = (holdings[toCoinId] || 0) + toAmount;
+});
+}
 
 lastSyncedBalance = holdings.usdt;
 
 const conv = {
-    id: Date.now(),
-    fromSymbol,
-    toSymbol,
-    fromAmount: Number(fromAmount.toFixed(8)),
-    toAmount: Number(toAmount.toFixed(8)),
-    usdValue: Number(usdAmount.toFixed(2)),
-    fee: feeUsd,
-    dateTime: new Date().toLocaleString(),
+id: data.convert.id || Date.now(),
+fromSymbol: data.convert.fromSymbol,
+toSymbol: data.convert.toSymbol,
+fromAmount: data.convert.fromAmount,
+toAmount: data.convert.toAmount,
+usdValue: data.convert.usdValue,
+fee: data.convert.fee,
+dateTime: data.convert.dateTime
 };
-
 converts.push(conv);
 await saveConvertToFirestore(conv);
-await saveUserHoldingsToFirestore();
 
 hideButtonSpinner(buttonId);
-showCustomModal('Convert Successful', `Converted ${fromAmount.toFixed(6)} ${fromSymbol} → ${toAmount.toFixed(6)} ${toSymbol}. Fee: $0.05`, 'success');
+showCustomModal('Convert Successful', `Converted ${data.convert.fromAmount.toFixed(6)} ${data.convert.fromSymbol} → ${data.convert.toAmount.toFixed(6)} ${data.convert.toSymbol}. Fee: $0.05`, 'success');
 
 document.getElementById('convertAmount').value = '';
 updateConvertUI();
 updatePortfolioTotal();
+renderCrypto();
+renderMarketsCrypto();
+
+} catch (err) {
+hideButtonSpinner(buttonId);
+console.error('Convert error:', err);
+showCustomModal('Convert Failed', 'Network error. Please try again.', 'error');
+}
 }
 
 function showActivityPage() {
