@@ -273,6 +273,7 @@ transition: 0.3s;
 .portfolio-card { background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 25px; margin-bottom: 30px; }
 .portfolio-card h3 { font-size: 18px; color: #a0a0c0; margin-bottom: 10px; }
 .portfolio-balance { font-size: 48px; font-weight: bold; margin-bottom: 10px; }
+.portfolio-balance .small-decimals { font-size: 20px; font-weight: normal; color: #a0a0c0; }
 .portfolio-change { color: #48bb78; margin-bottom: 20px; }
 .portfolio-buttons { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
 .deposit-btn { background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 10px 30px; border-radius: 30px; color: white; cursor: pointer; font-size: 14px; font-weight: bold; }
@@ -322,6 +323,48 @@ color: #a0a0c0;
 .trade-btn { background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 8px 20px; border-radius: 20px; color: white; cursor: pointer; font-size: 12px; }
 .refresh-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; color: white; cursor: pointer; transition: 0.3s; }
 .refresh-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* ===== NEW: 3-column coin row layout (Assets + Favorites) ===== */
+.coin-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+flex-wrap: wrap;
+}
+.coin-row .coin-left {
+flex: 1 1 auto;
+min-width: 0;
+}
+.coin-row .coin-left h4 { font-size: 18px; margin-bottom: 5px; }
+.coin-row .coin-left p { color: #a0a0c0; font-size: 12px; }
+.coin-row .coin-middle {
+flex: 0 0 auto;
+text-align: center;
+font-size: 13px;
+font-weight: 600;
+min-width: 60px;
+}
+.coin-row .coin-right {
+flex: 0 0 auto;
+text-align: right;
+min-width: 130px;
+}
+.coin-row .coin-right .amount-main {
+font-size: 20px;
+font-weight: bold;
+color: white;
+}
+.coin-row .coin-right .amount-sub {
+font-size: 12px;
+color: #a0a0c0;
+margin-top: 2px;
+}
+.coin-row .coin-right .price-main {
+font-size: 20px;
+font-weight: bold;
+color: white;
+}
 
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1129; display: flex; justify-content: space-around; padding: 10px 20px 12px; border-top: 1px solid rgba(255,255,255,0.08); z-index: 1000; }
 .nav-item { text-align: center; cursor: pointer; color: #a0a0c0; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -812,7 +855,7 @@ Continue with Apple
 <svg id="eyeIconSvg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
 </button>
 </div>
-<div class="portfolio-balance" id="portfolioBalance">$0.00</div>
+<div class="portfolio-balance" id="portfolioBalance">$0.00<span class="small-decimals">,0000</span></div>
 <div class="portfolio-change" id="portfolioChange">+0.00%</div>
 <div class="portfolio-buttons"><button class="deposit-btn" onclick="showDepositPage()">Deposit</button><button class="withdraw-btn" onclick="showWithdrawalPage()">Withdraw</button></div>
 </div>
@@ -2506,7 +2549,7 @@ if(!coin) continue;
 let price = currentPrices[coin.id] || FALLBACK_PRICES[coin.id];
 let change = currentPrices[coin.id+'Change'] || FALLBACK_PRICES[coin.id+'Change'];
 let changeClass = change >= 0 ? 'positive' : 'negative';
-html += `<div class="watchlist-item clickable" onclick="showTrade('${coin.symbol}')"><div class="coin-info"><h4>${coin.symbol}</h4><p>${coin.name}</p></div><div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div></div>`;
+html += `<div class="watchlist-item coin-row" onclick="showTrade('${coin.symbol}')"><div class="coin-left"><h4>${coin.symbol}</h4><p>${coin.name}</p></div><div class="coin-middle ${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div><div class="coin-right"><div class="price-main">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div></div></div>`;
 }
 html += `<div class="view-more-box" onclick="showMarkets()"><span>View More →</span></div>`;
 let container = document.getElementById('watchlistContainer');
@@ -2537,10 +2580,9 @@ const coinId = coin.id;
 const isUsdt = coin.symbol === 'USDT';
 const price = isUsdt ? 1 : (currentPrices[coinId] || FALLBACK_PRICES[coinId] || 0);
 const amount = isUsdt ? holdings.usdt : (holdings[coinId] || 0);
-const usdValue = amount * price;
 const change = isUsdt ? 0 : (currentPrices[coinId+'Change'] || 0);
 const changeClass = change >= 0 ? 'positive' : 'negative';
-html += `<div class="watchlist-item" onclick="openConvertFor('${coin.symbol}')"><div class="coin-info"><h4>${coin.symbol}</h4><p>${coin.name}</p><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div><div class="coin-price"><div class="price">$${usdValue.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div style="font-size:12px;color:#a0a0c0;">${amount.toFixed(6)} ${coin.symbol}</div><div style="font-size:12px;color:#a0a0c0;">@ $${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div></div></div>`;
+html += `<div class="watchlist-item coin-row" onclick="openConvertFor('${coin.symbol}')"><div class="coin-left"><h4>${coin.symbol}</h4><p>${coin.name}</p></div><div class="coin-middle ${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div><div class="coin-right"><div class="amount-main">${amount.toFixed(6)} ${coin.symbol}</div><div class="amount-sub">@ $${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div></div></div>`;
 }
 const container = document.getElementById('cryptoContainer');
 if(container) container.innerHTML = html;
@@ -2561,8 +2603,42 @@ if(balanceElement) {
 if (balanceHidden) {
 balanceElement.innerHTML = `****`;
 } else {
-balanceElement.innerHTML = `$${total.toFixed(2)}`;
+const totalStr = total.toFixed(6);
+const parts = totalStr.split('.');
+const whole = parts[0];
+const decimals = parts[1] || '000000';
+const firstTwo = decimals.substring(0, 2);
+const lastFour = decimals.substring(2, 6);
+const wholeWithCommas = parseInt(whole, 10).toLocaleString('en-US');
+balanceElement.innerHTML = `$${wholeWithCommas}.${firstTwo}<span class="small-decimals">,${lastFour}</span>`;
 }
+}
+updatePortfolioChange();
+}
+
+function updatePortfolioChange() {
+let totalValue = (holdings.usdt || 0) * 1;
+let weightedChange = 0;
+top200Coins.forEach(coin => {
+if (coin.symbol === 'USDT') return;
+const amt = holdings[coin.id] || 0;
+if (amt > 0) {
+const price = currentPrices[coin.id] || FALLBACK_PRICES[coin.id] || 0;
+const value = amt * price;
+const change = currentPrices[coin.id+'Change'] || 0;
+totalValue += value;
+weightedChange += value * change;
+}
+});
+let percentChange = 0;
+if (totalValue > 0) {
+percentChange = weightedChange / totalValue;
+}
+const changeEl = document.getElementById('portfolioChange');
+if (changeEl) {
+const sign = percentChange >= 0 ? '+' : '';
+changeEl.innerHTML = `${sign}${percentChange.toFixed(2)}%`;
+changeEl.className = 'portfolio-change ' + (percentChange >= 0 ? 'positive' : 'negative');
 }
 }
 
@@ -2617,7 +2693,7 @@ for(let coin of top200Coins) {
 let price = currentPrices[coin.id] || FALLBACK_PRICES[coin.id];
 let change = currentPrices[coin.id+'Change'] || FALLBACK_PRICES[coin.id+'Change'];
 let changeClass = change >= 0 ? 'positive' : 'negative';
-html += `<div class="watchlist-item clickable" onclick="showTrade('${coin.symbol}')"><div class="coin-info"><h4>${coin.symbol}</h4><p>${coin.name}</p></div><div class="coin-price"><div class="price">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div><div class="${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div></div></div>`;
+html += `<div class="watchlist-item coin-row" onclick="showTrade('${coin.symbol}')"><div class="coin-left"><h4>${coin.symbol}</h4><p>${coin.name}</p></div><div class="coin-middle ${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div><div class="coin-right"><div class="price-main">$${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div></div></div>`;
 }
 let container = document.getElementById('marketsWatchlistContainer');
 if(container) container.innerHTML = html;
@@ -2636,8 +2712,9 @@ const coinId = coin.id;
 const isUsdt = coin.symbol === 'USDT';
 const price = isUsdt ? 1 : (currentPrices[coinId] || FALLBACK_PRICES[coinId] || 0);
 const amount = isUsdt ? holdings.usdt : (holdings[coinId] || 0);
-const usdValue = amount * price;
-html += `<div class="watchlist-item" onclick="openConvertFor('${coin.symbol}')"><div class="coin-info"><h4>${coin.symbol}</h4><p>${coin.name}</p></div><div class="coin-price"><div class="price">$${usdValue.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div style="font-size:12px;color:#a0a0c0;">${amount.toFixed(6)} ${coin.symbol}</div></div></div>`;
+const change = isUsdt ? 0 : (currentPrices[coinId+'Change'] || 0);
+const changeClass = change >= 0 ? 'positive' : 'negative';
+html += `<div class="watchlist-item coin-row" onclick="openConvertFor('${coin.symbol}')"><div class="coin-left"><h4>${coin.symbol}</h4><p>${coin.name}</p></div><div class="coin-middle ${changeClass}">${change>=0?'+':''}${change.toFixed(2)}%</div><div class="coin-right"><div class="amount-main">${amount.toFixed(6)} ${coin.symbol}</div><div class="amount-sub">@ $${price.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})}</div></div></div>`;
 }
 let container = document.getElementById('marketsCryptoContainer');
 if(container) container.innerHTML = html;
