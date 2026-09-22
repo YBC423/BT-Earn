@@ -329,26 +329,26 @@ color: #a0a0c0;
 display: flex;
 align-items: center;
 justify-content: space-between;
-gap: 12px;
-flex-wrap: wrap;
+gap: 8px;
+flex-wrap: nowrap;
 }
 .coin-row .coin-left {
-flex: 1 1 auto;
+flex: 1 1 33%;
 min-width: 0;
+text-align: left;
 }
 .coin-row .coin-left h4 { font-size: 18px; margin-bottom: 5px; }
 .coin-row .coin-left p { color: #a0a0c0; font-size: 12px; }
 .coin-row .coin-middle {
-flex: 0 0 auto;
+flex: 1 1 33%;
 text-align: center;
 font-size: 13px;
 font-weight: 600;
-min-width: 60px;
 }
 .coin-row .coin-right {
-flex: 0 0 auto;
+flex: 1 1 33%;
 text-align: right;
-min-width: 130px;
+min-width: 0;
 }
 .coin-row .coin-right .amount-main {
 font-size: 20px;
@@ -624,6 +624,12 @@ color: white;
 .terms-container { padding: 100px 20px 60px; }
 .terms-container h1 { font-size: 28px; }
 .section-heading { font-size: 16px; }
+.coin-row .coin-left h4 { font-size: 16px; }
+.coin-row .coin-left p { font-size: 11px; }
+.coin-row .coin-middle { font-size: 12px; }
+.coin-row .coin-right .amount-main { font-size: 15px; }
+.coin-row .coin-right .amount-sub { font-size: 11px; }
+.coin-row .coin-right .price-main { font-size: 15px; }
 }
 </style>
 </head>
