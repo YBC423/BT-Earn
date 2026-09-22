@@ -526,7 +526,7 @@ color: #a0a0c0;
 .withdraw-submit-btn { width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border: none; padding: 14px; border-radius: 30px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .withdraw-submit-btn:hover { transform: scale(1.02); }
 .history-section { margin-top: 30px; }
-.history-section h3 { font-size: 20px; margin-bottom: 20px; color: #667eea; }
+.history-section h3 { font-size: 16px; margin-bottom: 16px; color: #667eea; }
 .history-table { width: 100%; border-collapse: collapse; }
 .history-table th { text-align: left; padding: 16px 12px; color: #a0a0c0; font-weight: 600; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.08); }
 .history-table td { padding: 18px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 16px; cursor: pointer; font-weight: 500; }
@@ -902,25 +902,22 @@ Continue with Apple
 <p class="subtitle">Your deposits, withdrawals, and conversions</p>
 
 <div class="history-section">
-<h3>Deposit History</h3>
+<h3>Deposit</h3>
 <table class="history-table">
-<thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead>
 <tbody id="activityDepositBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No deposits yet</td></tr></tbody>
 </table>
 </div>
 
 <div class="history-section">
-<h3>Withdrawal History</h3>
+<h3>Withdrawal</h3>
 <table class="history-table">
-<thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead>
 <tbody id="activityWithdrawBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No withdrawals yet</td></tr></tbody>
 </table>
 </div>
 
 <div class="history-section">
-<h3>Convert History</h3>
+<h3>Convert</h3>
 <table class="history-table">
-<thead><tr><th>From</th><th>To</th><th>Fee</th><th>Date</th></tr></thead>
 <tbody id="activityConvertBody"><tr><td colspan="4" style="text-align:center; color:#a0a0c0;">No converts yet</td></tr></tbody>
 </table>
 </div>
@@ -1177,7 +1174,7 @@ Continue with Apple
 <div class="input-field"><label id="walletAddressLabel">Bitcoin Wallet Address</label><input type="text" id="walletAddress" placeholder="Enter your Bitcoin wallet address"></div>
 <button class="withdraw-submit-btn" id="withdrawBtn" onclick="submitWithdrawalWithSpinner()">Withdraw</button>
 </div>
-<div class="history-section"><h3>Withdrawal History</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"></tbody></table></div>
+<div class="history-section"><h3>Withdrawal</h3><table class="history-table"><thead><tr><th>Amount</th><th>Asset</th><th>Address</th><th>Status</th></tr></thead><tbody id="withdrawalHistoryBody"></tbody></table></div>
 <div style="height:80px;"></div>
 </div>
 <div class="bottom-nav">
@@ -1216,7 +1213,7 @@ Continue with Apple
 <div id="botAccessError" style="color: #e53e3e; font-size: 13px; margin-top: 10px; display: none;">Incorrect code. Please try again.</div>
 <div id="botAccessSuccess" style="color: #48bb78; font-size: 13px; margin-top: 10px; display: none;">Correct! Access granted.</div>
 </div>
-<button class="custom-modal-btn" onclick="verifyBotAccess()" style="width: 100%;">Verify Access</button>
+<button class="custom-modal-btn" id="botAccessVerifyBtn" onclick="verifyBotAccess()" style="width: 100%;">Verify Access</button>
 <button onclick="closeBotAccessModal()" style="width: 100%; margin-top: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 30px; color: #a0a0c0; cursor: pointer; font-size: 14px;">Cancel</button>
 </div>
 </div>
@@ -1486,15 +1483,19 @@ const modal = document.getElementById('botAccessModal');
 if (modal) modal.classList.remove('active');
 }
 
-function verifyBotAccess() {
+async function verifyBotAccess() {
+const buttonId = 'botAccessVerifyBtn';
 const enteredCode = document.getElementById('botAccessCode').value.trim();
 const errorEl = document.getElementById('botAccessError');
 const successEl = document.getElementById('botAccessSuccess');
 
 if (enteredCode === BOT_ACCESS_CODE) {
+showButtonSpinner(buttonId, 'Verify Access');
+await delay(1500);
 botAccessGranted = true;
 successEl.style.display = 'block';
 errorEl.style.display = 'none';
+hideButtonSpinner(buttonId);
 setTimeout(function() {
 closeBotAccessModal();
 renderBotsPage();
@@ -3790,7 +3791,7 @@ renderActivityPage();
 }
 
 function renderActivityPage() {
-    // Deposits
+    // Deposits - newest first
     const depBody = document.getElementById('activityDepositBody');
     if (depBody) {
         if (!deposits || deposits.length === 0) {
@@ -3800,12 +3801,12 @@ function renderActivityPage() {
             depBody.innerHTML = sorted.map(d => {
                 const addr = d.address && d.address.length > 15 ? d.address.substring(0,12)+'...' : (d.address || '');
                 const cls = d.status === 'Pending' ? 'status-pending' : 'status-approved';
-                return `<tr><td>$${d.amount.toFixed(2)}</td><td>${d.asset}</td><td class="address-truncated">${addr}</td><td class="${cls}">${d.status}</td></tr>`;
+                return `<tr onclick="showDepositTransactionDetails(${d.id})"><td>$${d.amount.toFixed(2)}</td><td>${d.asset}</td><td class="address-truncated">${addr}</td><td class="${cls}">${d.status}</td></tr>`;
             }).join('');
         }
     }
 
-    // Withdrawals
+    // Withdrawals - newest first
     const wdBody = document.getElementById('activityWithdrawBody');
     if (wdBody) {
         if (!withdrawals || withdrawals.length === 0) {
@@ -3815,12 +3816,12 @@ function renderActivityPage() {
             wdBody.innerHTML = sorted.map(w => {
                 const addr = w.address && w.address.length > 15 ? w.address.substring(0,12)+'...' : (w.address || '');
                 const cls = w.status === 'Pending' ? 'status-pending' : 'status-approved';
-                return `<tr><td>$${w.amount.toFixed(2)}</td><td>${w.asset}</td><td class="address-truncated">${addr}</td><td class="${cls}">${w.status}</td></tr>`;
+                return `<tr onclick="showTransactionDetails(${w.id})"><td>$${w.amount.toFixed(2)}</td><td>${w.asset}</td><td class="address-truncated">${addr}</td><td class="${cls}">${w.status}</td></tr>`;
             }).join('');
         }
     }
 
-    // Converts
+    // Converts - newest first
     const cvBody = document.getElementById('activityConvertBody');
     if (cvBody) {
         if (!converts || converts.length === 0) {
@@ -3928,6 +3929,10 @@ window.addEventListener('load', function() {
             setTimeout(function() { loadingScreen.style.display = 'none'; }, 500);
         }
         setInterval(autoDetectDeposits, 2000);
+
+        setInterval(function() {
+          refreshDashboardPrices();
+        }, 5000);
     });
     
     populateTradeDropdown();
