@@ -324,7 +324,7 @@ color: #a0a0c0;
 .refresh-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; color: white; cursor: pointer; transition: 0.3s; }
 .refresh-btn:hover { background: rgba(255,255,255,0.1); }
 
-/* ===== NEW: 3-column coin row layout (Assets + Favorites) ===== */
+/* ===== 3-column coin row layout (Assets + Favorites) ===== */
 .coin-row {
 display: flex;
 align-items: center;
@@ -366,7 +366,7 @@ font-weight: bold;
 color: white;
 }
 
-/* ===== NEW: Convert page — Max button ===== */
+/* ===== Convert page — Max button ===== */
 .input-with-max {
 position: relative;
 display: flex;
@@ -2594,11 +2594,14 @@ if(container) container.innerHTML = html;
 
 function getHeldCoins() {
 const held = [];
-if ((holdings.usdt || 0) > 0) held.push({ symbol: 'USDT', name: 'Tether', id: 'usdt' });
+if ((holdings.usdt || 0) >= 0.01) held.push({ symbol: 'USDT', name: 'Tether', id: 'usdt' });
 top200Coins.forEach(coin => {
 if (coin.symbol === 'USDT') return;
 const coinId = coin.id;
-if ((holdings[coinId] || 0) > 0) held.push(coin);
+const amount = holdings[coinId] || 0;
+const price = currentPrices[coinId] || FALLBACK_PRICES[coinId] || 0;
+const usdValue = amount * price;
+if (usdValue >= 0.01) held.push(coin);
 });
 return held;
 }
@@ -3788,7 +3791,8 @@ const fromCoinData = top200Coins.find(c => c.symbol === fromSymbol) || { symbol:
 const fromCoinId = fromSymbol === 'USDT' ? 'usdt' : fromCoinData.id;
 const balance = fromSymbol === 'USDT' ? holdings.usdt : (holdings[fromCoinId] || 0);
 if (balance <= 0) return;
-document.getElementById('convertAmount').value = balance.toFixed(6);
+const floored = Math.floor(balance * 1e6) / 1e6;
+document.getElementById('convertAmount').value = floored.toFixed(6);
 calculateConvertReceive();
 }
 
