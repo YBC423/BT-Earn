@@ -366,6 +366,33 @@ font-weight: bold;
 color: white;
 }
 
+/* ===== NEW: Convert page — Max button ===== */
+.input-with-max {
+position: relative;
+display: flex;
+align-items: center;
+}
+.input-with-max input {
+width: 100%;
+padding-right: 80px;
+}
+.max-btn {
+position: absolute;
+right: 8px;
+top: 50%;
+transform: translateY(-50%);
+background: linear-gradient(135deg, #667eea, #764ba2);
+border: none;
+color: white;
+font-size: 12px;
+font-weight: bold;
+padding: 8px 18px;
+border-radius: 20px;
+cursor: pointer;
+transition: 0.2s;
+}
+.max-btn:hover { transform: translateY(-50%) scale(1.05); }
+
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1129; display: flex; justify-content: space-around; padding: 10px 20px 12px; border-top: 1px solid rgba(255,255,255,0.08); z-index: 1000; }
 .nav-item { text-align: center; cursor: pointer; color: #a0a0c0; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .nav-item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -906,9 +933,12 @@ Continue with Apple
 </div>
 
 <div class="input-field">
-<label>Amount (USD value)</label>
-<input type="number" id="convertAmount" placeholder="Enter amount (min $3)" min="3" step="0.01" oninput="calculateConvertReceive()">
-<div class="helper-text" style="font-size: 11px; color: #a0a0c0; margin-top: 5px;">Minimum: $3 · Fee: $0.05</div>
+<label>Amount</label>
+<div class="input-with-max">
+<input type="number" id="convertAmount" placeholder="Enter amount" min="0" step="0.00000001" oninput="calculateConvertReceive()">
+<button type="button" class="max-btn" onclick="fillConvertMax()">Max</button>
+</div>
+<div class="helper-text" style="font-size: 11px; color: #a0a0c0; margin-top: 5px;">Minimum: $1 · Fee: $0.05</div>
 </div>
 
 <div class="input-field">
@@ -3727,7 +3757,7 @@ const fromCoinId = fromSymbol === 'USDT' ? 'usdt' : fromCoinData.id;
 const fromBalance = fromSymbol === 'USDT' ? holdings.usdt : (holdings[fromCoinId] || 0);
 const fromPrice = fromSymbol === 'USDT' ? 1 : (currentPrices[fromCoinId] || FALLBACK_PRICES[fromCoinId] || 0);
 
-document.getElementById('convertFromBalance').innerHTML = `Available: ${fromBalance.toFixed(6)} ${fromSymbol} (~$${(fromBalance * fromPrice).toFixed(2)})`;
+document.getElementById('convertFromBalance').innerHTML = `Available: ${fromBalance.toFixed(6)} ${fromSymbol} ($${fromPrice.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:4})})`;
 
 // Rebuild "to" dropdown to exclude current from
 const prevTo = toSelect.value;
@@ -3752,10 +3782,20 @@ toSelect.value = prevTo;
 calculateConvertReceive();
 }
 
+function fillConvertMax() {
+const fromSymbol = document.getElementById('convertFromSelect').value;
+const fromCoinData = top200Coins.find(c => c.symbol === fromSymbol) || { symbol: 'USDT', id: 'usdt' };
+const fromCoinId = fromSymbol === 'USDT' ? 'usdt' : fromCoinData.id;
+const balance = fromSymbol === 'USDT' ? holdings.usdt : (holdings[fromCoinId] || 0);
+if (balance <= 0) return;
+document.getElementById('convertAmount').value = balance.toFixed(6);
+calculateConvertReceive();
+}
+
 function calculateConvertReceive() {
 const fromSymbol = document.getElementById('convertFromSelect').value;
 const toSymbol = document.getElementById('convertToSelect').value;
-const usdAmount = parseFloat(document.getElementById('convertAmount').value) || 0;
+const coinAmount = parseFloat(document.getElementById('convertAmount').value) || 0;
 
 const fromCoinData = top200Coins.find(c => c.symbol === fromSymbol) || { symbol: 'USDT', id: 'usdt' };
 const toCoinData = top200Coins.find(c => c.symbol === toSymbol);
@@ -3768,18 +3808,18 @@ const toPrice = toSymbol === 'USDT' ? 1 : (currentPrices[toCoinId] || FALLBACK_P
 const sendDisplay = document.getElementById('convertSendDisplay');
 const receiveDisplay = document.getElementById('convertReceiveDisplay');
 
-if (usdAmount <= 0 || !fromPrice || !toPrice) {
+if (coinAmount <= 0 || !fromPrice || !toPrice) {
 sendDisplay.innerHTML = '--';
 receiveDisplay.innerHTML = '--';
 return;
 }
 
+const usdAmount = coinAmount * fromPrice;
 const feeUsd = 0.05;
-const fromAmount = usdAmount / fromPrice;
 const usableUsd = Math.max(0, usdAmount - feeUsd);
 const toAmount = usableUsd / toPrice;
 
-sendDisplay.innerHTML = `${fromAmount.toFixed(6)} ${fromSymbol}`;
+sendDisplay.innerHTML = `${coinAmount.toFixed(6)} ${fromSymbol}`;
 receiveDisplay.innerHTML = `${toAmount.toFixed(6)} ${toSymbol}`;
 }
 
@@ -3790,16 +3830,22 @@ await delay(1500);
 
 const fromSymbol = document.getElementById('convertFromSelect').value;
 const toSymbol = document.getElementById('convertToSelect').value;
-const usdAmount = parseFloat(document.getElementById('convertAmount').value) || 0;
+const coinAmount = parseFloat(document.getElementById('convertAmount').value) || 0;
 
 if (fromSymbol === toSymbol) {
 hideButtonSpinner(buttonId);
 showCustomModal('Invalid', 'From and To must be different', 'error');
 return;
 }
-if (usdAmount < 3) {
+
+const fromCoinData = top200Coins.find(c => c.symbol === fromSymbol) || { symbol: 'USDT', id: 'usdt' };
+const fromCoinId = fromSymbol === 'USDT' ? 'usdt' : fromCoinData.id;
+const fromPrice = fromSymbol === 'USDT' ? 1 : (currentPrices[fromCoinId] || FALLBACK_PRICES[fromCoinId] || 0);
+const usdAmount = coinAmount * fromPrice;
+
+if (usdAmount < 1) {
 hideButtonSpinner(buttonId);
-showCustomModal('Invalid Amount', 'Minimum convert is $3', 'error');
+showCustomModal('Invalid Amount', 'Minimum convert is $1', 'error');
 return;
 }
 
