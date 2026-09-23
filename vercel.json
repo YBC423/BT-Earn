@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/((?!api|_next|_vercel|favicon|apple-touch|site\\.webmanifest|website_logo|robots|sitemap|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|css|js|mjs|json|webmanifest|txt|xml|woff|woff2|ttf|otf|map|mp4|webm|pdf|zip)).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
