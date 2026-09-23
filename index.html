@@ -1528,6 +1528,10 @@ let cameraStream = null;
 let balanceHidden = false;
 let assetsCollapsed = false;
 
+// BOT ACCESS TOKEN (from backend after code verification, valid 20 min)
+let botAccessToken = null;
+let botAccessGranted = false;
+
 const FALLBACK_PRICES = {};
 top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = 0; FALLBACK_PRICES[coin.id+'Change'] = 0; });
 currentPrices = { ...FALLBACK_PRICES };
@@ -1542,9 +1546,6 @@ const checkbox = document.getElementById('termsCheckbox');
 const signupBtn = document.getElementById('signupBtn');
 signupBtn.disabled = !checkbox.checked;
 }
-
-const BOT_ACCESS_CODE = "BT42349242";
-let botAccessGranted = false;
 
 function openBotAccessModal() {
 const modal = document.getElementById('botAccessModal');
@@ -1568,13 +1569,30 @@ const enteredCode = document.getElementById('botAccessCode').value.trim();
 const errorEl = document.getElementById('botAccessError');
 const successEl = document.getElementById('botAccessSuccess');
 
-if (enteredCode === BOT_ACCESS_CODE) {
+if (!enteredCode) {
+errorEl.textContent = 'Please enter a code.';
+errorEl.style.display = 'block';
+successEl.style.display = 'none';
+return;
+}
+
 showButtonSpinner(buttonId, 'Verify Access');
-await delay(1500);
+
+try {
+const res = await authFetch(`${API_BASE_URL}/api/auth/verify-bot-access`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ code: enteredCode })
+});
+
+const data = await res.json().catch(() => ({}));
+hideButtonSpinner(buttonId);
+
+if (res.ok && data.success && data.token) {
+botAccessToken = data.token;
 botAccessGranted = true;
 successEl.style.display = 'block';
 errorEl.style.display = 'none';
-hideButtonSpinner(buttonId);
 setTimeout(function() {
 closeBotAccessModal();
 renderBotsPage();
@@ -1585,17 +1603,24 @@ errorEl.style.display = 'block';
 successEl.style.display = 'none';
 errorEl.textContent = 'Incorrect code. Please try again.';
 document.getElementById('botAccessCode').value = '';
-document.getElementById('botAccessCode').focus();
 const input = document.getElementById('botAccessCode');
 input.style.borderColor = '#e53e3e';
 input.style.animation = 'shake 0.3s ease';
-setTimeout(function() { input.style.borderColor = 'rgba(255,255,255,0.1)'; input.style.animation = ''; }, 400);
+setTimeout(function() {
+input.style.borderColor = 'rgba(255,255,255,0.1)';
+input.style.animation = '';
+}, 400);
+}
+} catch (err) {
+hideButtonSpinner(buttonId);
+errorEl.style.display = 'block';
+errorEl.textContent = 'Network error. Try again.';
 }
 }
 
 function showBots() {
 if (!currentUser) { showAuthPage(); return; }
-if (botAccessGranted) { renderBotsPage(); return; }
+if (botAccessGranted && botAccessToken) { renderBotsPage(); return; }
 openBotAccessModal();
 }
 
@@ -1619,7 +1644,7 @@ document.getElementById('activityPage').style.display = 'none';
 loadSavedBotConfigs();
 }
 
-function resetBotAccess() { botAccessGranted = false; }
+function resetBotAccess() { botAccessGranted = false; botAccessToken = null; }
 
 function showCustomModal(title, message, type) {
 const modal = document.getElementById('customModal');
@@ -3511,12 +3536,21 @@ return;
 try {
 const res = await authFetch(`${API_BASE_URL}/api/auth/bot-run`, {
 method: 'POST',
-headers: { 'Content-Type': 'application/json' },
+headers: {
+'Content-Type': 'application/json',
+'x-bot-access-token': botAccessToken || ''
+},
 body: JSON.stringify({ botName: botStats.botName, asset: botStats.asset, amountPerTrade: amount })
 });
 const data = await res.json().catch(() => ({}));
 if (!res.ok || !data.success) {
 addBotLog(`Bot run failed: ${data.message || res.status}`, 'error');
+if (res.status === 403) {
+addBotLog(`Bot access expired. Re-enter code.`, 'error');
+botAccessGranted = false;
+botAccessToken = null;
+stopBotTrading();
+}
 return;
 }
 const profit = data.trade.profit;
