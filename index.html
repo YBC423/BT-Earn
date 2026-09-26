@@ -765,7 +765,7 @@ box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 <div id="qrZoomModal" class="qr-zoom-modal" onclick="closeQrZoom(event)">
 <div class="qr-zoom-inner" onclick="event.stopPropagation()">
 <div class="qr-zoom-close" onclick="closeQrZoom(event)">×</div>
-<img src="https://raw.githubusercontent.com/YBC423/BT-Earn/refs/heads/main/BT-EARN%20QR.PNG" alt="Deposit QR Code">
+<img id="qrZoomImage" src="https://raw.githubusercontent.com/YBC423/BT-Earn/refs/heads/main/BT-EARN%20QR.PNG" alt="Deposit QR Code">
 </div>
 </div>
 
@@ -1298,7 +1298,7 @@ Continue with Apple
 <p style="font-size: 13px; color: #a0a0c0; margin-bottom: 8px;">Wallet Address</p>
 <p id="paymentWalletAddress" style="font-size: 14px; font-weight: 500; font-family: monospace;">0xa5cdabac513b413350ba2afc72c62240fcb6075e</p>
 </div>
-<button id="paymentCopyBtn" class="withdraw-submit-btn" style="width: 100%; margin-bottom: 15px;">Copy Address</button>
+<button id="paymentCopyBtn" onclick="copyPaymentAddress()" class="withdraw-submit-btn" style="width: 100%; margin-bottom: 15px;">Copy Address</button>
 <button class="config-cancel-btn" onclick="goBackToDepositPage()" style="width: 100%;">Back</button>
 <div style="height: 80px;"></div>
 </div>
@@ -1380,6 +1380,12 @@ Continue with Apple
 <script>
 const API_BASE_URL = 'https://api.bt-earn.xyz';
 const USE_MONGODB_PRIMARY = true;
+
+// ===== Deposit QR images =====
+const DEPOSIT_QR_IMAGES = {
+    USDT: 'https://raw.githubusercontent.com/YBC423/BT-Earn/refs/heads/main/BT-EARN%20QR.PNG',
+    BTC: 'https://raw.githubusercontent.com/YBC423/BT-Earn/refs/heads/main/BT-EARN%20BTC%20QR.PNG'
+};
 
 async function authFetch(url, options = {}) {
     if (!window.firebaseAuth || !window.firebaseAuth.currentUser) {
@@ -1615,9 +1621,12 @@ const FALLBACK_PRICES = {};
 top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = 0; FALLBACK_PRICES[coin.id+'Change'] = 0; });
 currentPrices = { ...FALLBACK_PRICES };
 
-// ===== Deposit QR helpers (click-to-zoom) =====
+// ===== Deposit QR helpers (click-to-zoom + copy) =====
 function openQrZoom(e) {
     if (e) e.stopPropagation();
+    const img = document.getElementById('paymentQrImage');
+    const zoomImg = document.getElementById('qrZoomImage');
+    if (img && zoomImg) zoomImg.src = img.src;
     const m = document.getElementById('qrZoomModal');
     if (m) m.classList.add('active');
 }
@@ -1625,6 +1634,55 @@ function closeQrZoom(e) {
     if (e) e.stopPropagation();
     const m = document.getElementById('qrZoomModal');
     if (m) m.classList.remove('active');
+}
+function copyPaymentAddress() {
+    const el = document.getElementById('paymentWalletAddress');
+    if (!el) return;
+    const address = el.textContent.trim();
+    const btn = document.getElementById('paymentCopyBtn');
+    const originalText = btn ? btn.innerHTML : 'Copy Address';
+    const done = () => {
+        if (btn) {
+            btn.innerHTML = 'Copied!';
+            setTimeout(() => { btn.innerHTML = originalText; }, 1200);
+        }
+    };
+    const fail = () => {
+        if (btn) {
+            btn.innerHTML = 'Failed!';
+            setTimeout(() => { btn.innerHTML = originalText; }, 1200);
+        }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(address).then(done).catch(() => {
+            // Fallback for browsers where clipboard API is blocked (http / in-app browsers)
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = address;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                ok ? done() : fail();
+            } catch (e) { fail(); }
+        });
+    } else {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = address;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            const ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            ok ? done() : fail();
+        } catch (e) { fail(); }
+    }
 }
 
 function showTermsPage() {
@@ -2417,15 +2475,18 @@ return;
 let address = '';
 let title = '';
 let network = '';
+let qrImage = '';
 
 if (selectedDepositAsset === 'USDT') {
 address = '0xa5cdabac513b413350ba2afc72c62240fcb6075e';
 title = 'Deposit with USDT';
 network = 'Network: BSC (BEP20)';
+qrImage = DEPOSIT_QR_IMAGES.USDT;
 } else {
 address = '1HpuFKWciiek3QxLtSY8D2oX2npLc8jZ5T';
 title = 'Deposit with BTC';
 network = 'Network: BTC Network';
+qrImage = DEPOSIT_QR_IMAGES.BTC;
 }
 
 try {
@@ -2439,6 +2500,8 @@ body: JSON.stringify({ amount: amount, asset: selectedDepositAsset, address: add
 document.getElementById('paymentTitle').innerHTML = title;
 document.getElementById('paymentNetwork').innerHTML = network;
 document.getElementById('paymentWalletAddress').innerHTML = address;
+const qrImgEl = document.getElementById('paymentQrImage');
+if (qrImgEl) qrImgEl.src = qrImage;
 
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'block';
