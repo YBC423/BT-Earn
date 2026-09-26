@@ -625,6 +625,77 @@ transition: 0.2s;
 .camera-modal-content video { width: 100%; border-radius: 12px; background: #000; max-height: 400px; }
 .camera-close { position: absolute; right: 15px; top: 12px; font-size: 24px; cursor: pointer; color: white; background: rgba(255,255,255,0.1); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
+/* ===== Deposit QR ===== */
+.deposit-qr-wrap {
+background: #ffffff;
+padding: 18px;
+border-radius: 20px;
+display: inline-block;
+margin-bottom: 25px;
+cursor: pointer;
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+.deposit-qr-wrap:hover { transform: scale(1.03); box-shadow: 0 12px 32px rgba(102,126,234,0.35); }
+.deposit-qr-img {
+display: block;
+width: 260px;
+height: 260px;
+object-fit: contain;
+border-radius: 10px;
+}
+.deposit-qr-hint {
+font-size: 12px;
+color: #a0a0c0;
+margin-top: -10px;
+margin-bottom: 20px;
+}
+.qr-zoom-modal {
+display: none;
+position: fixed;
+top: 0; left: 0; width: 100%; height: 100%;
+background: rgba(0,0,0,0.96);
+z-index: 3300;
+justify-content: center;
+align-items: center;
+padding: 20px;
+}
+.qr-zoom-modal.active { display: flex; }
+.qr-zoom-inner {
+background: #ffffff;
+padding: 22px;
+border-radius: 22px;
+display: inline-block;
+position: relative;
+max-width: 92vw;
+max-height: 92vh;
+}
+.qr-zoom-inner img {
+display: block;
+width: min(78vw, 78vh, 520px);
+height: min(78vw, 78vh, 520px);
+object-fit: contain;
+}
+.qr-zoom-close {
+position: absolute;
+top: -14px; right: -14px;
+width: 38px; height: 38px;
+border-radius: 50%;
+background: #e53e3e;
+color: #fff;
+font-size: 22px;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+border: 2px solid #fff;
+box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.qr-zoom-close:hover { background: #c53030; }
+@media (max-width: 480px) {
+.deposit-qr-img { width: 220px; height: 220px; }
+}
+
 @media (max-width: 768px) {
 .header { padding: 15px 20px; }
 .header-icon-btn svg { width: 22px; height: 22px; }
@@ -688,6 +759,13 @@ transition: 0.2s;
 </div>
 <button class="custom-modal-btn" id="passwordResetSubmitBtn" onclick="submitPasswordReset()" style="width: 100%;">Send Reset Link</button>
 <button onclick="closePasswordResetModal()" style="width: 100%; margin-top: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 30px; color: #a0a0c0; cursor: pointer; font-size: 14px;">Cancel</button>
+</div>
+</div>
+
+<div id="qrZoomModal" class="qr-zoom-modal" onclick="closeQrZoom(event)">
+<div class="qr-zoom-inner" onclick="event.stopPropagation()">
+<div class="qr-zoom-close" onclick="closeQrZoom(event)">×</div>
+<img src="https://raw.githubusercontent.com/YBC423/BT-Earn/refs/heads/main/BT-EARN%20QR.PNG" alt="Deposit QR Code">
 </div>
 </div>
 
@@ -1168,7 +1246,7 @@ Continue with Apple
 <p class="subtitle">Choose your preferred deposit method below</p>
 <div style="margin-bottom: 25px;">
 <div id="depositOptionUSDT" onclick="selectDepositAsset('USDT')" style="display: flex; justify-content: space-between; align-items: center; padding: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(102,126,234,0.5); border-radius: 16px; margin-bottom: 12px; cursor: pointer; transition: 0.3s;">
-<div><div style="font-weight: bold; font-size: 16px;">USDT (TRC20)</div><div style="font-size: 13px; color: #a0a0c0; margin-top: 4px;">Network: TRON (TRC20)</div></div>
+<div><div style="font-weight: bold; font-size: 16px;">USDT (BEP20)</div><div style="font-size: 13px; color: #a0a0c0; margin-top: 4px;">Network: BSC (BEP20)</div></div>
 <div id="checkUSDT" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">✓</div>
 </div>
 <div id="depositOptionBTC" onclick="selectDepositAsset('BTC')" style="display: flex; justify-content: space-between; align-items: center; padding: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; cursor: pointer; transition: 0.3s;">
@@ -1211,13 +1289,14 @@ Continue with Apple
 </div>
 <div class="withdrawal-container" style="text-align: center;">
 <h1 id="paymentTitle">Deposit with USDT</h1>
-<p class="subtitle" id="paymentNetwork">Network: TRON (TRC20)</p>
-<div style="background: white; padding: 20px; border-radius: 20px; display: inline-block; margin-bottom: 25px;">
-<canvas id="paymentQrCanvas" width="200" height="200"></canvas>
+<p class="subtitle" id="paymentNetwork">Network: BSC (BEP20)</p>
+<div class="deposit-qr-wrap" onclick="openQrZoom(event)">
+<img class="deposit-qr-img" id="paymentQrImage" src="https://raw.githubusercontent.com/YBC423/BT-Earn/refs/heads/main/BT-EARN%20QR.PNG" alt="Deposit QR Code">
 </div>
+<div class="deposit-qr-hint">Tap the QR to enlarge for scanning</div>
 <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; margin-bottom: 25px; word-break: break-all;">
 <p style="font-size: 13px; color: #a0a0c0; margin-bottom: 8px;">Wallet Address</p>
-<p id="paymentWalletAddress" style="font-size: 14px; font-weight: 500; font-family: monospace;">TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj</p>
+<p id="paymentWalletAddress" style="font-size: 14px; font-weight: 500; font-family: monospace;">0xa5cdabac513b413350ba2afc72c62240fcb6075e</p>
 </div>
 <button id="paymentCopyBtn" class="withdraw-submit-btn" style="width: 100%; margin-bottom: 15px;">Copy Address</button>
 <button class="config-cancel-btn" onclick="goBackToDepositPage()" style="width: 100%;">Back</button>
@@ -1535,6 +1614,18 @@ let botAccessGranted = false;
 const FALLBACK_PRICES = {};
 top200Coins.forEach(coin => { FALLBACK_PRICES[coin.id] = 0; FALLBACK_PRICES[coin.id+'Change'] = 0; });
 currentPrices = { ...FALLBACK_PRICES };
+
+// ===== Deposit QR helpers (click-to-zoom) =====
+function openQrZoom(e) {
+    if (e) e.stopPropagation();
+    const m = document.getElementById('qrZoomModal');
+    if (m) m.classList.add('active');
+}
+function closeQrZoom(e) {
+    if (e) e.stopPropagation();
+    const m = document.getElementById('qrZoomModal');
+    if (m) m.classList.remove('active');
+}
 
 function showTermsPage() {
 document.getElementById('authPage').style.display = 'none';
@@ -2194,8 +2285,8 @@ const newDeposit = {
 id: Date.now(),
 amount: difference,
 asset: 'USDT',
-address: 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj',
-network: 'TRC20',
+address: '0xa5cdabac513b413350ba2afc72c62240fcb6075e',
+network: 'BEP20',
 status: 'Completed',
 dateTime: new Date().toLocaleString(),
 txId: 'DEP-AUTO-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8).toUpperCase()
@@ -2328,9 +2419,9 @@ let title = '';
 let network = '';
 
 if (selectedDepositAsset === 'USDT') {
-address = 'TXLu3TBKbeTASWZujVJSSy8b2KsdprRZmj';
+address = '0xa5cdabac513b413350ba2afc72c62240fcb6075e';
 title = 'Deposit with USDT';
-network = 'Network: TRON (TRC20)';
+network = 'Network: BSC (BEP20)';
 } else {
 address = '1HpuFKWciiek3QxLtSY8D2oX2npLc8jZ5T';
 title = 'Deposit with BTC';
@@ -2348,39 +2439,6 @@ body: JSON.stringify({ amount: amount, asset: selectedDepositAsset, address: add
 document.getElementById('paymentTitle').innerHTML = title;
 document.getElementById('paymentNetwork').innerHTML = network;
 document.getElementById('paymentWalletAddress').innerHTML = address;
-
-const canvas = document.getElementById('paymentQrCanvas');
-const ctx = canvas.getContext('2d');
-ctx.fillStyle = '#ffffff';
-ctx.fillRect(0, 0, 200, 200);
-
-if (typeof QRCode !== 'undefined') {
-try {
-if (currentPaymentQr) currentPaymentQr.clear();
-currentPaymentQr = new QRCode(canvas, {
-text: address, width: 200, height: 200, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H
-});
-} catch(e) {
-ctx.fillStyle = '#fff';
-ctx.fillRect(0, 0, 200, 200);
-ctx.fillStyle = '#000';
-ctx.font = '12px Arial';
-ctx.fillText('QR Code', 70, 100);
-ctx.fillText(address.substring(0, 20)+'...', 20, 140);
-}
-}
-
-const copyBtn = document.getElementById('paymentCopyBtn');
-const originalText = copyBtn.innerHTML;
-copyBtn.onclick = function() {
-navigator.clipboard.writeText(address).then(() => {
-copyBtn.innerHTML = 'Copied!';
-setTimeout(() => { copyBtn.innerHTML = originalText; }, 1000);
-}).catch(() => {
-copyBtn.innerHTML = 'Failed!';
-setTimeout(() => { copyBtn.innerHTML = originalText; }, 1000);
-});
-};
 
 document.getElementById('depositPage').style.display = 'none';
 document.getElementById('depositPaymentPage').style.display = 'block';
@@ -3341,7 +3399,7 @@ if(amount > holdings.usdt) { hideButtonSpinner(buttonId); showCustomModal('Insuf
 
 let txId = generateTxId();
 let fee = 0.20;
-let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'TRC20', fee: fee, txId, status: 'Pending', dateTime: new Date().toLocaleString() };
+let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'BTC' ? 'BTC Network' : 'BEP20', fee: fee, txId, status: 'Pending', dateTime: new Date().toLocaleString() };
 
 withdrawals.push(withdrawal);
 holdings.usdt -= amount;
@@ -4022,7 +4080,7 @@ let asset = e.target.getAttribute('data-asset');
 let networkName = document.getElementById('networkName');
 let walletLabel = document.getElementById('walletAddressLabel');
 if(asset === 'BTC') { networkName.innerHTML = 'BTC Network'; walletLabel.innerHTML = 'Bitcoin Wallet Address'; }
-else { networkName.innerHTML = 'TRC20'; walletLabel.innerHTML = 'USDT (TRC20) Wallet Address'; }
+else { networkName.innerHTML = 'BEP20'; walletLabel.innerHTML = 'USDT (BEP20) Wallet Address'; }
 }
 
 if(e.target.classList && e.target.classList.contains('time-btn')) {
