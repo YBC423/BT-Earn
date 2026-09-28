@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BT-EARN · Admin</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -33,6 +33,7 @@ body {
 button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 input, select, textarea { font-family: inherit; outline: none; }
 a { color: var(--accent); text-decoration: none; }
+svg { display: inline-block; vertical-align: middle; }
 
 /* ===== LOGIN ===== */
 #loginScreen {
@@ -41,9 +42,10 @@ a { color: var(--accent); text-decoration: none; }
   justify-content: center;
   min-height: 100vh;
   padding: 20px;
-  background: radial-gradient(circle at 30% 20%, rgba(102,126,234,0.15), transparent 50%),
-              radial-gradient(circle at 70% 80%, rgba(118,75,162,0.15), transparent 50%),
-              var(--bg);
+  background:
+    radial-gradient(circle at 30% 20%, rgba(102,126,234,0.15), transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(118,75,162,0.15), transparent 50%),
+    var(--bg);
 }
 .login-card {
   background: var(--bg-2);
@@ -54,6 +56,7 @@ a { color: var(--accent); text-decoration: none; }
   max-width: 420px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
+.login-shield { text-align: center; margin-bottom: 18px; color: var(--accent); }
 .login-logo {
   font-size: 36px;
   font-weight: 800;
@@ -65,13 +68,7 @@ a { color: var(--accent); text-decoration: none; }
   color: transparent;
   letter-spacing: 1px;
 }
-.login-sub {
-  text-align: center;
-  color: var(--muted);
-  font-size: 13px;
-  margin-bottom: 30px;
-}
-.login-shield { text-align: center; font-size: 32px; margin-bottom: 15px; }
+.login-sub { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 30px; }
 .login-field { margin-bottom: 18px; }
 .login-field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
 .login-field input {
@@ -98,13 +95,7 @@ a { color: var(--accent); text-decoration: none; }
 }
 .login-btn:hover { transform: scale(1.01); }
 .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.login-err {
-  color: var(--red);
-  font-size: 13px;
-  text-align: center;
-  margin-top: 14px;
-  min-height: 18px;
-}
+.login-err { color: var(--red); font-size: 13px; text-align: center; margin-top: 14px; min-height: 18px; }
 
 /* ===== APP SHELL ===== */
 #app { display: none; min-height: 100vh; }
@@ -122,13 +113,7 @@ a { color: var(--accent); text-decoration: none; }
   z-index: 100;
 }
 .topbar-left { display: flex; align-items: center; gap: 14px; }
-.menu-toggle {
-  background: transparent;
-  color: var(--muted);
-  display: none;
-  padding: 6px;
-  font-size: 22px;
-}
+.menu-toggle { background: transparent; color: var(--muted); display: none; padding: 6px; }
 .topbar-brand {
   font-size: 20px;
   font-weight: 800;
@@ -186,12 +171,8 @@ a { color: var(--accent); text-decoration: none; }
   margin-bottom: 4px;
 }
 .nav-item:hover { background: rgba(255,255,255,0.04); color: #fff; }
-.nav-item.active {
-  background: var(--grad);
-  color: #fff;
-  box-shadow: 0 6px 18px rgba(102,126,234,0.35);
-}
-.nav-item .ico { font-size: 17px; width: 20px; text-align: center; }
+.nav-item.active { background: var(--grad); color: #fff; box-shadow: 0 6px 18px rgba(102,126,234,0.35); }
+.nav-item .ico { width: 18px; height: 18px; flex-shrink: 0; }
 .nav-badge {
   margin-left: auto;
   background: var(--orange);
@@ -205,11 +186,7 @@ a { color: var(--accent); text-decoration: none; }
 }
 .nav-item.active .nav-badge { background: rgba(255,255,255,0.25); }
 
-.main {
-  margin-left: 235px;
-  padding: 90px 26px 40px;
-  min-height: 100vh;
-}
+.main { margin-left: 235px; padding: 90px 26px 40px; min-height: 100vh; }
 .page { display: none; }
 .page.active { display: block; }
 
@@ -245,10 +222,11 @@ a { color: var(--accent); text-decoration: none; }
 .btn-red:hover { background: #c53030; }
 .btn-orange { background: var(--orange); color: #fff; }
 .btn-orange:hover { background: #d97706; }
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-blue:hover { background: #2563eb; }
 .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
-/* ===== STATS ===== */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -279,7 +257,6 @@ a { color: var(--accent); text-decoration: none; }
 .stat-value { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
 .stat-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
 
-/* ===== CARDS / TABLES ===== */
 .card {
   background: var(--bg-2);
   border: 1px solid var(--border);
@@ -297,12 +274,7 @@ a { color: var(--accent); text-decoration: none; }
 }
 
 .table-wrap { overflow-x: auto; border-radius: 12px; }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  min-width: 600px;
-}
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
 thead th {
   text-align: left;
   padding: 12px 14px;
@@ -324,13 +296,7 @@ tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: rgba(255,255,255,0.02); }
 tbody tr.clickable { cursor: pointer; }
 td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; }
-
-.empty-row {
-  text-align: center;
-  color: var(--muted);
-  padding: 40px 20px !important;
-  font-size: 14px;
-}
+.empty-row { text-align: center; color: var(--muted); padding: 40px 20px !important; font-size: 14px; }
 
 .pill {
   display: inline-block;
@@ -346,26 +312,13 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 .pill-rejected { background: rgba(229,62,62,0.15); color: var(--red); }
 .pill-active { background: rgba(72,187,120,0.15); color: var(--green); }
 .pill-banned { background: rgba(229,62,62,0.15); color: var(--red); }
-.pill-green { background: rgba(72,187,120,0.15); color: var(--green); }
-.pill-red { background: rgba(229,62,62,0.15); color: var(--red); }
 .pill-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
 
 .pos { color: var(--green); font-weight: 700; }
 .neg { color: var(--red); font-weight: 700; }
 
-/* ===== FILTERS ===== */
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 16px;
-  align-items: center;
-}
-.search-box {
-  flex: 1;
-  min-width: 220px;
-  position: relative;
-}
+.filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center; }
+.search-box { flex: 1; min-width: 220px; position: relative; }
 .search-box input {
   width: 100%;
   padding: 11px 15px 11px 40px;
@@ -376,15 +329,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   font-size: 14px;
 }
 .search-box input:focus { border-color: var(--accent); }
-.search-box::before {
-  content: "🔍";
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 13px;
-  opacity: 0.5;
-}
+.search-box .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.5; color: var(--muted); }
 .select {
   padding: 11px 15px;
   background: var(--bg-2);
@@ -396,14 +341,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 }
 .select:focus { border-color: var(--accent); }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 18px;
-  flex-wrap: wrap;
-}
+.pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
 .pagination button {
   padding: 7px 13px;
   background: var(--bg-2);
@@ -418,7 +356,6 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
 .pagination-info { color: var(--muted); font-size: 12px; margin: 0 8px; }
 
-/* ===== MODAL ===== */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -471,6 +408,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   padding: 18px 22px;
   border-top: 1px solid var(--border);
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .detail-row {
@@ -499,7 +437,23 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
 .field textarea { min-height: 80px; resize: vertical; }
 
-/* ===== TOAST ===== */
+.wallet-row {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.wallet-row-info { flex: 1; min-width: 120px; }
+.wallet-row-symbol { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+.wallet-row-value { font-size: 16px; font-weight: 700; margin-top: 2px; }
+.wallet-row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
 .toast-container {
   position: fixed;
   top: 78px;
@@ -527,11 +481,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 .toast.warn { border-left-color: var(--orange); }
 @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-.loading-row {
-  text-align: center;
-  color: var(--muted);
-  padding: 30px !important;
-}
+.loading-row { text-align: center; color: var(--muted); padding: 30px !important; }
 .spinner {
   display: inline-block;
   width: 20px;
@@ -544,33 +494,18 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.overlay-close {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-}
+.backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 85; }
+.backdrop.active { display: block; }
 
-/* ===== MOBILE ===== */
 @media (max-width: 900px) {
   .menu-toggle { display: block; }
-  .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
-  }
+  .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; }
   .sidebar.open { transform: translateX(0); }
   .main { margin-left: 0; padding: 90px 16px 40px; }
   .topbar-email { display: none; }
   .page-title { font-size: 22px; }
   .stat-value { font-size: 22px; }
 }
-.backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 85;
-}
-.backdrop.active { display: block; }
 </style>
 </head>
 <body>
@@ -578,7 +513,11 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-shield">🛡️</div>
+    <div class="login-shield">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </div>
     <div class="login-logo">BT-EARN</div>
     <div class="login-sub">Admin Control Panel</div>
     <div class="login-field">
@@ -587,7 +526,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
     </div>
     <div class="login-field">
       <label>Password</label>
-      <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+      <input id="loginPassword" type="password" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
     </div>
     <button id="loginBtn" class="login-btn" onclick="doLogin()">Sign In</button>
     <div id="loginErr" class="login-err"></div>
@@ -598,7 +537,9 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 <div id="app">
   <div class="topbar">
     <div class="topbar-left">
-      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <button class="menu-toggle" onclick="toggleSidebar()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <div class="topbar-brand">BT-EARN</div>
       <div class="topbar-badge">Admin</div>
     </div>
@@ -612,24 +553,34 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 
   <div class="sidebar" id="sidebar">
     <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
-      <span class="ico">📊</span> Dashboard
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Dashboard
     </div>
     <div class="nav-item" data-page="users" onclick="showPage('users')">
-      <span class="ico">👥</span> Users
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Users
     </div>
     <div class="nav-item" data-page="deposits" onclick="showPage('deposits')">
-      <span class="ico">📥</span> Deposits
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+      Deposits
       <span class="nav-badge" id="badgeDeposits" style="display:none">0</span>
     </div>
     <div class="nav-item" data-page="withdrawals" onclick="showPage('withdrawals')">
-      <span class="ico">📤</span> Withdrawals
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M5 3h14"/></svg>
+      Withdrawals
       <span class="nav-badge" id="badgeWithdrawals" style="display:none">0</span>
     </div>
+    <div class="nav-item" data-page="converts" onclick="showPage('converts')">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      Converts
+    </div>
     <div class="nav-item" data-page="bots" onclick="showPage('bots')">
-      <span class="ico">🤖</span> Bot Trades
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+      Bot Trades
     </div>
     <div class="nav-item" data-page="logs" onclick="showPage('logs')">
-      <span class="ico">📝</span> Audit Log
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Audit Log
     </div>
   </div>
 
@@ -640,11 +591,14 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
       <div class="page-header">
         <div>
           <div class="page-title">Dashboard</div>
-          <div class="page-sub" id="dashUpdated">—</div>
+          <div class="page-sub" id="dashUpdated">Loading...</div>
         </div>
-        <button class="btn btn-ghost" onclick="loadDashboard()">🔄 Refresh</button>
+        <button class="btn btn-ghost" onclick="loadDashboard()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+          Refresh
+        </button>
       </div>
-      <div class="stats-grid" id="statsGrid">
+      <div class="stats-grid">
         <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value" id="sTotalUsers">—</div><div class="stat-sub" id="sActiveUsers">—</div></div>
         <div class="stat-card green"><div class="stat-label">Total USDT Held</div><div class="stat-value" id="sTotalUsdt">—</div><div class="stat-sub">Across all wallets</div></div>
         <div class="stat-card blue"><div class="stat-label">Bot Profit (all-time)</div><div class="stat-value" id="sBotProfit">—</div><div class="stat-sub" id="sTotalTrades">—</div></div>
@@ -670,10 +624,14 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
           <div class="page-title">Users</div>
           <div class="page-sub" id="usersCount">—</div>
         </div>
-        <button class="btn btn-primary" onclick="exportUsers()">⬇ Export CSV</button>
+        <button class="btn btn-primary" onclick="exportUsers()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
       </div>
       <div class="filters">
         <div class="search-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input id="userSearch" placeholder="Search by name, email, or firebaseUid..." oninput="debouncedLoadUsers()">
         </div>
         <select class="select" id="userStatusFilter" onchange="loadUsers(1)">
@@ -703,12 +661,15 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
       </div>
       <div class="filters">
         <select class="select" id="depositStatusFilter" onchange="loadDeposits(1)">
-          <option value="all">All statuses</option>
           <option value="Pending" selected>Pending</option>
           <option value="Approved">Approved</option>
           <option value="Rejected">Rejected</option>
+          <option value="all">All statuses</option>
         </select>
-        <button class="btn btn-ghost btn-sm" onclick="loadDeposits(1)">🔄 Refresh</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadDeposits()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+          Refresh
+        </button>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -731,12 +692,15 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
       </div>
       <div class="filters">
         <select class="select" id="withdrawStatusFilter" onchange="loadWithdrawals(1)">
-          <option value="all">All statuses</option>
           <option value="Pending" selected>Pending</option>
           <option value="Approved">Approved</option>
           <option value="Rejected">Rejected</option>
+          <option value="all">All statuses</option>
         </select>
-        <button class="btn btn-ghost btn-sm" onclick="loadWithdrawals(1)">🔄 Refresh</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadWithdrawals()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+          Refresh
+        </button>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -746,6 +710,25 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
           </table>
         </div>
         <div class="pagination" id="withdrawalsPagination"></div>
+      </div>
+    </div>
+
+    <!-- CONVERTS -->
+    <div class="page" id="page-converts">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Converts</div>
+          <div class="page-sub" id="convertsCount">—</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>From</th><th>To</th><th>USD Value</th><th>Fee</th><th>Date</th></tr></thead>
+            <tbody id="convertsBody"><tr><td colspan="6" class="loading-row"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="convertsPagination"></div>
       </div>
     </div>
 
@@ -792,7 +775,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 
 <!-- USER DETAIL MODAL -->
 <div class="modal-overlay" id="userModal" onclick="if(event.target.id==='userModal') closeUserModal()">
-  <div class="modal" style="max-width: 620px">
+  <div class="modal" style="max-width: 640px">
     <div class="modal-head">
       <h3 id="userModalTitle">User Details</h3>
       <button class="modal-close" onclick="closeUserModal()">×</button>
@@ -804,7 +787,32 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   </div>
 </div>
 
-<!-- ACTION MODAL (credit / debit / reject reason) -->
+<!-- WALLET ACTION MODAL -->
+<div class="modal-overlay" id="walletModal" onclick="if(event.target.id==='walletModal') closeWalletModal()">
+  <div class="modal" style="max-width: 440px">
+    <div class="modal-head">
+      <h3 id="walletModalTitle">Wallet Action</h3>
+      <button class="modal-close" onclick="closeWalletModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="walletModalDesc" style="color: var(--muted); font-size: 13px; margin-bottom: 16px;"></div>
+      <div class="field">
+        <label id="walletAmountLabel">Amount</label>
+        <input id="walletAmount" type="number" min="0" step="0.00000001" placeholder="0.00000000">
+      </div>
+      <div class="field">
+        <label>Reason / Note (optional)</label>
+        <textarea id="walletReason" placeholder="e.g. Manual adjustment"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeWalletModal()">Cancel</button>
+      <button class="btn btn-primary" id="walletConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ACTION MODAL (approve/reject/ban) -->
 <div class="modal-overlay" id="actionModal" onclick="if(event.target.id==='actionModal') closeActionModal()">
   <div class="modal" style="max-width: 440px">
     <div class="modal-head">
@@ -813,13 +821,9 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
     </div>
     <div class="modal-body">
       <div id="actionModalDesc" style="color: var(--muted); font-size: 13px; margin-bottom: 16px;"></div>
-      <div class="field" id="actionAmountField">
-        <label>Amount (USDT)</label>
-        <input id="actionAmount" type="number" min="0" step="0.01" placeholder="0.00">
-      </div>
       <div class="field">
         <label>Reason / Note (optional)</label>
-        <textarea id="actionReason" placeholder="e.g. Manual deposit verification"></textarea>
+        <textarea id="actionReason" placeholder="e.g. Verified via blockchain"></textarea>
       </div>
     </div>
     <div class="modal-footer">
@@ -829,7 +833,6 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   </div>
 </div>
 
-<!-- TOASTS -->
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- FIREBASE SDK -->
@@ -856,14 +859,13 @@ window.dispatchEvent(new Event("fb-ready"));
 </script>
 
 <script>
-/* ============================================================
- *  CONFIG — change API_BASE if needed
- * ============================================================ */
 const API_BASE = "https://api.bt-earn.xyz";
-
 let currentAdmin = null;
 let token = null;
 let pendingAction = null;
+let pendingWalletAction = null;
+let currentUserId = null;
+let currentUserData = null;
 
 /* ============================================================
  *  AUTH
@@ -874,7 +876,6 @@ window.addEventListener("fb-ready", () => {
       try {
         token = await user.getIdToken();
         currentAdmin = { email: user.email, uid: user.uid };
-        // Verify against backend /me to make sure this user is actually admin
         const res = await apiFetch("/api/admin/me");
         if (!res.ok) {
           await doLogout();
@@ -931,13 +932,10 @@ function enterApp() {
   document.getElementById("app").style.display = "block";
   document.getElementById("topbarEmail").textContent = currentAdmin?.email || "";
   showPage("dashboard");
-  // background refreshers
   setInterval(() => {
-    // refresh token every 50 minutes
     const u = window._fbAuth.currentUser;
     if (u) u.getIdToken(true).then(t => { token = t; }).catch(()=>{});
   }, 50 * 60 * 1000);
-  // auto-refresh current page every 30s
   setInterval(() => {
     const current = document.querySelector(".page.active")?.id?.replace("page-", "");
     if (current === "dashboard") loadDashboard();
@@ -955,9 +953,7 @@ async function apiFetch(path, options = {}) {
     ...(options.headers || {}),
     "Authorization": `Bearer ${token}`,
   };
-  if (options.body && !headers["Content-Type"]) {
-    headers["Content-Type"] = "application/json";
-  }
+  if (options.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
   return fetch(API_BASE + path, { ...options, headers });
 }
 
@@ -979,6 +975,7 @@ function showPage(name) {
   else if (name === "users") loadUsers(1);
   else if (name === "deposits") loadDeposits(1);
   else if (name === "withdrawals") loadWithdrawals(1);
+  else if (name === "converts") loadConverts(1);
   else if (name === "bots") loadBots(1);
   else if (name === "logs") loadLogs(1);
 }
@@ -997,11 +994,15 @@ function toast(msg, type = "info") {
 }
 
 /* ============================================================
- *  FORMAT HELPERS
+ *  FORMAT
  * ============================================================ */
 function fmtMoney(n) {
   const v = Number(n) || 0;
   return "$" + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtCoin(n, decimals = 8) {
+  const v = Number(n) || 0;
+  return v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: decimals });
 }
 function fmtDate(d) {
   if (!d) return "—";
@@ -1044,16 +1045,13 @@ async function loadDashboard() {
     document.getElementById("sPendingWd").textContent = s.withdrawals.Pending.count;
     document.getElementById("sPendingWdAmt").textContent = fmtMoney(s.withdrawals.Pending.total) + " total";
     document.getElementById("sBanned").textContent = s.bannedUsers;
-
     document.getElementById("dashUpdated").textContent = "Last updated: " + new Date().toLocaleTimeString();
 
-    // badges
     const bd = document.getElementById("badgeDeposits");
     const bw = document.getElementById("badgeWithdrawals");
     if (s.deposits.Pending.count > 0) { bd.textContent = s.deposits.Pending.count; bd.style.display = "inline-block"; } else bd.style.display = "none";
     if (s.withdrawals.Pending.count > 0) { bw.textContent = s.withdrawals.Pending.count; bw.style.display = "inline-block"; } else bw.style.display = "none";
 
-    // recent users
     const tbody = document.getElementById("recentUsersBody");
     if (!s.recentUsers || s.recentUsers.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No users yet</td></tr>';
@@ -1092,10 +1090,10 @@ async function loadUsers(page = 1) {
     const data = await res.json();
     if (!data.success) return toast(data.message || "Failed", "error");
 
-    document.getElementById("usersCount").textContent = `${data.total} users`;
+    document.getElementById("usersCount").textContent = `${data.total} verified user${data.total === 1 ? "" : "s"}`;
     const tbody = document.getElementById("usersBody");
     if (data.users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No users found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No verified users found</td></tr>';
     } else {
       tbody.innerHTML = data.users.map(u => `
         <tr class="clickable" onclick="openUser('${esc(u.firebaseUid)}')">
@@ -1117,7 +1115,6 @@ async function loadUsers(page = 1) {
 }
 
 function exportUsers() {
-  // Download via fetch + blob so we can send Authorization header
   apiFetch("/api/admin/users/export").then(async (res) => {
     if (!res.ok) return toast("Export failed", "error");
     const blob = await res.blob();
@@ -1134,8 +1131,6 @@ function exportUsers() {
 /* ============================================================
  *  USER DETAIL MODAL
  * ============================================================ */
-let currentUserId = null;
-
 async function openUser(uid) {
   currentUserId = uid;
   const modal = document.getElementById("userModal");
@@ -1149,8 +1144,33 @@ async function openUser(uid) {
     const data = await res.json();
     if (!data.success) { modal.classList.remove("active"); return toast(data.message, "error"); }
     const u = data.user;
+    currentUserData = u;
     const w = u.wallets || {};
+    const walletKeys = Object.keys(w);
+
     document.getElementById("userModalTitle").textContent = u.name || u.email;
+
+    // Wallets section — dynamic
+    const walletRowsHtml = walletKeys.length === 0
+      ? '<div style="color:var(--muted); font-size:13px;">No wallet fields</div>'
+      : walletKeys.map(k => {
+          const v = w[k];
+          const display = k === "usdt" || k === "ngn" ? fmtCoin(v, 2) : fmtCoin(v, 8);
+          const symbol = k.toUpperCase();
+          return `
+            <div class="wallet-row">
+              <div class="wallet-row-info">
+                <div class="wallet-row-symbol">${esc(symbol)}</div>
+                <div class="wallet-row-value">${display}</div>
+              </div>
+              <div class="wallet-row-actions">
+                <button class="btn btn-green btn-sm" onclick="openWalletAction('${esc(k)}','credit')">+ Add</button>
+                <button class="btn btn-orange btn-sm" onclick="openWalletAction('${esc(k)}','debit')">− Reduce</button>
+                <button class="btn btn-blue btn-sm" onclick="openWalletAction('${esc(k)}','set')">Set</button>
+              </div>
+            </div>
+          `;
+        }).join("");
 
     document.getElementById("userModalBody").innerHTML = `
       <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${esc(u.email)}</span></div>
@@ -1159,26 +1179,26 @@ async function openUser(uid) {
       <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${pill(u.status)}</span></div>
       <div class="detail-row"><span class="detail-label">Joined</span><span class="detail-value">${fmtDate(u.createdAt)}</span></div>
       <div class="detail-row"><span class="detail-label">Last Login</span><span class="detail-value">${fmtDate(u.lastLogin)}</span></div>
-      <div style="height:14px;"></div>
-      <div class="card-title" style="margin-bottom:8px;">Wallets</div>
-      <div class="detail-row"><span class="detail-label">USDT</span><span class="detail-value">${fmtMoney(w.usdt || 0)}</span></div>
-      <div class="detail-row"><span class="detail-label">BTC</span><span class="detail-value">${Number(w.btc || 0).toFixed(8)}</span></div>
-      <div class="detail-row"><span class="detail-label">ETH</span><span class="detail-value">${Number(w.eth || 0).toFixed(8)}</span></div>
-      <div class="detail-row"><span class="detail-label">NGN</span><span class="detail-value">${Number(w.ngn || 0).toLocaleString()}</span></div>
-      <div style="height:14px;"></div>
-      <div class="card-title" style="margin-bottom:8px;">Activity Counts</div>
+      <div class="detail-row"><span class="detail-label">Balance (Mongo field)</span><span class="detail-value">${fmtCoin(u.balance || 0, 8)}</span></div>
+      <div class="detail-row"><span class="detail-label">Total Bot Profit</span><span class="detail-value">${fmtMoney(u.totalProfit || 0)}</span></div>
+
+      <div style="height:16px;"></div>
+      <div class="card-title">Wallets (MongoDB)</div>
+      ${walletRowsHtml}
+
+      <div style="height:16px;"></div>
+      <div class="card-title">Activity</div>
       <div class="detail-row"><span class="detail-label">Deposits</span><span class="detail-value">${(u.deposits||[]).length}</span></div>
       <div class="detail-row"><span class="detail-label">Withdrawals</span><span class="detail-value">${(u.withdrawals||[]).length}</span></div>
       <div class="detail-row"><span class="detail-label">Converts</span><span class="detail-value">${(u.converts||[]).length}</span></div>
       <div class="detail-row"><span class="detail-label">Bot Trades</span><span class="detail-value">${(u.trades||[]).length}</span></div>
-      <div class="detail-row"><span class="detail-label">Total Bot Profit</span><span class="detail-value">${fmtMoney(u.totalProfit || 0)}</span></div>
     `;
 
     const isBanned = u.status === "banned";
     document.getElementById("userModalFooter").innerHTML = `
-      <button class="btn btn-green" onclick="openAction('credit','${uid}','${esc(u.email)}')">➕ Credit USDT</button>
-      <button class="btn btn-orange" onclick="openAction('debit','${uid}','${esc(u.email)}')">➖ Debit USDT</button>
-      <button class="btn ${isBanned?'btn-green':'btn-red'}" onclick="openAction('${isBanned?'unban':'ban'}','${uid}','${esc(u.email)}')">${isBanned?'✓ Unban':'🚫 Ban'}</button>
+      <button class="btn ${isBanned ? 'btn-green' : 'btn-red'}" onclick="openAction('${isBanned ? 'unban' : 'ban'}','${uid}','${esc(u.email)}')">
+        ${isBanned ? 'Unban User' : 'Ban User'}
+      </button>
     `;
   } catch (e) {
     console.error(e);
@@ -1189,70 +1209,125 @@ async function openUser(uid) {
 function closeUserModal() {
   document.getElementById("userModal").classList.remove("active");
   currentUserId = null;
+  currentUserData = null;
 }
 
 /* ============================================================
- *  ACTION MODAL (credit / debit / ban / unban / reject reason)
+ *  WALLET ACTION (credit/debit/set any field)
  * ============================================================ */
-function openAction(kind, uid, email) {
-  pendingAction = { kind, uid, email };
+function openWalletAction(field, action) {
+  if (!currentUserId) return;
+  pendingWalletAction = { field, action };
+  const modal = document.getElementById("walletModal");
+  const title = document.getElementById("walletModalTitle");
+  const desc = document.getElementById("walletModalDesc");
+  const amountLabel = document.getElementById("walletAmountLabel");
+  const amountInput = document.getElementById("walletAmount");
+  const reasonInput = document.getElementById("walletReason");
+  const btn = document.getElementById("walletConfirmBtn");
+
+  const symbol = field.toUpperCase();
+  const verb = action === "credit" ? "Add" : action === "debit" ? "Reduce" : "Set";
+
+  title.textContent = `${verb} ${symbol}`;
+  desc.innerHTML = `User: <strong>${esc(currentUserData?.email || "")}</strong>`;
+  amountLabel.textContent = action === "set" ? `New ${symbol} value` : `Amount (${symbol})`;
+  amountInput.value = "";
+  reasonInput.value = "";
+
+  btn.textContent = verb;
+  btn.className = action === "credit" ? "btn btn-green" : action === "debit" ? "btn btn-orange" : "btn btn-blue";
+  btn.onclick = confirmWalletAction;
+
+  modal.classList.add("active");
+}
+
+function closeWalletModal() {
+  document.getElementById("walletModal").classList.remove("active");
+  pendingWalletAction = null;
+}
+
+async function confirmWalletAction() {
+  if (!pendingWalletAction || !currentUserId) return;
+  const { field, action } = pendingWalletAction;
+  const amount = parseFloat(document.getElementById("walletAmount").value);
+  const reason = document.getElementById("walletReason").value.trim();
+  const btn = document.getElementById("walletConfirmBtn");
+
+  if (isNaN(amount) || amount < 0) return toast("Enter a valid amount", "error");
+
+  btn.disabled = true;
+  const orig = btn.textContent;
+  btn.textContent = "Working...";
+
+  try {
+    const res = await apiFetch(`/api/admin/users/${currentUserId}/wallet`, {
+      method: "POST",
+      body: JSON.stringify({ field, action, amount, reason }),
+    });
+    const data = await res.json();
+    if (!data.success) {
+      toast(data.message || "Action failed", "error");
+    } else {
+      toast(data.message || "Success", "success");
+      closeWalletModal();
+      // refresh user detail + users list
+      await openUser(currentUserId);
+      loadUsers();
+      loadDashboard();
+    }
+  } catch (e) {
+    console.error(e);
+    toast("Action failed", "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
+}
+
+/* ============================================================
+ *  ACTION MODAL (ban/unban/approve/reject)
+ * ============================================================ */
+function openAction(kind, uid, email, extra) {
+  pendingAction = { kind, uid, email, ...(extra || {}) };
   const modal = document.getElementById("actionModal");
   const title = document.getElementById("actionModalTitle");
   const desc = document.getElementById("actionModalDesc");
-  const amountField = document.getElementById("actionAmountField");
   const reason = document.getElementById("actionReason");
-  const amount = document.getElementById("actionAmount");
   const btn = document.getElementById("actionConfirmBtn");
 
   reason.value = "";
-  amount.value = "";
 
-  if (kind === "credit") {
-    title.textContent = "Credit USDT";
-    desc.innerHTML = `Add USDT to <strong>${esc(email)}</strong>.`;
-    amountField.style.display = "block";
-    btn.textContent = "Credit";
-    btn.className = "btn btn-green";
-  } else if (kind === "debit") {
-    title.textContent = "Debit USDT";
-    desc.innerHTML = `Remove USDT from <strong>${esc(email)}</strong>.`;
-    amountField.style.display = "block";
-    btn.textContent = "Debit";
-    btn.className = "btn btn-orange";
-  } else if (kind === "ban") {
+  if (kind === "ban") {
     title.textContent = "Ban User";
     desc.innerHTML = `Ban <strong>${esc(email)}</strong>? They will not be able to use the app.`;
-    amountField.style.display = "none";
     btn.textContent = "Ban User";
     btn.className = "btn btn-red";
   } else if (kind === "unban") {
     title.textContent = "Unban User";
     desc.innerHTML = `Restore access for <strong>${esc(email)}</strong>?`;
-    amountField.style.display = "none";
     btn.textContent = "Unban User";
     btn.className = "btn btn-green";
   } else if (kind === "approveDeposit") {
+    const amt = extra?.amount || 0;
     title.textContent = "Approve Deposit";
-    desc.innerHTML = `Approve deposit for <strong>${esc(email)}</strong>. Balance will be credited.`;
-    amountField.style.display = "none";
-    btn.textContent = "Approve";
+    desc.innerHTML = `Approve <strong>${fmtMoney(amt)}</strong> deposit for <strong>${esc(email)}</strong>.<br><br>This will credit <strong>${fmtMoney(amt)} USDT</strong> to their wallet automatically.`;
+    btn.textContent = "Approve & Credit";
     btn.className = "btn btn-green";
   } else if (kind === "rejectDeposit") {
     title.textContent = "Reject Deposit";
     desc.innerHTML = `Reject deposit for <strong>${esc(email)}</strong>. No balance change.`;
-    amountField.style.display = "none";
     btn.textContent = "Reject";
     btn.className = "btn btn-red";
   } else if (kind === "approveWithdrawal") {
     title.textContent = "Approve Withdrawal";
-    desc.innerHTML = `Approve withdrawal for <strong>${esc(email)}</strong>.`;
-    amountField.style.display = "none";
+    desc.innerHTML = `Approve withdrawal for <strong>${esc(email)}</strong>.<br><br>Funds were already deducted at request time. This just marks it approved.`;
     btn.textContent = "Approve";
     btn.className = "btn btn-green";
   } else if (kind === "rejectWithdrawal") {
+    const amt = extra?.amount || 0;
     title.textContent = "Reject Withdrawal";
-    desc.innerHTML = `Reject withdrawal for <strong>${esc(email)}</strong>. Funds will be refunded.`;
-    amountField.style.display = "none";
+    desc.innerHTML = `Reject withdrawal for <strong>${esc(email)}</strong>.<br><br>This will <strong>refund ${fmtMoney(amt)} USDT</strong> back to their wallet.`;
     btn.textContent = "Reject & Refund";
     btn.className = "btn btn-red";
   }
@@ -1268,24 +1343,21 @@ function closeActionModal() {
 
 async function confirmAction() {
   if (!pendingAction) return;
-  const { kind, uid } = pendingAction;
+  const { kind, uid, depositId, withdrawalId } = pendingAction;
   const btn = document.getElementById("actionConfirmBtn");
   const reason = document.getElementById("actionReason").value.trim();
-  const amount = parseFloat(document.getElementById("actionAmount").value) || 0;
   btn.disabled = true;
-  const origText = btn.textContent;
+  const orig = btn.textContent;
   btn.textContent = "Working...";
 
   try {
-    let path, body = { reason };
-    if (kind === "credit") { path = `/api/admin/users/${uid}/credit`; body.amount = amount; if (amount <= 0) throw new Error("Amount must be > 0"); }
-    else if (kind === "debit") { path = `/api/admin/users/${uid}/debit`; body.amount = amount; if (amount <= 0) throw new Error("Amount must be > 0"); }
-    else if (kind === "ban") { path = `/api/admin/users/${uid}/status`; body.status = "banned"; }
+    let path = "", body = { reason };
+    if (kind === "ban") { path = `/api/admin/users/${uid}/status`; body.status = "banned"; }
     else if (kind === "unban") { path = `/api/admin/users/${uid}/status`; body.status = "active"; }
-    else if (kind === "approveDeposit") { path = `/api/admin/deposits/${uid}/${pendingAction.depositId}/approve`; }
-    else if (kind === "rejectDeposit") { path = `/api/admin/deposits/${uid}/${pendingAction.depositId}/reject`; }
-    else if (kind === "approveWithdrawal") { path = `/api/admin/withdrawals/${uid}/${pendingAction.withdrawalId}/approve`; }
-    else if (kind === "rejectWithdrawal") { path = `/api/admin/withdrawals/${uid}/${pendingAction.withdrawalId}/reject`; }
+    else if (kind === "approveDeposit") path = `/api/admin/deposits/${uid}/${depositId}/approve`;
+    else if (kind === "rejectDeposit") path = `/api/admin/deposits/${uid}/${depositId}/reject`;
+    else if (kind === "approveWithdrawal") path = `/api/admin/withdrawals/${uid}/${withdrawalId}/approve`;
+    else if (kind === "rejectWithdrawal") path = `/api/admin/withdrawals/${uid}/${withdrawalId}/reject`;
 
     const res = await apiFetch(path, { method: "POST", body: JSON.stringify(body) });
     const data = await res.json();
@@ -1294,21 +1366,16 @@ async function confirmAction() {
     } else {
       toast(data.message || "Success", "success");
       closeActionModal();
-      // refresh views
-      if (kind.includes("Deposit")) loadDeposits();
-      else if (kind.includes("Withdrawal")) loadWithdrawals();
-      else if (["credit","debit","ban","unban"].includes(kind)) {
-        closeUserModal();
-        loadUsers();
-        loadDashboard();
-      }
+      if (kind.includes("Deposit")) { loadDeposits(); loadDashboard(); }
+      else if (kind.includes("Withdrawal")) { loadWithdrawals(); loadDashboard(); }
+      else if (["ban","unban"].includes(kind)) { closeUserModal(); loadUsers(); loadDashboard(); }
     }
   } catch (e) {
     console.error(e);
-    toast(e.message || "Action failed", "error");
+    toast("Action failed", "error");
   } finally {
     btn.disabled = false;
-    btn.textContent = origText;
+    btn.textContent = orig;
   }
 }
 
@@ -1321,7 +1388,7 @@ async function loadDeposits(page = 1) {
     const res = await apiFetch(`/api/admin/deposits?status=${status}&page=${page}&limit=25`);
     const data = await res.json();
     if (!data.success) return toast(data.message, "error");
-    document.getElementById("depositsCount").textContent = `${data.total} records`;
+    document.getElementById("depositsCount").textContent = `${data.total} record${data.total === 1 ? "" : "s"}`;
     const tbody = document.getElementById("depositsBody");
     if (data.deposits.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No deposits found</td></tr>';
@@ -1329,7 +1396,10 @@ async function loadDeposits(page = 1) {
       tbody.innerHTML = data.deposits.map(d => {
         const isPending = d.status === "Pending";
         return `<tr>
-          <td><div style="font-size:12px;">${esc(d.userEmail)}</div><div style="font-size:11px;color:var(--muted);">${esc(d.userName)}</div></td>
+          <td>
+            <div style="font-size:12px;">${esc(d.userEmail)}</div>
+            <div style="font-size:11px;color:var(--muted);">${esc(d.userName)}</div>
+          </td>
           <td><strong>${fmtMoney(d.amount)}</strong></td>
           <td>${esc(d.asset)}</td>
           <td>${esc(d.network)}</td>
@@ -1337,8 +1407,8 @@ async function loadDeposits(page = 1) {
           <td style="font-size:12px;">${esc(d.dateTime)}</td>
           <td>
             ${isPending ? `
-              <button class="btn btn-green btn-sm" onclick="quickDeposit('${d.firebaseUid}','${d.id}','${esc(d.userEmail)}','approve')">✓ Approve</button>
-              <button class="btn btn-red btn-sm" style="margin-left:4px;" onclick="quickDeposit('${d.firebaseUid}','${d.id}','${esc(d.userEmail)}','reject')">✕ Reject</button>
+              <button class="btn btn-green btn-sm" onclick="openAction('approveDeposit','${d.firebaseUid}','${esc(d.userEmail)}',{depositId:${d.id},amount:${d.amount}})">Approve</button>
+              <button class="btn btn-red btn-sm" style="margin-left:4px;" onclick="openAction('rejectDeposit','${d.firebaseUid}','${esc(d.userEmail)}',{depositId:${d.id}})">Reject</button>
             ` : '<span style="color:var(--muted);font-size:12px;">—</span>'}
           </td>
         </tr>`;
@@ -1351,11 +1421,6 @@ async function loadDeposits(page = 1) {
   }
 }
 
-function quickDeposit(uid, depositId, email, action) {
-  pendingAction = { kind: action === "approve" ? "approveDeposit" : "rejectDeposit", uid, depositId, email };
-  openAction(pendingAction.kind, uid, email);
-}
-
 /* ============================================================
  *  WITHDRAWALS
  * ============================================================ */
@@ -1365,7 +1430,7 @@ async function loadWithdrawals(page = 1) {
     const res = await apiFetch(`/api/admin/withdrawals?status=${status}&page=${page}&limit=25`);
     const data = await res.json();
     if (!data.success) return toast(data.message, "error");
-    document.getElementById("withdrawalsCount").textContent = `${data.total} records`;
+    document.getElementById("withdrawalsCount").textContent = `${data.total} record${data.total === 1 ? "" : "s"}`;
     const tbody = document.getElementById("withdrawalsBody");
     if (data.withdrawals.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No withdrawals found</td></tr>';
@@ -1374,16 +1439,19 @@ async function loadWithdrawals(page = 1) {
         const isPending = w.status === "Pending";
         const addr = w.address && w.address.length > 14 ? w.address.slice(0,10) + "…" + w.address.slice(-4) : w.address;
         return `<tr>
-          <td><div style="font-size:12px;">${esc(w.userEmail)}</div><div style="font-size:11px;color:var(--muted);">${esc(w.userName)}</div></td>
+          <td>
+            <div style="font-size:12px;">${esc(w.userEmail)}</div>
+            <div style="font-size:11px;color:var(--muted);">${esc(w.userName)}</div>
+          </td>
           <td><strong>${fmtMoney(w.amount)}</strong></td>
           <td>${esc(w.asset)}</td>
           <td>${esc(w.network)}</td>
-          <td class="mono">${esc(addr)}</td>
+          <td class="mono" title="${esc(w.address)}">${esc(addr)}</td>
           <td>${pill(w.status)}</td>
           <td>
             ${isPending ? `
-              <button class="btn btn-green btn-sm" onclick="quickWithdraw('${w.firebaseUid}','${w.id}','${esc(w.userEmail)}','approve')">✓ Approve</button>
-              <button class="btn btn-red btn-sm" style="margin-left:4px;" onclick="quickWithdraw('${w.firebaseUid}','${w.id}','${esc(w.userEmail)}','reject')">✕ Reject</button>
+              <button class="btn btn-green btn-sm" onclick="openAction('approveWithdrawal','${w.firebaseUid}','${esc(w.userEmail)}',{withdrawalId:${w.id}})">Approve</button>
+              <button class="btn btn-red btn-sm" style="margin-left:4px;" onclick="openAction('rejectWithdrawal','${w.firebaseUid}','${esc(w.userEmail)}',{withdrawalId:${w.id},amount:${w.amount}})">Reject</button>
             ` : '<span style="color:var(--muted);font-size:12px;">—</span>'}
           </td>
         </tr>`;
@@ -1396,9 +1464,35 @@ async function loadWithdrawals(page = 1) {
   }
 }
 
-function quickWithdraw(uid, withdrawalId, email, action) {
-  pendingAction = { kind: action === "approve" ? "approveWithdrawal" : "rejectWithdrawal", uid, withdrawalId, email };
-  openAction(pendingAction.kind, uid, email);
+/* ============================================================
+ *  CONVERTS
+ * ============================================================ */
+async function loadConverts(page = 1) {
+  try {
+    const res = await apiFetch(`/api/admin/converts?page=${page}&limit=25`);
+    const data = await res.json();
+    if (!data.success) return toast(data.message, "error");
+    document.getElementById("convertsCount").textContent = `${data.total} conversion${data.total === 1 ? "" : "s"}`;
+    const tbody = document.getElementById("convertsBody");
+    if (data.converts.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No conversions yet</td></tr>';
+    } else {
+      tbody.innerHTML = data.converts.map(c => `
+        <tr>
+          <td>${esc(c.userEmail)}</td>
+          <td><strong>${fmtCoin(c.fromAmount, 8)}</strong> ${esc(c.fromSymbol)}</td>
+          <td><strong>${fmtCoin(c.toAmount, 8)}</strong> ${esc(c.toSymbol)}</td>
+          <td>${fmtMoney(c.usdValue)}</td>
+          <td>${fmtMoney(c.fee)}</td>
+          <td style="font-size:12px;">${esc(c.dateTime)}</td>
+        </tr>
+      `).join("");
+    }
+    renderPagination("convertsPagination", data.page, data.pages, loadConverts);
+  } catch (e) {
+    console.error(e);
+    toast("Failed to load conversions", "error");
+  }
 }
 
 /* ============================================================
@@ -1409,7 +1503,7 @@ async function loadBots(page = 1) {
     const res = await apiFetch(`/api/admin/bots?page=${page}&limit=50`);
     const data = await res.json();
     if (!data.success) return toast(data.message, "error");
-    document.getElementById("botsCount").textContent = `${data.total} trades`;
+    document.getElementById("botsCount").textContent = `${data.total} trade${data.total === 1 ? "" : "s"}`;
     const tbody = document.getElementById("botsBody");
     if (data.trades.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" class="empty-row">No bot trades yet</td></tr>';
@@ -1446,7 +1540,7 @@ async function loadLogs(page = 1) {
     } else {
       tbody.innerHTML = data.logs.map(l => {
         const target = l.targetEmail || l.targetId || "—";
-        const amount = l.amount ? fmtMoney(l.amount) + (l.asset ? " " + esc(l.asset) : "") : "—";
+        const amount = l.amount ? fmtCoin(l.amount, 8) + (l.asset ? " " + esc(l.asset) : "") : "—";
         return `<tr>
           <td style="font-size:12px;">${fmtDate(l.createdAt)}</td>
           <td>${esc(l.adminEmail)}</td>
@@ -1471,16 +1565,16 @@ function renderPagination(containerId, current, total, onPageClick) {
   const el = document.getElementById(containerId);
   if (!el) return;
   if (total <= 1) { el.innerHTML = ""; return; }
+  const fnName = onPageClick.name;
   const pages = [];
-  const push = p => pages.push(`<button class="${p === current ? "active" : ""}" onclick="${onPageClick.name}(${p})">${p}</button>`);
   const start = Math.max(1, current - 2);
   const end = Math.min(total, current + 2);
-  let html = `<button ${current === 1 ? "disabled" : ""} onclick="${onPageClick.name}(${current - 1})">‹ Prev</button>`;
-  if (start > 1) { html += `<button onclick="${onPageClick.name}(1)">1</button>`; if (start > 2) html += `<span class="pagination-info">…</span>`; }
-  for (let i = start; i <= end; i++) push(i);
+  let html = `<button ${current === 1 ? "disabled" : ""} onclick="${fnName}(${current - 1})">‹ Prev</button>`;
+  if (start > 1) { html += `<button onclick="${fnName}(1)">1</button>`; if (start > 2) html += `<span class="pagination-info">…</span>`; }
+  for (let i = start; i <= end; i++) pages.push(`<button class="${i === current ? "active" : ""}" onclick="${fnName}(${i})">${i}</button>`);
   html += pages.join("");
-  if (end < total) { if (end < total - 1) html += `<span class="pagination-info">…</span>`; html += `<button onclick="${onPageClick.name}(${total})">${total}</button>`; }
-  html += `<button ${current === total ? "disabled" : ""} onclick="${onPageClick.name}(${current + 1})">Next ›</button>`;
+  if (end < total) { if (end < total - 1) html += `<span class="pagination-info">…</span>`; html += `<button onclick="${fnName}(${total})">${total}</button>`; }
+  html += `<button ${current === total ? "disabled" : ""} onclick="${fnName}(${current + 1})">Next ›</button>`;
   el.innerHTML = html;
 }
 
@@ -1491,6 +1585,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     closeUserModal();
     closeActionModal();
+    closeWalletModal();
   }
 });
 </script>
