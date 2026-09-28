@@ -1,52 +1,1498 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>BT-EARN ADMIN</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BT-EARN · Admin</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
 <style>
-body{background:#0a0a0a;color:#fff;font-family:Arial;padding:15px}
-.card{background:#171717;padding:20px;border-radius:12px;border:1px solid #f0b90b;margin-bottom:15px}
-input,select,button{width:100%;padding:12px;margin:6px 0;border-radius:8px;border:none;box-sizing:border-box}
-input,select{background:#2a2a2a;color:#fff}
-button{background:#f0b90b;font-weight:bold}
-button.red{background:#ff3333;color:#fff}
-.user{background:#222;padding:10px;margin:5px 0;border-radius:6px;display:flex;justify-content:space-between;font-size:13px}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0a0e27;
+  --bg-2: #0d1129;
+  --bg-3: #131a3a;
+  --border: rgba(255,255,255,0.08);
+  --border-2: rgba(255,255,255,0.12);
+  --text: #ffffff;
+  --muted: #a0a0c0;
+  --accent: #667eea;
+  --accent-2: #764ba2;
+  --green: #48bb78;
+  --red: #e53e3e;
+  --orange: #f59e0b;
+  --blue: #3b82f6;
+  --grad: linear-gradient(135deg, #667eea, #764ba2);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+input, select, textarea { font-family: inherit; outline: none; }
+a { color: var(--accent); text-decoration: none; }
+
+/* ===== LOGIN ===== */
+#loginScreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: radial-gradient(circle at 30% 20%, rgba(102,126,234,0.15), transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(118,75,162,0.15), transparent 50%),
+              var(--bg);
+}
+.login-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px 35px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.login-logo {
+  font-size: 36px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 6px;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 1px;
+}
+.login-sub {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 30px;
+}
+.login-shield { text-align: center; font-size: 32px; margin-bottom: 15px; }
+.login-field { margin-bottom: 18px; }
+.login-field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.login-field input {
+  width: 100%;
+  padding: 13px 15px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+.login-field input:focus { border-color: var(--accent); }
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--grad);
+  color: #fff;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 8px;
+  transition: transform 0.15s;
+}
+.login-btn:hover { transform: scale(1.01); }
+.login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.login-err {
+  color: var(--red);
+  font-size: 13px;
+  text-align: center;
+  margin-top: 14px;
+  min-height: 18px;
+}
+
+/* ===== APP SHELL ===== */
+#app { display: none; min-height: 100vh; }
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 62px;
+  background: rgba(13,17,41,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  z-index: 100;
+}
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.menu-toggle {
+  background: transparent;
+  color: var(--muted);
+  display: none;
+  padding: 6px;
+  font-size: 22px;
+}
+.topbar-brand {
+  font-size: 20px;
+  font-weight: 800;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.5px;
+}
+.topbar-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-email { font-size: 13px; color: var(--muted); }
+.topbar-logout {
+  padding: 8px 18px;
+  background: rgba(229,62,62,0.12);
+  border: 1px solid rgba(229,62,62,0.4);
+  color: var(--red);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.topbar-logout:hover { background: rgba(229,62,62,0.25); }
+
+.sidebar {
+  position: fixed;
+  top: 62px; left: 0; bottom: 0;
+  width: 235px;
+  background: var(--bg-2);
+  border-right: 1px solid var(--border);
+  padding: 20px 12px;
+  overflow-y: auto;
+  z-index: 90;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 4px;
+}
+.nav-item:hover { background: rgba(255,255,255,0.04); color: #fff; }
+.nav-item.active {
+  background: var(--grad);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(102,126,234,0.35);
+}
+.nav-item .ico { font-size: 17px; width: 20px; text-align: center; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--orange);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+.nav-item.active .nav-badge { background: rgba(255,255,255,0.25); }
+
+.main {
+  margin-left: 235px;
+  padding: 90px 26px 40px;
+  min-height: 100vh;
+}
+.page { display: none; }
+.page.active { display: block; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.page-title { font-size: 26px; font-weight: 800; letter-spacing: -0.3px; }
+.page-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+.btn-primary { background: var(--grad); color: #fff; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(102,126,234,0.35); }
+.btn-ghost { background: rgba(255,255,255,0.04); color: var(--muted); border-color: var(--border-2); }
+.btn-ghost:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { background: #3da867; }
+.btn-red { background: var(--red); color: #fff; }
+.btn-red:hover { background: #c53030; }
+.btn-orange { background: var(--orange); color: #fff; }
+.btn-orange:hover { background: #d97706; }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* ===== STATS ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.stat-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--grad);
+  opacity: 0.7;
+}
+.stat-card.green::before { background: linear-gradient(90deg, #48bb78, #38a169); }
+.stat-card.red::before { background: linear-gradient(90deg, #e53e3e, #c53030); }
+.stat-card.orange::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.stat-card.blue::before { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+.stat-label { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 8px; }
+.stat-value { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.stat-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* ===== CARDS / TABLES ===== */
+.card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.table-wrap { overflow-x: auto; border-radius: 12px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 600px;
+}
+thead th {
+  text-align: left;
+  padding: 12px 14px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 13px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody tr.clickable { cursor: pointer; }
+td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; }
+
+.empty-row {
+  text-align: center;
+  color: var(--muted);
+  padding: 40px 20px !important;
+  font-size: 14px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.pill-pending { background: rgba(245,158,11,0.15); color: var(--orange); }
+.pill-approved { background: rgba(72,187,120,0.15); color: var(--green); }
+.pill-rejected { background: rgba(229,62,62,0.15); color: var(--red); }
+.pill-active { background: rgba(72,187,120,0.15); color: var(--green); }
+.pill-banned { background: rgba(229,62,62,0.15); color: var(--red); }
+.pill-green { background: rgba(72,187,120,0.15); color: var(--green); }
+.pill-red { background: rgba(229,62,62,0.15); color: var(--red); }
+.pill-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+
+.pos { color: var(--green); font-weight: 700; }
+.neg { color: var(--red); font-weight: 700; }
+
+/* ===== FILTERS ===== */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.search-box {
+  flex: 1;
+  min-width: 220px;
+  position: relative;
+}
+.search-box input {
+  width: 100%;
+  padding: 11px 15px 11px 40px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+}
+.search-box input:focus { border-color: var(--accent); }
+.search-box::before {
+  content: "🔍";
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  opacity: 0.5;
+}
+.select {
+  padding: 11px 15px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+.select:focus { border-color: var(--accent); }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.pagination button {
+  padding: 7px 13px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  color: var(--muted);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pagination button:hover:not(:disabled) { background: rgba(255,255,255,0.05); color: #fff; }
+.pagination button.active { background: var(--grad); color: #fff; border-color: transparent; }
+.pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+.pagination-info { color: var(--muted); font-size: 12px; margin: 0 8px; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(4px);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s;
+}
+.modal-overlay.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 88vh;
+  overflow-y: auto;
+  animation: popIn 0.2s;
+}
+@keyframes popIn { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-head h3 { font-size: 17px; font-weight: 700; }
+.modal-close {
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close:hover { background: rgba(255,255,255,0.1); }
+.modal-body { padding: 22px; }
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 18px 22px;
+  border-top: 1px solid var(--border);
+  justify-content: flex-end;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 13px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label { color: var(--muted); }
+.detail-value { color: #fff; text-align: right; word-break: break-all; font-weight: 600; }
+
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+.field input, .field textarea, .field select {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+}
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+.field textarea { min-height: 80px; resize: vertical; }
+
+/* ===== TOAST ===== */
+.toast-container {
+  position: fixed;
+  top: 78px;
+  right: 20px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.toast {
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  border-left: 4px solid var(--accent);
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 260px;
+  max-width: 380px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  animation: slideIn 0.25s;
+}
+.toast.success { border-left-color: var(--green); }
+.toast.error { border-left-color: var(--red); }
+.toast.warn { border-left-color: var(--orange); }
+@keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+.loading-row {
+  text-align: center;
+  color: var(--muted);
+  padding: 30px !important;
+}
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.overlay-close {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 900px) {
+  .menu-toggle { display: block; }
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; padding: 90px 16px 40px; }
+  .topbar-email { display: none; }
+  .page-title { font-size: 22px; }
+  .stat-value { font-size: 22px; }
+}
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 85;
+}
+.backdrop.active { display: block; }
 </style>
 </head>
 <body>
-<h2>BT-EARN ADMIN 🔐</h2>
-<div class="card">
-<input id="email" placeholder="User Email e.g user@gmail.com">
-<input id="amount" type="number" placeholder="Amount e.g 100">
-<select id="currency"><option value="usdt">USDT</option><option value="btc">BTC</option><option value="eth">ETH</option><option value="bnb">BNB</option><option value="sol">SOL</option></select>
-<button onclick="addBal()">ADD BALANCE ✅</button>
-<button class="red" onclick="reduceBal()">REDUCE ❌</button>
-<p id="msg"></p>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-shield">🛡️</div>
+    <div class="login-logo">BT-EARN</div>
+    <div class="login-sub">Admin Control Panel</div>
+    <div class="login-field">
+      <label>Admin Email</label>
+      <input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+    <button id="loginBtn" class="login-btn" onclick="doLogin()">Sign In</button>
+    <div id="loginErr" class="login-err"></div>
+  </div>
 </div>
-<div class="card">
-<button onclick="loadUsers()">🔄 Load All Users</button>
-<div id="users"></div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-brand">BT-EARN</div>
+      <div class="topbar-badge">Admin</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-email" id="topbarEmail"></div>
+      <button class="topbar-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="backdrop" id="backdrop" onclick="toggleSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+      <span class="ico">📊</span> Dashboard
+    </div>
+    <div class="nav-item" data-page="users" onclick="showPage('users')">
+      <span class="ico">👥</span> Users
+    </div>
+    <div class="nav-item" data-page="deposits" onclick="showPage('deposits')">
+      <span class="ico">📥</span> Deposits
+      <span class="nav-badge" id="badgeDeposits" style="display:none">0</span>
+    </div>
+    <div class="nav-item" data-page="withdrawals" onclick="showPage('withdrawals')">
+      <span class="ico">📤</span> Withdrawals
+      <span class="nav-badge" id="badgeWithdrawals" style="display:none">0</span>
+    </div>
+    <div class="nav-item" data-page="bots" onclick="showPage('bots')">
+      <span class="ico">🤖</span> Bot Trades
+    </div>
+    <div class="nav-item" data-page="logs" onclick="showPage('logs')">
+      <span class="ico">📝</span> Audit Log
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub" id="dashUpdated">—</div>
+        </div>
+        <button class="btn btn-ghost" onclick="loadDashboard()">🔄 Refresh</button>
+      </div>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value" id="sTotalUsers">—</div><div class="stat-sub" id="sActiveUsers">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Total USDT Held</div><div class="stat-value" id="sTotalUsdt">—</div><div class="stat-sub">Across all wallets</div></div>
+        <div class="stat-card blue"><div class="stat-label">Bot Profit (all-time)</div><div class="stat-value" id="sBotProfit">—</div><div class="stat-sub" id="sTotalTrades">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">Pending Deposits</div><div class="stat-value" id="sPendingDep">—</div><div class="stat-sub" id="sPendingDepAmt">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="sPendingWd">—</div><div class="stat-sub" id="sPendingWdAmt">—</div></div>
+        <div class="stat-card red"><div class="stat-label">Banned Users</div><div class="stat-value" id="sBanned">—</div><div class="stat-sub">Account status = banned</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent Signups</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Country</th><th>USDT</th><th>Status</th><th>Joined</th></tr></thead>
+            <tbody id="recentUsersBody"><tr><td colspan="6" class="loading-row"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Users</div>
+          <div class="page-sub" id="usersCount">—</div>
+        </div>
+        <button class="btn btn-primary" onclick="exportUsers()">⬇ Export CSV</button>
+      </div>
+      <div class="filters">
+        <div class="search-box">
+          <input id="userSearch" placeholder="Search by name, email, or firebaseUid..." oninput="debouncedLoadUsers()">
+        </div>
+        <select class="select" id="userStatusFilter" onchange="loadUsers(1)">
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="banned">Banned</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Country</th><th>USDT</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+            <tbody id="usersBody"><tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="usersPagination"></div>
+      </div>
+    </div>
+
+    <!-- DEPOSITS -->
+    <div class="page" id="page-deposits">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Deposits</div>
+          <div class="page-sub" id="depositsCount">—</div>
+        </div>
+      </div>
+      <div class="filters">
+        <select class="select" id="depositStatusFilter" onchange="loadDeposits(1)">
+          <option value="all">All statuses</option>
+          <option value="Pending" selected>Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="loadDeposits(1)">🔄 Refresh</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>Amount</th><th>Asset</th><th>Network</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="depositsBody"><tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="depositsPagination"></div>
+      </div>
+    </div>
+
+    <!-- WITHDRAWALS -->
+    <div class="page" id="page-withdrawals">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Withdrawals</div>
+          <div class="page-sub" id="withdrawalsCount">—</div>
+        </div>
+      </div>
+      <div class="filters">
+        <select class="select" id="withdrawStatusFilter" onchange="loadWithdrawals(1)">
+          <option value="all">All statuses</option>
+          <option value="Pending" selected>Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="loadWithdrawals(1)">🔄 Refresh</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>Amount</th><th>Asset</th><th>Network</th><th>Address</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="withdrawalsBody"><tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="withdrawalsPagination"></div>
+      </div>
+    </div>
+
+    <!-- BOTS -->
+    <div class="page" id="page-bots">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Bot Trades</div>
+          <div class="page-sub" id="botsCount">—</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>Bot</th><th>Asset</th><th>Profit</th><th>Date</th></tr></thead>
+            <tbody id="botsBody"><tr><td colspan="5" class="loading-row"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="botsPagination"></div>
+      </div>
+    </div>
+
+    <!-- AUDIT LOG -->
+    <div class="page" id="page-logs">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Audit Log</div>
+          <div class="page-sub">Every admin action is recorded here</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>When</th><th>Admin</th><th>Action</th><th>Target</th><th>Amount</th><th>Reason</th></tr></thead>
+            <tbody id="logsBody"><tr><td colspan="6" class="loading-row"><span class="spinner"></span></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="logsPagination"></div>
+      </div>
+    </div>
+
+  </div>
 </div>
+
+<!-- USER DETAIL MODAL -->
+<div class="modal-overlay" id="userModal" onclick="if(event.target.id==='userModal') closeUserModal()">
+  <div class="modal" style="max-width: 620px">
+    <div class="modal-head">
+      <h3 id="userModalTitle">User Details</h3>
+      <button class="modal-close" onclick="closeUserModal()">×</button>
+    </div>
+    <div class="modal-body" id="userModalBody">
+      <div class="loading-row"><span class="spinner"></span></div>
+    </div>
+    <div class="modal-footer" id="userModalFooter"></div>
+  </div>
+</div>
+
+<!-- ACTION MODAL (credit / debit / reject reason) -->
+<div class="modal-overlay" id="actionModal" onclick="if(event.target.id==='actionModal') closeActionModal()">
+  <div class="modal" style="max-width: 440px">
+    <div class="modal-head">
+      <h3 id="actionModalTitle">Action</h3>
+      <button class="modal-close" onclick="closeActionModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="actionModalDesc" style="color: var(--muted); font-size: 13px; margin-bottom: 16px;"></div>
+      <div class="field" id="actionAmountField">
+        <label>Amount (USDT)</label>
+        <input id="actionAmount" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="field">
+        <label>Reason / Note (optional)</label>
+        <textarea id="actionReason" placeholder="e.g. Manual deposit verification"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeActionModal()">Cancel</button>
+      <button class="btn btn-primary" id="actionConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDjv41yKM3ViDPbf9TQmiVKgXKkQn88uZE",
+  authDomain: "bt-earn-986f3.firebaseapp.com",
+  projectId: "bt-earn-986f3",
+  storageBucket: "bt-earn-986f3.firebasestorage.app",
+  messagingSenderId: "101980248199",
+  appId: "1:101980248199:web:772642b9ebe807f18f0022",
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const fbAuth = getAuth(fbApp);
+window._fbAuth = fbAuth;
+window._fbSignIn = signInWithEmailAndPassword;
+window._fbSignOut = signOut;
+window._fbOnAuth = onAuthStateChanged;
+window.dispatchEvent(new Event("fb-ready"));
+</script>
+
 <script>
-const API="https://api.bt-earn.xyz";
-async function addBal(){
- const email=document.getElementById('email').value;
- const amount=document.getElementById('amount').value;
- const currency=document.getElementById('currency').value;
- const res=await fetch(API+'/api/admin/add-balance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,amount,currency})});
- const d=await res.json(); document.getElementById('msg').innerText=d.success?"✅ Added!":"❌ "+d.error; loadUsers();
+/* ============================================================
+ *  CONFIG — change API_BASE if needed
+ * ============================================================ */
+const API_BASE = "https://api.bt-earn.xyz";
+
+let currentAdmin = null;
+let token = null;
+let pendingAction = null;
+
+/* ============================================================
+ *  AUTH
+ * ============================================================ */
+window.addEventListener("fb-ready", () => {
+  window._fbOnAuth(window._fbAuth, async (user) => {
+    if (user) {
+      try {
+        token = await user.getIdToken();
+        currentAdmin = { email: user.email, uid: user.uid };
+        // Verify against backend /me to make sure this user is actually admin
+        const res = await apiFetch("/api/admin/me");
+        if (!res.ok) {
+          await doLogout();
+          document.getElementById("loginErr").textContent = "You are not authorized as admin.";
+          return;
+        }
+        enterApp();
+      } catch (e) {
+        console.error(e);
+        await doLogout();
+        document.getElementById("loginErr").textContent = "Session error. Please sign in again.";
+      }
+    } else {
+      showLogin();
+    }
+  });
+});
+
+async function doLogin() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const err = document.getElementById("loginErr");
+  const btn = document.getElementById("loginBtn");
+  err.textContent = "";
+  if (!email || !password) { err.textContent = "Enter email and password."; return; }
+  btn.disabled = true;
+  btn.textContent = "Signing in...";
+  try {
+    await window._fbSignIn(window._fbAuth, email, password);
+  } catch (e) {
+    console.error(e);
+    err.textContent = "Invalid email or password.";
+    btn.disabled = false;
+    btn.textContent = "Sign In";
+  }
 }
-async function reduceBal(){
- const email=document.getElementById('email').value;
- const amount=document.getElementById('amount').value;
- const currency=document.getElementById('currency').value;
- const res=await fetch(API+'/api/admin/reduce-balance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,amount,currency})});
- const d=await res.json(); document.getElementById('msg').innerText=d.success?"✅ Reduced!":"❌ "+d.error; loadUsers();
+
+async function doLogout() {
+  try { await window._fbSignOut(window._fbAuth); } catch(e){}
+  token = null;
+  currentAdmin = null;
+  showLogin();
 }
-async function loadUsers(){
- const res=await fetch(API+'/api/admin/users'); const users=await res.json();
- document.getElementById('users').innerHTML=users.map(u=>`<div class="user"><span>${u.email}</span><span><b>${u.balance} USDT</b></span></div>`).join('');
+
+function showLogin() {
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("loginBtn").disabled = false;
+  document.getElementById("loginBtn").textContent = "Sign In";
 }
+
+function enterApp() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("topbarEmail").textContent = currentAdmin?.email || "";
+  showPage("dashboard");
+  // background refreshers
+  setInterval(() => {
+    // refresh token every 50 minutes
+    const u = window._fbAuth.currentUser;
+    if (u) u.getIdToken(true).then(t => { token = t; }).catch(()=>{});
+  }, 50 * 60 * 1000);
+  // auto-refresh current page every 30s
+  setInterval(() => {
+    const current = document.querySelector(".page.active")?.id?.replace("page-", "");
+    if (current === "dashboard") loadDashboard();
+    else if (current === "deposits") loadDeposits();
+    else if (current === "withdrawals") loadWithdrawals();
+  }, 30000);
+}
+
+async function apiFetch(path, options = {}) {
+  if (!token) {
+    const u = window._fbAuth?.currentUser;
+    if (u) token = await u.getIdToken();
+  }
+  const headers = {
+    ...(options.headers || {}),
+    "Authorization": `Bearer ${token}`,
+  };
+  if (options.body && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
+  return fetch(API_BASE + path, { ...options, headers });
+}
+
+/* ============================================================
+ *  NAV
+ * ============================================================ */
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("backdrop").classList.toggle("active");
+}
+
+function showPage(name) {
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.page === name));
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === "page-" + name));
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("backdrop").classList.remove("active");
+
+  if (name === "dashboard") loadDashboard();
+  else if (name === "users") loadUsers(1);
+  else if (name === "deposits") loadDeposits(1);
+  else if (name === "withdrawals") loadWithdrawals(1);
+  else if (name === "bots") loadBots(1);
+  else if (name === "logs") loadLogs(1);
+}
+
+/* ============================================================
+ *  TOASTS
+ * ============================================================ */
+function toast(msg, type = "info") {
+  const c = document.getElementById("toastContainer");
+  const el = document.createElement("div");
+  el.className = "toast " + type;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity 0.3s"; }, 3200);
+  setTimeout(() => el.remove(), 3600);
+}
+
+/* ============================================================
+ *  FORMAT HELPERS
+ * ============================================================ */
+function fmtMoney(n) {
+  const v = Number(n) || 0;
+  return "$" + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtDate(d) {
+  if (!d) return "—";
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return String(d);
+  return dt.toLocaleString();
+}
+function esc(s) {
+  if (s === null || s === undefined) return "";
+  return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+}
+function pill(status) {
+  const s = String(status || "").toLowerCase();
+  const cls = s.includes("pending") ? "pill-pending"
+            : s.includes("approved") || s.includes("completed") ? "pill-approved"
+            : s.includes("rejected") ? "pill-rejected"
+            : s === "active" ? "pill-active"
+            : s === "banned" ? "pill-banned"
+            : "pill-blue";
+  return `<span class="pill ${cls}">${esc(status)}</span>`;
+}
+
+/* ============================================================
+ *  DASHBOARD
+ * ============================================================ */
+async function loadDashboard() {
+  try {
+    const res = await apiFetch("/api/admin/stats");
+    const data = await res.json();
+    if (!data.success) return toast(data.message || "Failed to load stats", "error");
+    const s = data.stats;
+
+    document.getElementById("sTotalUsers").textContent = s.totalUsers;
+    document.getElementById("sActiveUsers").textContent = `${s.activeUsers} active · ${s.bannedUsers} banned`;
+    document.getElementById("sTotalUsdt").textContent = fmtMoney(s.totalUsdt);
+    document.getElementById("sBotProfit").textContent = fmtMoney(s.botProfit);
+    document.getElementById("sTotalTrades").textContent = `${s.totalTrades} trades`;
+    document.getElementById("sPendingDep").textContent = s.deposits.Pending.count;
+    document.getElementById("sPendingDepAmt").textContent = fmtMoney(s.deposits.Pending.total) + " total";
+    document.getElementById("sPendingWd").textContent = s.withdrawals.Pending.count;
+    document.getElementById("sPendingWdAmt").textContent = fmtMoney(s.withdrawals.Pending.total) + " total";
+    document.getElementById("sBanned").textContent = s.bannedUsers;
+
+    document.getElementById("dashUpdated").textContent = "Last updated: " + new Date().toLocaleTimeString();
+
+    // badges
+    const bd = document.getElementById("badgeDeposits");
+    const bw = document.getElementById("badgeWithdrawals");
+    if (s.deposits.Pending.count > 0) { bd.textContent = s.deposits.Pending.count; bd.style.display = "inline-block"; } else bd.style.display = "none";
+    if (s.withdrawals.Pending.count > 0) { bw.textContent = s.withdrawals.Pending.count; bw.style.display = "inline-block"; } else bw.style.display = "none";
+
+    // recent users
+    const tbody = document.getElementById("recentUsersBody");
+    if (!s.recentUsers || s.recentUsers.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No users yet</td></tr>';
+    } else {
+      tbody.innerHTML = s.recentUsers.map(u => `
+        <tr>
+          <td>${esc(u.name)}</td>
+          <td>${esc(u.email)}</td>
+          <td>${esc(u.country)}</td>
+          <td>${fmtMoney(u.wallets?.usdt || 0)}</td>
+          <td>${pill(u.status)}</td>
+          <td>${fmtDate(u.createdAt)}</td>
+        </tr>
+      `).join("");
+    }
+  } catch (e) {
+    console.error(e);
+    toast("Failed to load dashboard", "error");
+  }
+}
+
+/* ============================================================
+ *  USERS
+ * ============================================================ */
+let userSearchTimer = null;
+function debouncedLoadUsers() {
+  clearTimeout(userSearchTimer);
+  userSearchTimer = setTimeout(() => loadUsers(1), 350);
+}
+
+async function loadUsers(page = 1) {
+  const q = document.getElementById("userSearch").value.trim();
+  const status = document.getElementById("userStatusFilter").value;
+  try {
+    const res = await apiFetch(`/api/admin/users?q=${encodeURIComponent(q)}&page=${page}&limit=25&status=${status}`);
+    const data = await res.json();
+    if (!data.success) return toast(data.message || "Failed", "error");
+
+    document.getElementById("usersCount").textContent = `${data.total} users`;
+    const tbody = document.getElementById("usersBody");
+    if (data.users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No users found</td></tr>';
+    } else {
+      tbody.innerHTML = data.users.map(u => `
+        <tr class="clickable" onclick="openUser('${esc(u.firebaseUid)}')">
+          <td>${esc(u.name)}</td>
+          <td>${esc(u.email)}</td>
+          <td>${esc(u.country)}</td>
+          <td><strong>${fmtMoney(u.wallets?.usdt || 0)}</strong></td>
+          <td>${pill(u.status)}</td>
+          <td>${fmtDate(u.createdAt)}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openUser('${esc(u.firebaseUid)}')">Manage</button></td>
+        </tr>
+      `).join("");
+    }
+    renderPagination("usersPagination", data.page, data.pages, loadUsers);
+  } catch (e) {
+    console.error(e);
+    toast("Failed to load users", "error");
+  }
+}
+
+function exportUsers() {
+  // Download via fetch + blob so we can send Authorization header
+  apiFetch("/api/admin/users/export").then(async (res) => {
+    if (!res.ok) return toast("Export failed", "error");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "bt-earn-users-" + Date.now() + ".csv";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast("CSV exported", "success");
+  }).catch(() => toast("Export failed", "error"));
+}
+
+/* ============================================================
+ *  USER DETAIL MODAL
+ * ============================================================ */
+let currentUserId = null;
+
+async function openUser(uid) {
+  currentUserId = uid;
+  const modal = document.getElementById("userModal");
+  modal.classList.add("active");
+  document.getElementById("userModalTitle").textContent = "User Details";
+  document.getElementById("userModalBody").innerHTML = '<div class="loading-row"><span class="spinner"></span></div>';
+  document.getElementById("userModalFooter").innerHTML = "";
+
+  try {
+    const res = await apiFetch(`/api/admin/users/${uid}`);
+    const data = await res.json();
+    if (!data.success) { modal.classList.remove("active"); return toast(data.message, "error"); }
+    const u = data.user;
+    const w = u.wallets || {};
+    document.getElementById("userModalTitle").textContent = u.name || u.email;
+
+    document.getElementById("userModalBody").innerHTML = `
+      <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${esc(u.email)}</span></div>
+      <div class="detail-row"><span class="detail-label">Firebase UID</span><span class="detail-value" style="font-size:11px;">${esc(u.firebaseUid)}</span></div>
+      <div class="detail-row"><span class="detail-label">Country</span><span class="detail-value">${esc(u.country)}</span></div>
+      <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${pill(u.status)}</span></div>
+      <div class="detail-row"><span class="detail-label">Joined</span><span class="detail-value">${fmtDate(u.createdAt)}</span></div>
+      <div class="detail-row"><span class="detail-label">Last Login</span><span class="detail-value">${fmtDate(u.lastLogin)}</span></div>
+      <div style="height:14px;"></div>
+      <div class="card-title" style="margin-bottom:8px;">Wallets</div>
+      <div class="detail-row"><span class="detail-label">USDT</span><span class="detail-value">${fmtMoney(w.usdt || 0)}</span></div>
+      <div class="detail-row"><span class="detail-label">BTC</span><span class="detail-value">${Number(w.btc || 0).toFixed(8)}</span></div>
+      <div class="detail-row"><span class="detail-label">ETH</span><span class="detail-value">${Number(w.eth || 0).toFixed(8)}</span></div>
+      <div class="detail-row"><span class="detail-label">NGN</span><span class="detail-value">${Number(w.ngn || 0).toLocaleString()}</span></div>
+      <div style="height:14px;"></div>
+      <div class="card-title" style="margin-bottom:8px;">Activity Counts</div>
+      <div class="detail-row"><span class="detail-label">Deposits</span><span class="detail-value">${(u.deposits||[]).length}</span></div>
+      <div class="detail-row"><span class="detail-label">Withdrawals</span><span class="detail-value">${(u.withdrawals||[]).length}</span></div>
+      <div class="detail-row"><span class="detail-label">Converts</span><span class="detail-value">${(u.converts||[]).length}</span></div>
+      <div class="detail-row"><span class="detail-label">Bot Trades</span><span class="detail-value">${(u.trades||[]).length}</span></div>
+      <div class="detail-row"><span class="detail-label">Total Bot Profit</span><span class="detail-value">${fmtMoney(u.totalProfit || 0)}</span></div>
+    `;
+
+    const isBanned = u.status === "banned";
+    document.getElementById("userModalFooter").innerHTML = `
+      <button class="btn btn-green" onclick="openAction('credit','${uid}','${esc(u.email)}')">➕ Credit USDT</button>
+      <button class="btn btn-orange" onclick="openAction('debit','${uid}','${esc(u.email)}')">➖ Debit USDT</button>
+      <button class="btn ${isBanned?'btn-green':'btn-red'}" onclick="openAction('${isBanned?'unban':'ban'}','${uid}','${esc(u.email)}')">${isBanned?'✓ Unban':'🚫 Ban'}</button>
+    `;
+  } catch (e) {
+    console.error(e);
+    toast("Failed to load user", "error");
+  }
+}
+
+function closeUserModal() {
+  document.getElementById("userModal").classList.remove("active");
+  currentUserId = null;
+}
+
+/* ============================================================
+ *  ACTION MODAL (credit / debit / ban / unban / reject reason)
+ * ============================================================ */
+function openAction(kind, uid, email) {
+  pendingAction = { kind, uid, email };
+  const modal = document.getElementById("actionModal");
+  const title = document.getElementById("actionModalTitle");
+  const desc = document.getElementById("actionModalDesc");
+  const amountField = document.getElementById("actionAmountField");
+  const reason = document.getElementById("actionReason");
+  const amount = document.getElementById("actionAmount");
+  const btn = document.getElementById("actionConfirmBtn");
+
+  reason.value = "";
+  amount.value = "";
+
+  if (kind === "credit") {
+    title.textContent = "Credit USDT";
+    desc.innerHTML = `Add USDT to <strong>${esc(email)}</strong>.`;
+    amountField.style.display = "block";
+    btn.textContent = "Credit";
+    btn.className = "btn btn-green";
+  } else if (kind === "debit") {
+    title.textContent = "Debit USDT";
+    desc.innerHTML = `Remove USDT from <strong>${esc(email)}</strong>.`;
+    amountField.style.display = "block";
+    btn.textContent = "Debit";
+    btn.className = "btn btn-orange";
+  } else if (kind === "ban") {
+    title.textContent = "Ban User";
+    desc.innerHTML = `Ban <strong>${esc(email)}</strong>? They will not be able to use the app.`;
+    amountField.style.display = "none";
+    btn.textContent = "Ban User";
+    btn.className = "btn btn-red";
+  } else if (kind === "unban") {
+    title.textContent = "Unban User";
+    desc.innerHTML = `Restore access for <strong>${esc(email)}</strong>?`;
+    amountField.style.display = "none";
+    btn.textContent = "Unban User";
+    btn.className = "btn btn-green";
+  } else if (kind === "approveDeposit") {
+    title.textContent = "Approve Deposit";
+    desc.innerHTML = `Approve deposit for <strong>${esc(email)}</strong>. Balance will be credited.`;
+    amountField.style.display = "none";
+    btn.textContent = "Approve";
+    btn.className = "btn btn-green";
+  } else if (kind === "rejectDeposit") {
+    title.textContent = "Reject Deposit";
+    desc.innerHTML = `Reject deposit for <strong>${esc(email)}</strong>. No balance change.`;
+    amountField.style.display = "none";
+    btn.textContent = "Reject";
+    btn.className = "btn btn-red";
+  } else if (kind === "approveWithdrawal") {
+    title.textContent = "Approve Withdrawal";
+    desc.innerHTML = `Approve withdrawal for <strong>${esc(email)}</strong>.`;
+    amountField.style.display = "none";
+    btn.textContent = "Approve";
+    btn.className = "btn btn-green";
+  } else if (kind === "rejectWithdrawal") {
+    title.textContent = "Reject Withdrawal";
+    desc.innerHTML = `Reject withdrawal for <strong>${esc(email)}</strong>. Funds will be refunded.`;
+    amountField.style.display = "none";
+    btn.textContent = "Reject & Refund";
+    btn.className = "btn btn-red";
+  }
+
+  btn.onclick = confirmAction;
+  modal.classList.add("active");
+}
+
+function closeActionModal() {
+  document.getElementById("actionModal").classList.remove("active");
+  pendingAction = null;
+}
+
+async function confirmAction() {
+  if (!pendingAction) return;
+  const { kind, uid } = pendingAction;
+  const btn = document.getElementById("actionConfirmBtn");
+  const reason = document.getElementById("actionReason").value.trim();
+  const amount = parseFloat(document.getElementById("actionAmount").value) || 0;
+  btn.disabled = true;
+  const origText = btn.textContent;
+  btn.textContent = "Working...";
+
+  try {
+    let path, body = { reason };
+    if (kind === "credit") { path = `/api/admin/users/${uid}/credit`; body.amount = amount; if (amount <= 0) throw new Error("Amount must be > 0"); }
+    else if (kind === "debit") { path = `/api/admin/users/${uid}/debit`; body.amount = amount; if (amount <= 0) throw new Error("Amount must be > 0"); }
+    else if (kind === "ban") { path = `/api/admin/users/${uid}/status`; body.status = "banned"; }
+    else if (kind === "unban") { path = `/api/admin/users/${uid}/status`; body.status = "active"; }
+    else if (kind === "approveDeposit") { path = `/api/admin/deposits/${uid}/${pendingAction.depositId}/approve`; }
+    else if (kind === "rejectDeposit") { path = `/api/admin/deposits/${uid}/${pendingAction.depositId}/reject`; }
+    else if (kind === "approveWithdrawal") { path = `/api/admin/withdrawals/${uid}/${pendingAction.withdrawalId}/approve`; }
+    else if (kind === "rejectWithdrawal") { path = `/api/admin/withdrawals/${uid}/${pendingAction.withdrawalId}/reject`; }
+
+    const res = await apiFetch(path, { method: "POST", body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!data.success) {
+      toast(data.message || "Action failed", "error");
+    } else {
+      toast(data.message || "Success", "success");
+      closeActionModal();
+      // refresh views
+      if (kind.includes("Deposit")) loadDeposits();
+      else if (kind.includes("Withdrawal")) loadWithdrawals();
+      else if (["credit","debit","ban","unban"].includes(kind)) {
+        closeUserModal();
+        loadUsers();
+        loadDashboard();
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    toast(e.message || "Action failed", "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = origText;
+  }
+}
+
+/* ============================================================
+ *  DEPOSITS
+ * ============================================================ */
+async function loadDeposits(page = 1) {
+  const status = document.getElementById("depositStatusFilter").value;
+  try {
+    const res = await apiFetch(`/api/admin/deposits?status=${status}&page=${page}&limit=25`);
+    const data = await res.json();
+    if (!data.success) return toast(data.message, "error");
+    document.getElementById("depositsCount").textContent = `${data.total} records`;
+    const tbody = document.getElementById("depositsBody");
+    if (data.deposits.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No deposits found</td></tr>';
+    } else {
+      tbody.innerHTML = data.deposits.map(d => {
+        const isPending = d.status === "Pending";
+        return `<tr>
+          <td><div style="font-size:12px;">${esc(d.userEmail)}</div><div style="font-size:11px;color:var(--muted);">${esc(d.userName)}</div></td>
+          <td><strong>${fmtMoney(d.amount)}</strong></td>
+          <td>${esc(d.asset)}</td>
+          <td>${esc(d.network)}</td>
+          <td>${pill(d.status)}</td>
+          <td style="font-size:12px;">${esc(d.dateTime)}</td>
+          <td>
+            ${isPending ? `
+              <button class="btn btn-green btn-sm" onclick="quickDeposit('${d.firebaseUid}','${d.id}','${esc(d.userEmail)}','approve')">✓ Approve</button>
+              <button class="btn btn-red btn-sm" style="margin-left:4px;" onclick="quickDeposit('${d.firebaseUid}','${d.id}','${esc(d.userEmail)}','reject')">✕ Reject</button>
+            ` : '<span style="color:var(--muted);font-size:12px;">—</span>'}
+          </td>
+        </tr>`;
+      }).join("");
+    }
+    renderPagination("depositsPagination", data.page, data.pages, loadDeposits);
+  } catch (e) {
+    console.error(e);
+    toast("Failed to load deposits", "error");
+  }
+}
+
+function quickDeposit(uid, depositId, email, action) {
+  pendingAction = { kind: action === "approve" ? "approveDeposit" : "rejectDeposit", uid, depositId, email };
+  openAction(pendingAction.kind, uid, email);
+}
+
+/* ============================================================
+ *  WITHDRAWALS
+ * ============================================================ */
+async function loadWithdrawals(page = 1) {
+  const status = document.getElementById("withdrawStatusFilter").value;
+  try {
+    const res = await apiFetch(`/api/admin/withdrawals?status=${status}&page=${page}&limit=25`);
+    const data = await res.json();
+    if (!data.success) return toast(data.message, "error");
+    document.getElementById("withdrawalsCount").textContent = `${data.total} records`;
+    const tbody = document.getElementById("withdrawalsBody");
+    if (data.withdrawals.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No withdrawals found</td></tr>';
+    } else {
+      tbody.innerHTML = data.withdrawals.map(w => {
+        const isPending = w.status === "Pending";
+        const addr = w.address && w.address.length > 14 ? w.address.slice(0,10) + "…" + w.address.slice(-4) : w.address;
+        return `<tr>
+          <td><div style="font-size:12px;">${esc(w.userEmail)}</div><div style="font-size:11px;color:var(--muted);">${esc(w.userName)}</div></td>
+          <td><strong>${fmtMoney(w.amount)}</strong></td>
+          <td>${esc(w.asset)}</td>
+          <td>${esc(w.network)}</td>
+          <td class="mono">${esc(addr)}</td>
+          <td>${pill(w.status)}</td>
+          <td>
+            ${isPending ? `
+              <button class="btn btn-green btn-sm" onclick="quickWithdraw('${w.firebaseUid}','${w.id}','${esc(w.userEmail)}','approve')">✓ Approve</button>
+              <button class="btn btn-red btn-sm" style="margin-left:4px;" onclick="quickWithdraw('${w.firebaseUid}','${w.id}','${esc(w.userEmail)}','reject')">✕ Reject</button>
+            ` : '<span style="color:var(--muted);font-size:12px;">—</span>'}
+          </td>
+        </tr>`;
+      }).join("");
+    }
+    renderPagination("withdrawalsPagination", data.page, data.pages, loadWithdrawals);
+  } catch (e) {
+    console.error(e);
+    toast("Failed to load withdrawals", "error");
+  }
+}
+
+function quickWithdraw(uid, withdrawalId, email, action) {
+  pendingAction = { kind: action === "approve" ? "approveWithdrawal" : "rejectWithdrawal", uid, withdrawalId, email };
+  openAction(pendingAction.kind, uid, email);
+}
+
+/* ============================================================
+ *  BOTS
+ * ============================================================ */
+async function loadBots(page = 1) {
+  try {
+    const res = await apiFetch(`/api/admin/bots?page=${page}&limit=50`);
+    const data = await res.json();
+    if (!data.success) return toast(data.message, "error");
+    document.getElementById("botsCount").textContent = `${data.total} trades`;
+    const tbody = document.getElementById("botsBody");
+    if (data.trades.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-row">No bot trades yet</td></tr>';
+    } else {
+      tbody.innerHTML = data.trades.map(t => {
+        const cls = t.profit >= 0 ? "pos" : "neg";
+        return `<tr>
+          <td>${esc(t.userEmail)}</td>
+          <td>${esc(t.botName)}</td>
+          <td>${esc(t.asset)}</td>
+          <td class="${cls}">${t.profit >= 0 ? "+" : ""}${fmtMoney(t.profit)}</td>
+          <td style="font-size:12px;">${fmtDate(t.timestamp)}</td>
+        </tr>`;
+      }).join("");
+    }
+    renderPagination("botsPagination", data.page, data.pages, loadBots);
+  } catch (e) {
+    console.error(e);
+    toast("Failed to load bot trades", "error");
+  }
+}
+
+/* ============================================================
+ *  AUDIT LOG
+ * ============================================================ */
+async function loadLogs(page = 1) {
+  try {
+    const res = await apiFetch(`/api/admin/logs?page=${page}&limit=50`);
+    const data = await res.json();
+    if (!data.success) return toast(data.message, "error");
+    const tbody = document.getElementById("logsBody");
+    if (data.logs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No admin actions yet</td></tr>';
+    } else {
+      tbody.innerHTML = data.logs.map(l => {
+        const target = l.targetEmail || l.targetId || "—";
+        const amount = l.amount ? fmtMoney(l.amount) + (l.asset ? " " + esc(l.asset) : "") : "—";
+        return `<tr>
+          <td style="font-size:12px;">${fmtDate(l.createdAt)}</td>
+          <td>${esc(l.adminEmail)}</td>
+          <td><span class="pill pill-blue">${esc(l.action)}</span></td>
+          <td>${esc(target)}</td>
+          <td>${amount}</td>
+          <td style="font-size:12px;color:var(--muted);">${esc(l.reason || "—")}</td>
+        </tr>`;
+      }).join("");
+    }
+    renderPagination("logsPagination", data.page, data.pages, loadLogs);
+  } catch (e) {
+    console.error(e);
+    toast("Failed to load logs", "error");
+  }
+}
+
+/* ============================================================
+ *  PAGINATION
+ * ============================================================ */
+function renderPagination(containerId, current, total, onPageClick) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (total <= 1) { el.innerHTML = ""; return; }
+  const pages = [];
+  const push = p => pages.push(`<button class="${p === current ? "active" : ""}" onclick="${onPageClick.name}(${p})">${p}</button>`);
+  const start = Math.max(1, current - 2);
+  const end = Math.min(total, current + 2);
+  let html = `<button ${current === 1 ? "disabled" : ""} onclick="${onPageClick.name}(${current - 1})">‹ Prev</button>`;
+  if (start > 1) { html += `<button onclick="${onPageClick.name}(1)">1</button>`; if (start > 2) html += `<span class="pagination-info">…</span>`; }
+  for (let i = start; i <= end; i++) push(i);
+  html += pages.join("");
+  if (end < total) { if (end < total - 1) html += `<span class="pagination-info">…</span>`; html += `<button onclick="${onPageClick.name}(${total})">${total}</button>`; }
+  html += `<button ${current === total ? "disabled" : ""} onclick="${onPageClick.name}(${current + 1})">Next ›</button>`;
+  el.innerHTML = html;
+}
+
+/* ============================================================
+ *  KEYBOARD
+ * ============================================================ */
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeUserModal();
+    closeActionModal();
+  }
+});
 </script>
 </body>
 </html>
