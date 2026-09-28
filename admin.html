@@ -35,7 +35,8 @@ input, select, textarea { font-family: inherit; outline: none; }
 a { color: var(--accent); text-decoration: none; }
 svg { display: inline-block; vertical-align: middle; }
 
-/* ===== LOGIN ===== */
+@keyframes spin { to { transform: rotate(360deg); } }
+
 #loginScreen {
   display: flex;
   align-items: center;
@@ -97,7 +98,6 @@ svg { display: inline-block; vertical-align: middle; }
 .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .login-err { color: var(--red); font-size: 13px; text-align: center; margin-top: 14px; min-height: 18px; }
 
-/* ===== APP SHELL ===== */
 #app { display: none; min-height: 100vh; }
 .topbar {
   position: fixed;
@@ -231,7 +231,7 @@ svg { display: inline-block; vertical-align: middle; }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
-  margin-bottom: 26px;
+  margin-bottom: 16px;
 }
 .stat-card {
   background: var(--bg-2);
@@ -492,7 +492,6 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   animation: spin 0.7s linear infinite;
   vertical-align: middle;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 .backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 85; }
 .backdrop.active { display: block; }
@@ -510,7 +509,6 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-shield">
@@ -533,7 +531,6 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <div class="topbar">
     <div class="topbar-left">
@@ -598,14 +595,54 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
           Refresh
         </button>
       </div>
+
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value" id="sTotalUsers">—</div><div class="stat-sub" id="sActiveUsers">—</div></div>
-        <div class="stat-card green"><div class="stat-label">Total USDT Held</div><div class="stat-value" id="sTotalUsdt">—</div><div class="stat-sub">Across all wallets</div></div>
-        <div class="stat-card blue"><div class="stat-label">Bot Profit (all-time)</div><div class="stat-value" id="sBotProfit">—</div><div class="stat-sub" id="sTotalTrades">—</div></div>
-        <div class="stat-card orange"><div class="stat-label">Pending Deposits</div><div class="stat-value" id="sPendingDep">—</div><div class="stat-sub" id="sPendingDepAmt">—</div></div>
-        <div class="stat-card orange"><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="sPendingWd">—</div><div class="stat-sub" id="sPendingWdAmt">—</div></div>
-        <div class="stat-card red"><div class="stat-label">Banned Users</div><div class="stat-value" id="sBanned">—</div><div class="stat-sub">Account status = banned</div></div>
+        <div class="stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="sTotalUsers">—</div>
+          <div class="stat-sub" id="sActiveUsers">—</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Total USDT</div>
+          <div class="stat-value" id="sTotalUsdt">—</div>
+          <div class="stat-sub" id="sTotalUsdtHolders">—</div>
+        </div>
+        <div class="stat-card blue" id="totalCoinsCard" onclick="toggleCoinsBreakdown()" style="cursor:pointer;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="stat-label" style="margin-bottom:0;">Total Coins</div>
+            <svg id="coinsChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s;">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="stat-value" id="sTotalCoinsCount" style="font-size:20px;">—</div>
+          <div class="stat-sub">Tap to expand</div>
+          <div id="coinsBreakdown" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.08);"></div>
+        </div>
       </div>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Bot Profit (all-time)</div>
+          <div class="stat-value" id="sBotProfit">—</div>
+          <div class="stat-sub" id="sTotalTrades">—</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-label">Pending Deposits</div>
+          <div class="stat-value" id="sPendingDep">—</div>
+          <div class="stat-sub" id="sPendingDepAmt">—</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-label">Pending Withdrawals</div>
+          <div class="stat-value" id="sPendingWd">—</div>
+          <div class="stat-sub" id="sPendingWdAmt">—</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Banned Users</div>
+          <div class="stat-value" id="sBanned">—</div>
+          <div class="stat-sub">Account status = banned</div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-title">Recent Signups</div>
         <div class="table-wrap">
@@ -835,7 +872,6 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
 
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- FIREBASE SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -867,28 +903,40 @@ let pendingWalletAction = null;
 let currentUserId = null;
 let currentUserData = null;
 
-/* ============================================================
- *  AUTH
- * ============================================================ */
+/* ============== AUTH (silent re-auth, no login flash) ============== */
 window.addEventListener("fb-ready", () => {
+  // Show a boot screen immediately (no login flash)
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "none";
+  const boot = document.createElement("div");
+  boot.id = "bootScreen";
+  boot.style.cssText = "position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#0a0e27; z-index:9998; flex-direction:column; gap:20px;";
+  boot.innerHTML = '<div style="color:#667eea; font-size:20px; font-weight:800; letter-spacing:1px;">BT-EARN</div><div style="width:36px; height:36px; border:3px solid rgba(102,126,234,0.2); border-top-color:#667eea; border-radius:50%; animation:spin 0.8s linear infinite;"></div>';
+  document.body.appendChild(boot);
+
   window._fbOnAuth(window._fbAuth, async (user) => {
+    const removeBoot = () => { const b = document.getElementById("bootScreen"); if (b) b.remove(); };
     if (user) {
       try {
         token = await user.getIdToken();
         currentAdmin = { email: user.email, uid: user.uid };
         const res = await apiFetch("/api/admin/me");
         if (!res.ok) {
+          removeBoot();
           await doLogout();
           document.getElementById("loginErr").textContent = "You are not authorized as admin.";
           return;
         }
+        removeBoot();
         enterApp();
       } catch (e) {
         console.error(e);
+        removeBoot();
         await doLogout();
         document.getElementById("loginErr").textContent = "Session error. Please sign in again.";
       }
     } else {
+      removeBoot();
       showLogin();
     }
   });
@@ -957,9 +1005,7 @@ async function apiFetch(path, options = {}) {
   return fetch(API_BASE + path, { ...options, headers });
 }
 
-/* ============================================================
- *  NAV
- * ============================================================ */
+/* ============== NAV ============== */
 function toggleSidebar() {
   document.getElementById("sidebar").classList.toggle("open");
   document.getElementById("backdrop").classList.toggle("active");
@@ -980,9 +1026,7 @@ function showPage(name) {
   else if (name === "logs") loadLogs(1);
 }
 
-/* ============================================================
- *  TOASTS
- * ============================================================ */
+/* ============== TOASTS ============== */
 function toast(msg, type = "info") {
   const c = document.getElementById("toastContainer");
   const el = document.createElement("div");
@@ -993,9 +1037,7 @@ function toast(msg, type = "info") {
   setTimeout(() => el.remove(), 3600);
 }
 
-/* ============================================================
- *  FORMAT
- * ============================================================ */
+/* ============== FORMAT ============== */
 function fmtMoney(n) {
   const v = Number(n) || 0;
   return "$" + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1025,13 +1067,65 @@ function pill(status) {
   return `<span class="pill ${cls}">${esc(status)}</span>`;
 }
 
-/* ============================================================
- *  DASHBOARD
- * ============================================================ */
+/* ============== COIN TOTALS ============== */
+async function loadCoinTotals() {
+  try {
+    const res = await apiFetch("/api/admin/stats/wallets");
+    const data = await res.json();
+    if (!data.success) return;
+    const totals = data.totals || {};
+    const holders = data.holders || {};
+    const keys = Object.keys(totals);
+
+    document.getElementById("sTotalCoinsCount").textContent =
+      keys.length === 1 ? "1 coin" : `${keys.length} coins`;
+
+    const sorted = keys.sort((a, b) => {
+      if (a === "usdt") return -1;
+      if (b === "usdt") return 1;
+      return a.localeCompare(b);
+    });
+
+    const rows = sorted.map(k => {
+      const v = totals[k];
+      const display = k === "usdt" || k === "ngn" ? fmtCoin(v, 2) : fmtCoin(v, 8);
+      const symbol = k.toUpperCase();
+      const holderCount = holders[k] || 0;
+      return `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:12px;">
+          <div style="color:var(--muted); font-weight:700; letter-spacing:0.5px;">${esc(symbol)}</div>
+          <div style="text-align:right;">
+            <div style="font-weight:700; color:#fff;">${display}</div>
+            <div style="color:var(--muted); font-size:10px;">${holderCount} holder${holderCount === 1 ? "" : "s"}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    document.getElementById("coinsBreakdown").innerHTML = rows ||
+      '<div style="color:var(--muted); font-size:12px;">No wallet data</div>';
+  } catch (e) {
+    console.error("Coin totals error:", e);
+  }
+}
+
+function toggleCoinsBreakdown() {
+  const el = document.getElementById("coinsBreakdown");
+  const chev = document.getElementById("coinsChevron");
+  const isOpen = el.style.display === "block";
+  el.style.display = isOpen ? "none" : "block";
+  chev.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
+}
+
+/* ============== DASHBOARD ============== */
 async function loadDashboard() {
   try {
-    const res = await apiFetch("/api/admin/stats");
-    const data = await res.json();
+    const [statsRes, walletRes] = await Promise.all([
+      apiFetch("/api/admin/stats"),
+      apiFetch("/api/admin/stats/wallets"),
+    ]);
+    const data = await statsRes.json();
+    const walletData = await walletRes.json();
     if (!data.success) return toast(data.message || "Failed to load stats", "error");
     const s = data.stats;
 
@@ -1046,6 +1140,17 @@ async function loadDashboard() {
     document.getElementById("sPendingWdAmt").textContent = fmtMoney(s.withdrawals.Pending.total) + " total";
     document.getElementById("sBanned").textContent = s.bannedUsers;
     document.getElementById("dashUpdated").textContent = "Last updated: " + new Date().toLocaleTimeString();
+
+    if (walletData.success) {
+      const holders = walletData.holders || {};
+      const usdtHolders = holders.usdt || 0;
+      document.getElementById("sTotalUsdtHolders").textContent =
+        `${usdtHolders} user${usdtHolders === 1 ? "" : "s"} hold USDT`;
+    } else {
+      document.getElementById("sTotalUsdtHolders").textContent = "Across all wallets";
+    }
+
+    await loadCoinTotals();
 
     const bd = document.getElementById("badgeDeposits");
     const bw = document.getElementById("badgeWithdrawals");
@@ -1073,9 +1178,7 @@ async function loadDashboard() {
   }
 }
 
-/* ============================================================
- *  USERS
- * ============================================================ */
+/* ============== USERS ============== */
 let userSearchTimer = null;
 function debouncedLoadUsers() {
   clearTimeout(userSearchTimer);
@@ -1128,9 +1231,7 @@ function exportUsers() {
   }).catch(() => toast("Export failed", "error"));
 }
 
-/* ============================================================
- *  USER DETAIL MODAL
- * ============================================================ */
+/* ============== USER DETAIL MODAL ============== */
 async function openUser(uid) {
   currentUserId = uid;
   const modal = document.getElementById("userModal");
@@ -1146,13 +1247,23 @@ async function openUser(uid) {
     const u = data.user;
     currentUserData = u;
     const w = u.wallets || {};
-    const walletKeys = Object.keys(w);
+
+    // Frontend-style dust filter: only show if USD value >= $0.01
+    const knownPrices = { btc: 83000, eth: 2000, bnb: 580, sol: 145 };
+    const rawKeys = Object.keys(w);
+    const walletKeys = rawKeys.filter(k => {
+      const v = Number(w[k]) || 0;
+      if (v === 0) return false;
+      const price = k === "usdt" || k === "ngn" ? 1 : (knownPrices[k] || 0);
+      if (price === 0) return true;
+      return v * price >= 0.01;
+    });
+    const hiddenCount = rawKeys.length - walletKeys.length;
 
     document.getElementById("userModalTitle").textContent = u.name || u.email;
 
-    // Wallets section — dynamic
     const walletRowsHtml = walletKeys.length === 0
-      ? '<div style="color:var(--muted); font-size:13px;">No wallet fields</div>'
+      ? '<div style="color:var(--muted); font-size:13px; padding:8px 0;">No active wallets (dust hidden)</div>'
       : walletKeys.map(k => {
           const v = w[k];
           const display = k === "usdt" || k === "ngn" ? fmtCoin(v, 2) : fmtCoin(v, 8);
@@ -1183,7 +1294,10 @@ async function openUser(uid) {
       <div class="detail-row"><span class="detail-label">Total Bot Profit</span><span class="detail-value">${fmtMoney(u.totalProfit || 0)}</span></div>
 
       <div style="height:16px;"></div>
-      <div class="card-title">Wallets (MongoDB)</div>
+      <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Wallets</span>
+        ${hiddenCount > 0 ? `<span style="font-size:11px; color:var(--muted); text-transform:none; letter-spacing:0; font-weight:500;">${hiddenCount} dust hidden</span>` : ""}
+      </div>
       ${walletRowsHtml}
 
       <div style="height:16px;"></div>
@@ -1212,9 +1326,7 @@ function closeUserModal() {
   currentUserData = null;
 }
 
-/* ============================================================
- *  WALLET ACTION (credit/debit/set any field)
- * ============================================================ */
+/* ============== WALLET ACTION ============== */
 function openWalletAction(field, action) {
   if (!currentUserId) return;
   pendingWalletAction = { field, action };
@@ -1271,7 +1383,6 @@ async function confirmWalletAction() {
     } else {
       toast(data.message || "Success", "success");
       closeWalletModal();
-      // refresh user detail + users list
       await openUser(currentUserId);
       loadUsers();
       loadDashboard();
@@ -1285,9 +1396,7 @@ async function confirmWalletAction() {
   }
 }
 
-/* ============================================================
- *  ACTION MODAL (ban/unban/approve/reject)
- * ============================================================ */
+/* ============== ACTION MODAL ============== */
 function openAction(kind, uid, email, extra) {
   pendingAction = { kind, uid, email, ...(extra || {}) };
   const modal = document.getElementById("actionModal");
@@ -1379,9 +1488,7 @@ async function confirmAction() {
   }
 }
 
-/* ============================================================
- *  DEPOSITS
- * ============================================================ */
+/* ============== DEPOSITS ============== */
 async function loadDeposits(page = 1) {
   const status = document.getElementById("depositStatusFilter").value;
   try {
@@ -1421,9 +1528,7 @@ async function loadDeposits(page = 1) {
   }
 }
 
-/* ============================================================
- *  WITHDRAWALS
- * ============================================================ */
+/* ============== WITHDRAWALS ============== */
 async function loadWithdrawals(page = 1) {
   const status = document.getElementById("withdrawStatusFilter").value;
   try {
@@ -1464,9 +1569,7 @@ async function loadWithdrawals(page = 1) {
   }
 }
 
-/* ============================================================
- *  CONVERTS
- * ============================================================ */
+/* ============== CONVERTS ============== */
 async function loadConverts(page = 1) {
   try {
     const res = await apiFetch(`/api/admin/converts?page=${page}&limit=25`);
@@ -1495,9 +1598,7 @@ async function loadConverts(page = 1) {
   }
 }
 
-/* ============================================================
- *  BOTS
- * ============================================================ */
+/* ============== BOTS ============== */
 async function loadBots(page = 1) {
   try {
     const res = await apiFetch(`/api/admin/bots?page=${page}&limit=50`);
@@ -1526,9 +1627,7 @@ async function loadBots(page = 1) {
   }
 }
 
-/* ============================================================
- *  AUDIT LOG
- * ============================================================ */
+/* ============== AUDIT LOG ============== */
 async function loadLogs(page = 1) {
   try {
     const res = await apiFetch(`/api/admin/logs?page=${page}&limit=50`);
@@ -1558,9 +1657,7 @@ async function loadLogs(page = 1) {
   }
 }
 
-/* ============================================================
- *  PAGINATION
- * ============================================================ */
+/* ============== PAGINATION ============== */
 function renderPagination(containerId, current, total, onPageClick) {
   const el = document.getElementById(containerId);
   if (!el) return;
@@ -1578,9 +1675,7 @@ function renderPagination(containerId, current, total, onPageClick) {
   el.innerHTML = html;
 }
 
-/* ============================================================
- *  KEYBOARD
- * ============================================================ */
+/* ============== KEYBOARD ============== */
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     closeUserModal();
