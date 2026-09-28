@@ -614,8 +614,8 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
               <polyline points="6 9 12 15 18 9"/>
             </svg>
           </div>
-          <div class="stat-value" id="sTotalCoinsCount" style="font-size:20px;">—</div>
-          <div class="stat-sub">Tap to expand</div>
+          <div class="stat-value" id="sTotalCoinsValue">—</div>
+          <div class="stat-sub" id="sTotalCoinsSub">Tap to expand</div>
           <div id="coinsBreakdown" style="display:none; margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.08);"></div>
         </div>
       </div>
@@ -896,6 +896,8 @@ window.dispatchEvent(new Event("fb-ready"));
 
 <script>
 const API_BASE = "https://api.bt-earn.xyz";
+const PRICE_KEYS_NO_FETCH = ["usdt", "ngn"]; // pegged at $1
+
 let currentAdmin = null;
 let token = null;
 let pendingAction = null;
@@ -905,7 +907,6 @@ let currentUserData = null;
 
 /* ============== AUTH (silent re-auth, no login flash) ============== */
 window.addEventListener("fb-ready", () => {
-  // Show a boot screen immediately (no login flash)
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("app").style.display = "none";
   const boot = document.createElement("div");
@@ -1005,6 +1006,42 @@ async function apiFetch(path, options = {}) {
   return fetch(API_BASE + path, { ...options, headers });
 }
 
+/* ============== LIVE PRICES HELPER ============== */
+/**
+ * Fetch live USD prices for the given wallet field names.
+ * USDT and NGN are treated as $1 pegs.
+ * Returns a map: { usdt: 1, btc: 83000, trx: 0.16, ... }
+ */
+async function fetchLivePrices(walletKeys) {
+  const prices = {};
+  const toFetch = [];
+  for (const k of walletKeys) {
+    if (PRICE_KEYS_NO_FETCH.includes(k)) {
+      prices[k] = 1;
+    } else {
+      toFetch.push(k.toUpperCase());
+    }
+  }
+  if (toFetch.length === 0) return prices;
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/prices?symbols=${toFetch.join(",")}`);
+    const data = await res.json();
+    if (data && data.success && data.prices) {
+      for (const sym of Object.keys(data.prices)) {
+        const key = sym.toLowerCase();
+        prices[key] = Number(data.prices[sym].usd) || 0;
+      }
+    }
+  } catch (e) {
+    console.warn("Live price fetch failed:", e);
+  }
+  // Fill missing keys with 0
+  for (const k of walletKeys) {
+    if (prices[k] === undefined) prices[k] = 0;
+  }
+  return prices;
+}
+
 /* ============== NAV ============== */
 function toggleSidebar() {
   document.getElementById("sidebar").classList.toggle("open");
@@ -1067,35 +1104,53 @@ function pill(status) {
   return `<span class="pill ${cls}">${esc(status)}</span>`;
 }
 
-/* ============== COIN TOTALS ============== */
+/* ============== COIN TOTALS (Total Coins card) ============== */
 async function loadCoinTotals() {
   try {
     const res = await apiFetch("/api/admin/stats/wallets");
     const data = await res.json();
     if (!data.success) return;
+
     const totals = data.totals || {};
     const holders = data.holders || {};
     const keys = Object.keys(totals);
 
-    document.getElementById("sTotalCoinsCount").textContent =
-      keys.length === 1 ? "1 coin" : `${keys.length} coins`;
+    if (keys.length === 0) {
+      document.getElementById("sTotalCoinsValue").textContent = "$0.00";
+      document.getElementById("sTotalCoinsSub").textContent = "No wallet data";
+      document.getElementById("coinsBreakdown").innerHTML =
+        '<div style="color:var(--muted); font-size:12px;">No wallet data</div>';
+      return;
+    }
 
-    const sorted = keys.sort((a, b) => {
-      if (a === "usdt") return -1;
-      if (b === "usdt") return 1;
-      return a.localeCompare(b);
-    });
+    const prices = await fetchLivePrices(keys);
 
-    const rows = sorted.map(k => {
-      const v = totals[k];
-      const display = k === "usdt" || k === "ngn" ? fmtCoin(v, 2) : fmtCoin(v, 8);
-      const symbol = k.toUpperCase();
+    // Compute per-coin USD
+    const coinUSD = {};
+    let totalUSD = 0;
+    for (const k of keys) {
+      const usd = (Number(totals[k]) || 0) * (prices[k] || 0);
+      coinUSD[k] = usd;
+      totalUSD += usd;
+    }
+
+    // Collapsed view: total USD
+    document.getElementById("sTotalCoinsValue").textContent = fmtMoney(totalUSD);
+    document.getElementById("sTotalCoinsSub").textContent = `${keys.length} coin${keys.length === 1 ? "" : "s"} · Tap to expand`;
+
+    // Expanded view: only coins with USD >= $0.01, sorted by USD desc
+    const visible = keys
+      .filter(k => coinUSD[k] >= 0.01)
+      .sort((a, b) => coinUSD[b] - coinUSD[a]);
+
+    const rows = visible.map(k => {
+      const usdDisplay = fmtMoney(coinUSD[k]);
       const holderCount = holders[k] || 0;
       return `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:12px;">
-          <div style="color:var(--muted); font-weight:700; letter-spacing:0.5px;">${esc(symbol)}</div>
+          <div style="color:var(--muted); font-weight:700; letter-spacing:0.5px;">${esc(k.toUpperCase())}</div>
           <div style="text-align:right;">
-            <div style="font-weight:700; color:#fff;">${display}</div>
+            <div style="font-weight:700; color:#fff;">${usdDisplay}</div>
             <div style="color:var(--muted); font-size:10px;">${holderCount} holder${holderCount === 1 ? "" : "s"}</div>
           </div>
         </div>
@@ -1103,7 +1158,7 @@ async function loadCoinTotals() {
     }).join("");
 
     document.getElementById("coinsBreakdown").innerHTML = rows ||
-      '<div style="color:var(--muted); font-size:12px;">No wallet data</div>';
+      '<div style="color:var(--muted); font-size:12px;">No coins worth ≥ $0.01</div>';
   } catch (e) {
     console.error("Coin totals error:", e);
   }
@@ -1247,15 +1302,17 @@ async function openUser(uid) {
     const u = data.user;
     currentUserData = u;
     const w = u.wallets || {};
-
-    // Frontend-style dust filter: only show if USD value >= $0.01
-    const knownPrices = { btc: 83000, eth: 2000, bnb: 580, sol: 145 };
     const rawKeys = Object.keys(w);
+
+    // Fetch live prices so the dust filter matches the frontend exactly
+    const livePrices = await fetchLivePrices(rawKeys);
+
+    // Dust filter: only show if USD value >= $0.01
     const walletKeys = rawKeys.filter(k => {
       const v = Number(w[k]) || 0;
       if (v === 0) return false;
-      const price = k === "usdt" || k === "ngn" ? 1 : (knownPrices[k] || 0);
-      if (price === 0) return true;
+      const price = livePrices[k] || 0;
+      if (price === 0) return false;
       return v * price >= 0.01;
     });
     const hiddenCount = rawKeys.length - walletKeys.length;
@@ -1268,11 +1325,13 @@ async function openUser(uid) {
           const v = w[k];
           const display = k === "usdt" || k === "ngn" ? fmtCoin(v, 2) : fmtCoin(v, 8);
           const symbol = k.toUpperCase();
+          const usdVal = (Number(v) || 0) * (livePrices[k] || 0);
+          const usdDisplay = usdVal >= 0.01 ? ` ≈ ${fmtMoney(usdVal)}` : "";
           return `
             <div class="wallet-row">
               <div class="wallet-row-info">
                 <div class="wallet-row-symbol">${esc(symbol)}</div>
-                <div class="wallet-row-value">${display}</div>
+                <div class="wallet-row-value">${display}<span style="font-size:12px;color:var(--muted);font-weight:500;">${usdDisplay}</span></div>
               </div>
               <div class="wallet-row-actions">
                 <button class="btn btn-green btn-sm" onclick="openWalletAction('${esc(k)}','credit')">+ Add</button>
