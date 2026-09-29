@@ -41,7 +41,6 @@ input, select, textarea { font-family: inherit; outline: none; }
 a { color: var(--accent); text-decoration: none; }
 svg { display: inline-block; vertical-align: middle; }
 
-/* Prevent any flash of login/app before JS decides what to show */
 #loginScreen, #app { display: none !important; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -695,7 +694,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
         <div class="card-title">Recent Signups</div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Country</th><th>USDT</th><th>Status</th><th>Joined</th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Country</th><th>Total Balance</th><th>Status</th><th>Joined</th></tr></thead>
             <tbody id="recentUsersBody"><tr><td colspan="6" class="loading-row"><span class="spinner"></span></td></tr></tbody>
           </table>
         </div>
@@ -734,7 +733,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
       <div class="card">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Country</th><th>USDT</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Country</th><th>Total Balance</th><th>Status</th><th>Joined</th><th></th></tr></thead>
             <tbody id="usersBody"><tr><td colspan="7" class="loading-row"><span class="spinner"></span></td></tr></tbody>
           </table>
         </div>
@@ -963,9 +962,6 @@ window.dispatchEvent(new Event("fb-ready"));
 </script>
 
 <script>
-/* ============================================================
- *  Register Service Worker (for PWA install)
- * ============================================================ */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw-admin.js").catch((e) => {
@@ -1009,7 +1005,6 @@ function updateBadges(stats) {
   refreshAppBadge();
 }
 
-/* ============== APP ICON BADGE (PWA) ============== */
 function computeUnreadCount() {
   const u = parseInt(document.getElementById("badgeUsers")?.textContent || "0", 10) || 0;
   const d = parseInt(document.getElementById("badgeDeposits")?.textContent || "0", 10) || 0;
@@ -1106,7 +1101,6 @@ function showLogin() {
 function enterApp() {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("app").style.setProperty("display", "block", "important");
-  // Leave topbarName empty until real name resolves — avoids email flash
   document.getElementById("topbarName").textContent = "";
   loadAdminName();
   showPage("dashboard");
@@ -1374,7 +1368,7 @@ async function loadDashboard() {
           <td>${esc(u.name)}</td>
           <td>${esc(u.email)}</td>
           <td>${esc(u.country)}</td>
-          <td>${fmtMoney(u.wallets?.usdt || 0)}</td>
+          <td>${fmtMoney(u.balance || 0)}</td>
           <td>${pill(u.status)}</td>
           <td>${fmtDate(u.createdAt)}</td>
         </tr>
@@ -1417,7 +1411,7 @@ async function loadUsers(page = 1) {
           <td>${esc(u.name)}</td>
           <td>${esc(u.email)}</td>
           <td>${esc(u.country)}</td>
-          <td><strong>${fmtMoney(u.wallets?.usdt || 0)}</strong></td>
+          <td><strong>${fmtMoney(u.balance || 0)}</strong></td>
           <td>${pill(u.status)}</td>
           <td>${fmtDate(u.createdAt)}</td>
           <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openUser('${esc(u.firebaseUid)}')">Manage</button></td>
@@ -1572,7 +1566,7 @@ async function openUser(uid) {
       <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${pill(u.status)}</span></div>
       <div class="detail-row"><span class="detail-label">Joined</span><span class="detail-value">${fmtDate(u.createdAt)}</span></div>
       <div class="detail-row"><span class="detail-label">Last Login</span><span class="detail-value">${fmtDate(u.lastLogin)}</span></div>
-      <div class="detail-row"><span class="detail-label">Balance (Mongo field)</span><span class="detail-value">${fmtCoin(u.balance || 0, 8)}</span></div>
+      <div class="detail-row"><span class="detail-label">Total Balance</span><span class="detail-value">${fmtCoin(u.balance || 0, 8)}</span></div>
       <div class="detail-row"><span class="detail-label">Total Bot Profit</span><span class="detail-value">${fmtMoney(u.totalProfit || 0)}</span></div>
 
       <div style="height:16px;"></div>
