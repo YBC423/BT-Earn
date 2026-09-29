@@ -134,7 +134,7 @@ svg { display: inline-block; vertical-align: middle; }
   text-transform: uppercase;
 }
 .topbar-right { display: flex; align-items: center; gap: 16px; }
-.topbar-email { font-size: 13px; color: var(--muted); }
+.topbar-name { font-size: 14px; color: #fff; font-weight: 700; }
 
 .sidebar {
   position: fixed;
@@ -516,7 +516,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; }
   .sidebar.open { transform: translateX(0); }
   .main { margin-left: 0; padding: 90px 16px 40px; }
-  .topbar-email { display: none; }
+  .topbar-name { display: none; }
   .page-title { font-size: 22px; }
   .stat-value { font-size: 22px; }
 }
@@ -556,7 +556,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
       <div class="topbar-badge">Admin</div>
     </div>
     <div class="topbar-right">
-      <div class="topbar-email" id="topbarEmail"></div>
+      <div class="topbar-name" id="topbarName"></div>
     </div>
   </div>
 
@@ -1049,18 +1049,64 @@ function showLogin() {
 function enterApp() {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("app").style.display = "block";
-  document.getElementById("topbarEmail").textContent = currentAdmin?.email || "";
+  document.getElementById("topbarName").textContent = currentAdmin?.email || "";
+  loadAdminName();
   showPage("dashboard");
+
+  // Token refresh every 50 min
   setInterval(() => {
     const u = window._fbAuth.currentUser;
     if (u) u.getIdToken(true).then(t => { token = t; }).catch(()=>{});
   }, 50 * 60 * 1000);
+
+  // Auto-sync verified users every 30s
+  setInterval(() => {
+    autoSyncUsers();
+  }, 30000);
+
+  // Auto-refresh current page every 30s
   setInterval(() => {
     const current = document.querySelector(".page.active")?.id?.replace("page-", "");
     if (current === "dashboard") loadDashboard();
     else if (current === "deposits") loadDeposits();
     else if (current === "withdrawals") loadWithdrawals();
   }, 30000);
+}
+
+async function loadAdminName() {
+  // Try to find the admin's own MongoDB record for a friendly name
+  try {
+    const fbUser = window._fbAuth.currentUser;
+    if (fbUser) {
+      const res = await apiFetch(`/api/admin/users/${fbUser.uid}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user?.name) {
+          currentAdmin.name = data.user.name;
+          document.getElementById("topbarName").textContent = data.user.name;
+          return;
+        }
+      }
+    }
+  } catch (e) { /* ignore */ }
+  // Fallback: Firebase displayName
+  const fbUser = window._fbAuth.currentUser;
+  if (fbUser && fbUser.displayName) {
+    document.getElementById("topbarName").textContent = fbUser.displayName;
+  }
+}
+
+async function autoSyncUsers() {
+  try {
+    const res = await apiFetch("/api/admin/sync-users-silent", { method: "POST" });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.success && data.created > 0) {
+      const current = document.querySelector(".page.active")?.id?.replace("page-", "");
+      if (current === "users") loadUsers(1);
+      if (current === "dashboard") loadDashboard();
+    }
+  } catch (e) { /* silent */ }
 }
 
 async function apiFetch(path, options = {}) {
