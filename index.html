@@ -2281,7 +2281,7 @@ const userRef = window.doc(db, 'users', user.uid);
 await window.setDoc(userRef, {
 name: displayName,
 email: userEmail,
-country: '',
+country: 'Not set',
 provider: provider,
 holdings: { usdt: 0.00 },
 withdrawals: [],
@@ -2294,7 +2294,7 @@ try {
 await fetch(`${API_BASE_URL}/api/auth/register`, {
 method: 'POST',
 headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ name: displayName, email: userEmail, country: '', firebaseUid: user.uid })
+body: JSON.stringify({ name: displayName, email: userEmail, country: 'Not set', firebaseUid: user.uid })
 });
 } catch (be) { console.warn("Backend registration failed:", be); }
 
