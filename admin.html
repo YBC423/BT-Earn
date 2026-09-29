@@ -874,7 +874,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   </div>
 </div>
 
-<!-- ACTION MODAL (approve/reject/ban) -->
+<!-- ACTION MODAL (approve/reject/ban/delete) -->
 <div class="modal-overlay" id="actionModal" onclick="if(event.target.id==='actionModal') closeActionModal()">
   <div class="modal" style="max-width: 440px">
     <div class="modal-head">
@@ -954,7 +954,7 @@ function updateBadges(stats) {
   showBadge("badgeWithdrawals", Math.max(0, pendingWd - getSeen("withdrawals")));
 }
 
-/* ============== AUTH (silent re-auth, no login flash) ============== */
+/* ============== AUTH ============== */
 window.addEventListener("fb-ready", () => {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("app").style.display = "none";
@@ -1055,16 +1055,13 @@ async function apiFetch(path, options = {}) {
   return fetch(API_BASE + path, { ...options, headers });
 }
 
-/* ============== LIVE PRICES HELPER ============== */
+/* ============== LIVE PRICES ============== */
 async function fetchLivePrices(walletKeys) {
   const prices = {};
   const toFetch = [];
   for (const k of walletKeys) {
-    if (PRICE_KEYS_NO_FETCH.includes(k)) {
-      prices[k] = 1;
-    } else {
-      toFetch.push(k.toUpperCase());
-    }
+    if (PRICE_KEYS_NO_FETCH.includes(k)) prices[k] = 1;
+    else toFetch.push(k.toUpperCase());
   }
   if (toFetch.length === 0) return prices;
   try {
@@ -1079,9 +1076,7 @@ async function fetchLivePrices(walletKeys) {
   } catch (e) {
     console.warn("Live price fetch failed:", e);
   }
-  for (const k of walletKeys) {
-    if (prices[k] === undefined) prices[k] = 0;
-  }
+  for (const k of walletKeys) if (prices[k] === undefined) prices[k] = 0;
   return prices;
 }
 
@@ -1179,9 +1174,7 @@ async function loadCoinTotals() {
     document.getElementById("sTotalCoinsValue").textContent = fmtMoney(totalUSD);
     document.getElementById("sTotalCoinsSub").textContent = `${keys.length} coin${keys.length === 1 ? "" : "s"} · Tap to expand`;
 
-    const visible = keys
-      .filter(k => coinUSD[k] >= 0.01)
-      .sort((a, b) => coinUSD[b] - coinUSD[a]);
+    const visible = keys.filter(k => coinUSD[k] >= 0.01).sort((a, b) => coinUSD[b] - coinUSD[a]);
 
     const rows = visible.map(k => {
       const usdDisplay = fmtMoney(coinUSD[k]);
@@ -1245,9 +1238,7 @@ async function loadDashboard() {
       document.getElementById("sTotalUsdtHolders").textContent = "Across all wallets";
     }
 
-    // Update notification badges based on unread since last view
     updateBadges(s);
-
     await loadCoinTotals();
 
     const tbody = document.getElementById("recentUsersBody");
@@ -1286,7 +1277,6 @@ async function loadUsers(page = 1) {
     const data = await res.json();
     if (!data.success) return toast(data.message || "Failed", "error");
 
-    // Mark users as seen when visiting the Users page (only if no filter/search active)
     if (!q && status === "all") {
       setSeen("users", data.total);
       showBadge("badgeUsers", 0);
@@ -1411,6 +1401,9 @@ async function openUser(uid) {
 
     const isBanned = u.status === "banned";
     document.getElementById("userModalFooter").innerHTML = `
+      <button class="btn btn-red" style="margin-right:auto;" onclick="openAction('delete','${uid}','${esc(u.email)}')">
+        Delete User
+      </button>
       <button class="btn ${isBanned ? 'btn-green' : 'btn-red'}" onclick="openAction('${isBanned ? 'unban' : 'ban'}','${uid}','${esc(u.email)}')">
         ${isBanned ? 'Unban User' : 'Ban User'}
       </button>
@@ -1540,6 +1533,11 @@ function openAction(kind, uid, email, extra) {
     desc.innerHTML = `Reject withdrawal for <strong>${esc(email)}</strong>.<br><br>This will <strong>refund ${fmtMoney(amt)} USDT</strong> back to their wallet.`;
     btn.textContent = "Reject & Refund";
     btn.className = "btn btn-red";
+  } else if (kind === "delete") {
+    title.textContent = "Delete User";
+    desc.innerHTML = `Permanently delete <strong>${esc(email)}</strong> from Firebase, Firestore, and MongoDB?<br><br><span style="color:var(--red); font-weight:700;">This cannot be undone.</span> The email can sign up again afterwards.`;
+    btn.textContent = "Delete Forever";
+    btn.className = "btn btn-red";
   }
 
   btn.onclick = confirmAction;
@@ -1561,15 +1559,18 @@ async function confirmAction() {
   btn.textContent = "Working...";
 
   try {
-    let path = "", body = { reason };
+    let path = "", body = { reason }, method = "POST";
     if (kind === "ban") { path = `/api/admin/users/${uid}/status`; body.status = "banned"; }
     else if (kind === "unban") { path = `/api/admin/users/${uid}/status`; body.status = "active"; }
     else if (kind === "approveDeposit") path = `/api/admin/deposits/${uid}/${depositId}/approve`;
     else if (kind === "rejectDeposit") path = `/api/admin/deposits/${uid}/${depositId}/reject`;
     else if (kind === "approveWithdrawal") path = `/api/admin/withdrawals/${uid}/${withdrawalId}/approve`;
     else if (kind === "rejectWithdrawal") path = `/api/admin/withdrawals/${uid}/${withdrawalId}/reject`;
+    else if (kind === "delete") { path = `/api/admin/users/${uid}`; method = "DELETE"; }
 
-    const res = await apiFetch(path, { method: "POST", body: JSON.stringify(body) });
+    const fetchOpts = { method };
+    if (method === "POST") fetchOpts.body = JSON.stringify(body);
+    const res = await apiFetch(path, fetchOpts);
     const data = await res.json();
     if (!data.success) {
       toast(data.message || "Action failed", "error");
@@ -1578,7 +1579,7 @@ async function confirmAction() {
       closeActionModal();
       if (kind.includes("Deposit")) { loadDeposits(); loadDashboard(); }
       else if (kind.includes("Withdrawal")) { loadWithdrawals(); loadDashboard(); }
-      else if (["ban","unban"].includes(kind)) { closeUserModal(); loadUsers(); loadDashboard(); }
+      else if (["ban","unban","delete"].includes(kind)) { closeUserModal(); loadUsers(); loadDashboard(); }
     }
   } catch (e) {
     console.error(e);
@@ -1597,7 +1598,6 @@ async function loadDeposits(page = 1) {
     const data = await res.json();
     if (!data.success) return toast(data.message, "error");
 
-    // Mark pending deposits as seen when visiting the page (only on Pending filter)
     if (status === "Pending") {
       setSeen("deposits", data.total);
       showBadge("badgeDeposits", 0);
@@ -1644,7 +1644,6 @@ async function loadWithdrawals(page = 1) {
     const data = await res.json();
     if (!data.success) return toast(data.message, "error");
 
-    // Mark pending withdrawals as seen when visiting the page (only on Pending filter)
     if (status === "Pending") {
       setSeen("withdrawals", data.total);
       showBadge("badgeWithdrawals", 0);
