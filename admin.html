@@ -214,6 +214,7 @@ svg { display: inline-block; vertical-align: middle; }
 }
 .page-title { font-size: 26px; font-weight: 800; letter-spacing: -0.3px; }
 .page-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.page-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
 .btn {
   display: inline-flex;
@@ -686,10 +687,16 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
           <div class="page-title">Users</div>
           <div class="page-sub" id="usersCount">—</div>
         </div>
-        <button class="btn btn-primary" onclick="exportUsers()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Export CSV
-        </button>
+        <div class="page-header-actions">
+          <button class="btn btn-blue" onclick="syncUsers()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+            Sync Verified Users
+          </button>
+          <button class="btn btn-primary" onclick="exportUsers()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
       </div>
       <div class="filters">
         <div class="search-box">
@@ -874,7 +881,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   </div>
 </div>
 
-<!-- ACTION MODAL (approve/reject/ban/delete) -->
+<!-- ACTION MODAL -->
 <div class="modal-overlay" id="actionModal" onclick="if(event.target.id==='actionModal') closeActionModal()">
   <div class="modal" style="max-width: 440px">
     <div class="modal-head">
@@ -891,6 +898,20 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeActionModal()">Cancel</button>
       <button class="btn btn-primary" id="actionConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- SYNC RESULT MODAL -->
+<div class="modal-overlay" id="syncModal" onclick="if(event.target.id==='syncModal') closeSyncModal()">
+  <div class="modal" style="max-width: 520px">
+    <div class="modal-head">
+      <h3>Sync Complete</h3>
+      <button class="modal-close" onclick="closeSyncModal()">×</button>
+    </div>
+    <div class="modal-body" id="syncModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeSyncModal()">Done</button>
     </div>
   </div>
 </div>
@@ -930,7 +951,7 @@ let pendingWalletAction = null;
 let currentUserId = null;
 let currentUserData = null;
 
-/* ============== NOTIFICATION SEEN STATE ============== */
+/* ============== NOTIFICATION BADGES ============== */
 function getSeen(key) {
   return parseInt(localStorage.getItem("admin_seen_" + key) || "0", 10) || 0;
 }
@@ -1318,6 +1339,72 @@ function exportUsers() {
     URL.revokeObjectURL(url);
     toast("CSV exported", "success");
   }).catch(() => toast("Export failed", "error"));
+}
+
+async function syncUsers() {
+  const confirmed = confirm(
+    "Sync all VERIFIED Firebase users into MongoDB?\n\n" +
+    "This will:\n" +
+    "• Fetch all verified Firebase accounts\n" +
+    "• Create MongoDB records for any that don't exist yet\n" +
+    "• Skip users already in MongoDB\n" +
+    "• Not touch unverified users\n\n" +
+    "Continue?"
+  );
+  if (!confirmed) return;
+
+  toast("Syncing verified users...", "info");
+  try {
+    const res = await apiFetch("/api/admin/sync-users", { method: "POST" });
+    const data = await res.json();
+    if (!data.success) {
+      return toast(data.message || "Sync failed", "error");
+    }
+    showSyncModal(data);
+    loadUsers(1);
+    loadDashboard();
+  } catch (e) {
+    console.error(e);
+    toast("Sync failed", "error");
+  }
+}
+
+function showSyncModal(data) {
+  const created = data.created || [];
+  const skipped = data.skipped || [];
+  const errors = data.errors || [];
+
+  const createdHtml = created.length
+    ? created.map(e => `<div style="padding:4px 0; font-size:12px; color:var(--green);">+ ${esc(e)}</div>`).join("")
+    : '<div style="color:var(--muted); font-size:12px;">None</div>';
+
+  const skippedHtml = skipped.length
+    ? skipped.slice(0, 10).map(e => `<div style="padding:3px 0; font-size:11px; color:var(--muted);">${esc(e)}</div>`).join("") +
+      (skipped.length > 10 ? `<div style="color:var(--muted); font-size:11px;">… and ${skipped.length - 10} more</div>` : "")
+    : '<div style="color:var(--muted); font-size:12px;">None</div>';
+
+  const errorsHtml = errors.length
+    ? errors.map(e => `<div style="padding:4px 0; font-size:12px; color:var(--red);">${esc(e)}</div>`).join("")
+    : '<div style="color:var(--muted); font-size:12px;">None</div>';
+
+  document.getElementById("syncModalBody").innerHTML = `
+    <div class="detail-row"><span class="detail-label">Total verified in Firebase</span><span class="detail-value">${data.totalVerified || 0}</span></div>
+    <div class="detail-row"><span class="detail-label">Created in MongoDB</span><span class="detail-value pos">${created.length}</span></div>
+    <div class="detail-row"><span class="detail-label">Skipped (already in DB)</span><span class="detail-value">${skipped.length}</span></div>
+    <div class="detail-row"><span class="detail-label">Errors</span><span class="detail-value ${errors.length ? 'neg' : ''}">${errors.length}</span></div>
+    <div style="height:14px;"></div>
+    <div class="card-title">Newly Created</div>
+    ${createdHtml}
+    <div style="height:14px;"></div>
+    <div class="card-title">Skipped</div>
+    ${skippedHtml}
+    ${errors.length ? `<div style="height:14px;"></div><div class="card-title">Errors</div>${errorsHtml}` : ""}
+  `;
+  document.getElementById("syncModal").classList.add("active");
+}
+
+function closeSyncModal() {
+  document.getElementById("syncModal").classList.remove("active");
 }
 
 /* ============== USER DETAIL MODAL ============== */
@@ -1795,6 +1882,7 @@ document.addEventListener("keydown", (e) => {
     closeUserModal();
     closeActionModal();
     closeWalletModal();
+    closeSyncModal();
   }
 });
 </script>
