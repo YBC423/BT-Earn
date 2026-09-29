@@ -41,6 +41,9 @@ input, select, textarea { font-family: inherit; outline: none; }
 a { color: var(--accent); text-decoration: none; }
 svg { display: inline-block; vertical-align: middle; }
 
+/* Prevent any flash of login/app before JS decides what to show */
+#loginScreen, #app { display: none !important; }
+
 @keyframes spin { to { transform: rotate(360deg); } }
 
 #loginScreen {
@@ -104,7 +107,7 @@ svg { display: inline-block; vertical-align: middle; }
 .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .login-err { color: var(--red); font-size: 13px; text-align: center; margin-top: 14px; min-height: 18px; }
 
-#app { display: none; min-height: 100vh; }
+#app { min-height: 100vh; }
 .topbar {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -1093,7 +1096,8 @@ async function doLogout() {
 }
 
 function showLogin() {
-  document.getElementById("loginScreen").style.display = "flex";
+  const ls = document.getElementById("loginScreen");
+  ls.style.setProperty("display", "flex", "important");
   document.getElementById("app").style.display = "none";
   document.getElementById("loginBtn").disabled = false;
   document.getElementById("loginBtn").textContent = "Sign In";
@@ -1101,8 +1105,9 @@ function showLogin() {
 
 function enterApp() {
   document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "block";
-  document.getElementById("topbarName").textContent = currentAdmin?.email || "";
+  document.getElementById("app").style.setProperty("display", "block", "important");
+  // Leave topbarName empty until real name resolves — avoids email flash
+  document.getElementById("topbarName").textContent = "";
   loadAdminName();
   showPage("dashboard");
 
@@ -1141,6 +1146,10 @@ async function loadAdminName() {
   const fbUser = window._fbAuth.currentUser;
   if (fbUser && fbUser.displayName) {
     document.getElementById("topbarName").textContent = fbUser.displayName;
+    return;
+  }
+  if (currentAdmin?.email) {
+    document.getElementById("topbarName").textContent = currentAdmin.email;
   }
 }
 
