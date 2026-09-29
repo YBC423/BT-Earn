@@ -1,19 +1,5 @@
 {
   "rewrites": [
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "admin.bt-earn.xyz" }],
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/manifest-admin.json",
-      "has": [{ "type": "host", "value": "admin.bt-earn.xyz" }],
-      "destination": "/manifest-admin.json"
-    },
-    {
-      "source": "/sw-admin.js",
-      "has": [{ "type": "host", "value": "admin.bt-earn.xyz" }],
-      "destination": "/sw-admin.js"
-    }
+    { "source": "/", "has": [{ "type": "host", "value": "admin.bt-earn.xyz" }], "destination": "/admin.html" }
   ]
 }
