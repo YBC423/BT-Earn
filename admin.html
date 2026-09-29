@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BT-EARN · Admin</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>">
+<link rel="manifest" href="/manifest-admin.json">
+<meta name="theme-color" content="#0a0e27">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BT-Admin">
+<link rel="apple-touch-icon" href="./android-chrome-192x192.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -134,7 +140,15 @@ svg { display: inline-block; vertical-align: middle; }
   text-transform: uppercase;
 }
 .topbar-right { display: flex; align-items: center; gap: 16px; }
-.topbar-name { font-size: 14px; color: #fff; font-weight: 700; }
+.topbar-name {
+  font-size: 20px;
+  font-weight: 800;
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.5px;
+}
 
 .sidebar {
   position: fixed;
@@ -516,9 +530,14 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
   .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; }
   .sidebar.open { transform: translateX(0); }
   .main { margin-left: 0; padding: 90px 16px 40px; }
-  .topbar-name { display: none; }
+  .topbar-name { font-size: 15px; }
   .page-title { font-size: 22px; }
   .stat-value { font-size: 22px; }
+}
+@media (max-width: 480px) {
+  .topbar-brand { font-size: 16px; }
+  .topbar-badge { font-size: 9px; padding: 2px 6px; }
+  .topbar-name { font-size: 13px; }
 }
 </style>
 </head>
@@ -941,6 +960,17 @@ window.dispatchEvent(new Event("fb-ready"));
 </script>
 
 <script>
+/* ============================================================
+ *  Register Service Worker (for PWA install)
+ * ============================================================ */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw-admin.js").catch((e) => {
+      console.warn("SW registration failed (non-fatal):", e);
+    });
+  });
+}
+
 const API_BASE = "https://api.bt-earn.xyz";
 const PRICE_KEYS_NO_FETCH = ["usdt", "ngn"];
 
@@ -973,6 +1003,28 @@ function updateBadges(stats) {
   showBadge("badgeUsers", Math.max(0, totalUsers - getSeen("users")));
   showBadge("badgeDeposits", Math.max(0, pendingDep - getSeen("deposits")));
   showBadge("badgeWithdrawals", Math.max(0, pendingWd - getSeen("withdrawals")));
+  refreshAppBadge();
+}
+
+/* ============== APP ICON BADGE (PWA) ============== */
+function computeUnreadCount() {
+  const u = parseInt(document.getElementById("badgeUsers")?.textContent || "0", 10) || 0;
+  const d = parseInt(document.getElementById("badgeDeposits")?.textContent || "0", 10) || 0;
+  const w = parseInt(document.getElementById("badgeWithdrawals")?.textContent || "0", 10) || 0;
+  return u + d + w;
+}
+
+function refreshAppBadge() {
+  const total = computeUnreadCount();
+  try {
+    if ("setAppBadge" in navigator) {
+      if (total > 0) {
+        navigator.setAppBadge(total).catch(() => {});
+      } else if ("clearAppBadge" in navigator) {
+        navigator.clearAppBadge().catch(() => {});
+      }
+    }
+  } catch (e) { /* silent */ }
 }
 
 /* ============== AUTH ============== */
@@ -1036,6 +1088,7 @@ async function doLogout() {
   try { await window._fbSignOut(window._fbAuth); } catch(e){}
   token = null;
   currentAdmin = null;
+  try { if ("clearAppBadge" in navigator) navigator.clearAppBadge().catch(()=>{}); } catch(e){}
   showLogin();
 }
 
@@ -1053,18 +1106,15 @@ function enterApp() {
   loadAdminName();
   showPage("dashboard");
 
-  // Token refresh every 50 min
   setInterval(() => {
     const u = window._fbAuth.currentUser;
     if (u) u.getIdToken(true).then(t => { token = t; }).catch(()=>{});
   }, 50 * 60 * 1000);
 
-  // Auto-sync verified users every 30s
   setInterval(() => {
     autoSyncUsers();
   }, 30000);
 
-  // Auto-refresh current page every 30s
   setInterval(() => {
     const current = document.querySelector(".page.active")?.id?.replace("page-", "");
     if (current === "dashboard") loadDashboard();
@@ -1074,7 +1124,6 @@ function enterApp() {
 }
 
 async function loadAdminName() {
-  // Try to find the admin's own MongoDB record for a friendly name
   try {
     const fbUser = window._fbAuth.currentUser;
     if (fbUser) {
@@ -1089,7 +1138,6 @@ async function loadAdminName() {
       }
     }
   } catch (e) { /* ignore */ }
-  // Fallback: Firebase displayName
   const fbUser = window._fbAuth.currentUser;
   if (fbUser && fbUser.displayName) {
     document.getElementById("topbarName").textContent = fbUser.displayName;
@@ -1347,6 +1395,7 @@ async function loadUsers(page = 1) {
     if (!q && status === "all") {
       setSeen("users", data.total);
       showBadge("badgeUsers", 0);
+      refreshAppBadge();
     }
 
     document.getElementById("usersCount").textContent = `${data.total} verified user${data.total === 1 ? "" : "s"}`;
@@ -1734,6 +1783,7 @@ async function loadDeposits(page = 1) {
     if (status === "Pending") {
       setSeen("deposits", data.total);
       showBadge("badgeDeposits", 0);
+      refreshAppBadge();
     }
 
     document.getElementById("depositsCount").textContent = `${data.total} record${data.total === 1 ? "" : "s"}`;
@@ -1780,6 +1830,7 @@ async function loadWithdrawals(page = 1) {
     if (status === "Pending") {
       setSeen("withdrawals", data.total);
       showBadge("badgeWithdrawals", 0);
+      refreshAppBadge();
     }
 
     document.getElementById("withdrawalsCount").textContent = `${data.total} record${data.total === 1 ? "" : "s"}`;
