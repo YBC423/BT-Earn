@@ -135,17 +135,6 @@ svg { display: inline-block; vertical-align: middle; }
 }
 .topbar-right { display: flex; align-items: center; gap: 16px; }
 .topbar-email { font-size: 13px; color: var(--muted); }
-.topbar-logout {
-  padding: 8px 18px;
-  background: rgba(229,62,62,0.12);
-  border: 1px solid rgba(229,62,62,0.4);
-  color: var(--red);
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  transition: background 0.15s;
-}
-.topbar-logout:hover { background: rgba(229,62,62,0.25); }
 
 .sidebar {
   position: fixed;
@@ -156,6 +145,8 @@ svg { display: inline-block; vertical-align: middle; }
   padding: 20px 12px;
   overflow-y: auto;
   z-index: 90;
+  display: flex;
+  flex-direction: column;
 }
 .nav-item {
   display: flex;
@@ -175,7 +166,7 @@ svg { display: inline-block; vertical-align: middle; }
 .nav-item .ico { width: 18px; height: 18px; flex-shrink: 0; }
 .nav-badge {
   margin-left: auto;
-  background: var(--orange);
+  background: var(--red);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -183,8 +174,31 @@ svg { display: inline-block; vertical-align: middle; }
   border-radius: 10px;
   min-width: 18px;
   text-align: center;
+  box-shadow: 0 0 0 2px var(--bg-2);
 }
-.nav-item.active .nav-badge { background: rgba(255,255,255,0.25); }
+.nav-item.active .nav-badge { background: rgba(255,255,255,0.3); box-shadow: none; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  background: rgba(229,62,62,0.12);
+  border: 1px solid rgba(229,62,62,0.4);
+  color: var(--red);
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+.sidebar-logout:hover { background: rgba(229,62,62,0.25); }
 
 .main { margin-left: 235px; padding: 90px 26px 40px; min-height: 100vh; }
 .page { display: none; }
@@ -542,7 +556,6 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
     </div>
     <div class="topbar-right">
       <div class="topbar-email" id="topbarEmail"></div>
-      <button class="topbar-logout" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
@@ -556,6 +569,7 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
     <div class="nav-item" data-page="users" onclick="showPage('users')">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Users
+      <span class="nav-badge" id="badgeUsers" style="display:none">0</span>
     </div>
     <div class="nav-item" data-page="deposits" onclick="showPage('deposits')">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
@@ -578,6 +592,17 @@ td.mono { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; 
     <div class="nav-item" data-page="logs" onclick="showPage('logs')">
       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Audit Log
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sidebar-logout" onclick="doLogout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
     </div>
   </div>
 
@@ -896,7 +921,7 @@ window.dispatchEvent(new Event("fb-ready"));
 
 <script>
 const API_BASE = "https://api.bt-earn.xyz";
-const PRICE_KEYS_NO_FETCH = ["usdt", "ngn"]; // pegged at $1
+const PRICE_KEYS_NO_FETCH = ["usdt", "ngn"];
 
 let currentAdmin = null;
 let token = null;
@@ -904,6 +929,30 @@ let pendingAction = null;
 let pendingWalletAction = null;
 let currentUserId = null;
 let currentUserData = null;
+
+/* ============== NOTIFICATION SEEN STATE ============== */
+function getSeen(key) {
+  return parseInt(localStorage.getItem("admin_seen_" + key) || "0", 10) || 0;
+}
+function setSeen(key, val) {
+  localStorage.setItem("admin_seen_" + key, String(val || 0));
+}
+function showBadge(id, count) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (count > 0) { el.textContent = count; el.style.display = "inline-block"; }
+  else el.style.display = "none";
+}
+function updateBadges(stats) {
+  if (!stats) return;
+  const totalUsers = stats.totalUsers || 0;
+  const pendingDep = stats.deposits?.Pending?.count || 0;
+  const pendingWd = stats.withdrawals?.Pending?.count || 0;
+
+  showBadge("badgeUsers", Math.max(0, totalUsers - getSeen("users")));
+  showBadge("badgeDeposits", Math.max(0, pendingDep - getSeen("deposits")));
+  showBadge("badgeWithdrawals", Math.max(0, pendingWd - getSeen("withdrawals")));
+}
 
 /* ============== AUTH (silent re-auth, no login flash) ============== */
 window.addEventListener("fb-ready", () => {
@@ -1007,11 +1056,6 @@ async function apiFetch(path, options = {}) {
 }
 
 /* ============== LIVE PRICES HELPER ============== */
-/**
- * Fetch live USD prices for the given wallet field names.
- * USDT and NGN are treated as $1 pegs.
- * Returns a map: { usdt: 1, btc: 83000, trx: 0.16, ... }
- */
 async function fetchLivePrices(walletKeys) {
   const prices = {};
   const toFetch = [];
@@ -1035,7 +1079,6 @@ async function fetchLivePrices(walletKeys) {
   } catch (e) {
     console.warn("Live price fetch failed:", e);
   }
-  // Fill missing keys with 0
   for (const k of walletKeys) {
     if (prices[k] === undefined) prices[k] = 0;
   }
@@ -1104,7 +1147,7 @@ function pill(status) {
   return `<span class="pill ${cls}">${esc(status)}</span>`;
 }
 
-/* ============== COIN TOTALS (Total Coins card) ============== */
+/* ============== COIN TOTALS ============== */
 async function loadCoinTotals() {
   try {
     const res = await apiFetch("/api/admin/stats/wallets");
@@ -1125,7 +1168,6 @@ async function loadCoinTotals() {
 
     const prices = await fetchLivePrices(keys);
 
-    // Compute per-coin USD
     const coinUSD = {};
     let totalUSD = 0;
     for (const k of keys) {
@@ -1134,11 +1176,9 @@ async function loadCoinTotals() {
       totalUSD += usd;
     }
 
-    // Collapsed view: total USD
     document.getElementById("sTotalCoinsValue").textContent = fmtMoney(totalUSD);
     document.getElementById("sTotalCoinsSub").textContent = `${keys.length} coin${keys.length === 1 ? "" : "s"} · Tap to expand`;
 
-    // Expanded view: only coins with USD >= $0.01, sorted by USD desc
     const visible = keys
       .filter(k => coinUSD[k] >= 0.01)
       .sort((a, b) => coinUSD[b] - coinUSD[a]);
@@ -1205,12 +1245,10 @@ async function loadDashboard() {
       document.getElementById("sTotalUsdtHolders").textContent = "Across all wallets";
     }
 
-    await loadCoinTotals();
+    // Update notification badges based on unread since last view
+    updateBadges(s);
 
-    const bd = document.getElementById("badgeDeposits");
-    const bw = document.getElementById("badgeWithdrawals");
-    if (s.deposits.Pending.count > 0) { bd.textContent = s.deposits.Pending.count; bd.style.display = "inline-block"; } else bd.style.display = "none";
-    if (s.withdrawals.Pending.count > 0) { bw.textContent = s.withdrawals.Pending.count; bw.style.display = "inline-block"; } else bw.style.display = "none";
+    await loadCoinTotals();
 
     const tbody = document.getElementById("recentUsersBody");
     if (!s.recentUsers || s.recentUsers.length === 0) {
@@ -1247,6 +1285,12 @@ async function loadUsers(page = 1) {
     const res = await apiFetch(`/api/admin/users?q=${encodeURIComponent(q)}&page=${page}&limit=25&status=${status}`);
     const data = await res.json();
     if (!data.success) return toast(data.message || "Failed", "error");
+
+    // Mark users as seen when visiting the Users page (only if no filter/search active)
+    if (!q && status === "all") {
+      setSeen("users", data.total);
+      showBadge("badgeUsers", 0);
+    }
 
     document.getElementById("usersCount").textContent = `${data.total} verified user${data.total === 1 ? "" : "s"}`;
     const tbody = document.getElementById("usersBody");
@@ -1304,10 +1348,8 @@ async function openUser(uid) {
     const w = u.wallets || {};
     const rawKeys = Object.keys(w);
 
-    // Fetch live prices so the dust filter matches the frontend exactly
     const livePrices = await fetchLivePrices(rawKeys);
 
-    // Dust filter: only show if USD value >= $0.01
     const walletKeys = rawKeys.filter(k => {
       const v = Number(w[k]) || 0;
       if (v === 0) return false;
@@ -1554,6 +1596,13 @@ async function loadDeposits(page = 1) {
     const res = await apiFetch(`/api/admin/deposits?status=${status}&page=${page}&limit=25`);
     const data = await res.json();
     if (!data.success) return toast(data.message, "error");
+
+    // Mark pending deposits as seen when visiting the page (only on Pending filter)
+    if (status === "Pending") {
+      setSeen("deposits", data.total);
+      showBadge("badgeDeposits", 0);
+    }
+
     document.getElementById("depositsCount").textContent = `${data.total} record${data.total === 1 ? "" : "s"}`;
     const tbody = document.getElementById("depositsBody");
     if (data.deposits.length === 0) {
@@ -1594,6 +1643,13 @@ async function loadWithdrawals(page = 1) {
     const res = await apiFetch(`/api/admin/withdrawals?status=${status}&page=${page}&limit=25`);
     const data = await res.json();
     if (!data.success) return toast(data.message, "error");
+
+    // Mark pending withdrawals as seen when visiting the page (only on Pending filter)
+    if (status === "Pending") {
+      setSeen("withdrawals", data.total);
+      showBadge("badgeWithdrawals", 0);
+    }
+
     document.getElementById("withdrawalsCount").textContent = `${data.total} record${data.total === 1 ? "" : "s"}`;
     const tbody = document.getElementById("withdrawalsBody");
     if (data.withdrawals.length === 0) {
