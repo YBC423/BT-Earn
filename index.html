@@ -3485,24 +3485,6 @@ if(document.getElementById('withdrawBalance')) document.getElementById('withdraw
 hideButtonSpinner(buttonId);
 showCustomModal('Withdrawal Requested', `Request for $${amount} ${asset} submitted. Fee: $0.20`, 'success');
 
-setTimeout(async () => {
-try {
-let idx = withdrawals.findIndex(w => w.id === withdrawal.id);
-if(idx !== -1 && withdrawals[idx].status === 'Pending') {
-withdrawals[idx].status = 'Approved';
-const db = window.firebaseDb;
-const userRef = window.doc(db, 'users', currentUser.uid);
-const userDoc = await window.getDoc(userRef);
-if(userDoc.exists()) {
-const currentWithdrawals = userDoc.data().withdrawals || [];
-const updatedWithdrawals = currentWithdrawals.map(w => w.id === withdrawal.id ? {...w, status: 'Approved'} : w);
-await window.updateDoc(userRef, { withdrawals: updatedWithdrawals });
-renderWithdrawalHistory();
-if(document.getElementById('txDetailModal').style.display === 'block' && currentTxId === withdrawal.id) { updateTxModal(withdrawals[idx]); }
-}
-}
-} catch(e) { console.log("Error approving withdrawal:", e); }
-}, 30000);
 }
 
 function showTransactionDetails(id) {
