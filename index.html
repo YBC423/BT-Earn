@@ -3466,7 +3466,6 @@ let withdrawal = { id: Date.now(), amount, asset, address, network: asset === 'B
 
 withdrawals.push(withdrawal);
 holdings.usdt -= amount;
-lastSyncedBalance = holdings.usdt;
 
 await saveWithdrawalToFirestore(withdrawal);
 await saveUserHoldingsToFirestore();
